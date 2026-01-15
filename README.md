@@ -1,0 +1,105 @@
+# Calculadora de Gastos
+
+Aplicativo para controle financeiro pessoal com foco em clareza, organização e tomada de decisão consciente.
+
+## 🎯 Sobre o Projeto
+
+O **Calculadora de Gastos** oferece uma visão clara, simples e confiável da vida financeira do usuário, transformando dados financeiros em informações compreensíveis.
+
+### Características
+
+- **Interface clara e organizada**: Design baseado em cards com hierarquia visual forte
+- **Mobile-first**: Experiência otimizada para dispositivos móveis
+- **Modular e escalável**: Arquitetura pensada para facilitar manutenção e evolução
+- **TypeScript**: Tipagem estática para maior confiabilidade
+
+## 📐 Arquitetura
+
+### Módulos Principais
+
+- **Dashboard**: Visão geral e resumo financeiro imediato
+- **Lançamentos**: Registro e consulta de receitas e despesas
+- **Relatórios**: Análise gráfica e comparativa de dados
+- **Metas**: Planejamento e acompanhamento financeiro
+- **Configurações**: Personalização e gestão de dados
+
+### Estrutura de Pastas
+
+```
+src/
+├── components/     # Componentes reutilizáveis
+├── modules/        # Módulos funcionais (Dashboard, Lançamentos, etc)
+├── types/          # Definições de tipos TypeScript
+├── hooks/          # Hooks customizados
+├── utils/          # Funções utilitárias
+└── ...
+```
+
+### Entidades Principais
+
+- Usuário
+- Conta (corrente, poupança, investimento)
+- Cartão de crédito
+- Lançamento (receita/despesa)
+- Categoria
+- Meta financeira
+
+## 🚀 Tecnologias
+
+- **React 19** - Biblioteca UI
+- **TypeScript** - Tipagem estática
+- **Vite** - Build tool e dev server
+- **ESLint** - Linting
+
+## 📦 Instalação
+
+```bash
+# Instalar dependências
+npm install
+
+# Executar em desenvolvimento
+npm run dev
+
+# Build para produção
+npm run build
+
+# Preview do build
+npm run preview
+
+# Linting
+npm run lint
+```
+
+## 🎨 Diretrizes de Design
+
+### Cores Funcionais
+- **Verde** (`#22c55e`): Valores positivos (receitas, saldo positivo)
+- **Vermelho** (`#ef4444`): Valores negativos (despesas, saldo negativo)
+
+### Princípios de UX
+- Uma informação principal por card
+- Números mais visíveis que textos
+- Ações sempre próximas do contexto
+- Linguagem simples e direta
+
+## 📝 Path Aliases
+
+O projeto utiliza aliases para facilitar imports:
+
+```typescript
+import { Dashboard } from '@/modules/Dashboard';
+import { Card } from '@/components/Card';
+import { Usuario } from '@/types';
+```
+
+Aliases disponíveis:
+- `@/*` → `./src/*`
+- `@/components/*` → `./src/components/*`
+- `@/modules/*` → `./src/modules/*`
+- `@/types/*` → `./src/types/*`
+- `@/hooks/*` → `./src/hooks/*`
+- `@/utils/*` → `./src/utils/*`
+
+## 📄 Licença
+
+Este projeto é privado.
