@@ -60,7 +60,8 @@
   gap: var(--spacing-md);
 }
 
-.icon-button {
+/* Botões de ícone específicos do header - evita colisão com Dashboard */
+.app-header .icon-button {
   width: 36px;
   height: 36px;
   display: flex;
@@ -74,7 +75,7 @@
   font-size: var(--font-size-lg);
 }
 
-.icon-button:hover {
+.app-header .icon-button:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
