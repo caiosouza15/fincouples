@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Conta } from '@/types';
+import type { Conta } from '@/types';
 import { getContas, createConta, updateConta, deleteConta } from '@/services/contasService';
 
 interface ContasContextType {

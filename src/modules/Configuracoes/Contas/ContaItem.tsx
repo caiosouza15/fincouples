@@ -1,4 +1,4 @@
-import { Conta } from '@/types';
+import type { Conta } from '@/types';
 import { formatCurrency } from '@/utils';
 import './Contas.css';
 

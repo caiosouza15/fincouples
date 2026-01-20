@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card } from '@/components/Card';
 import { useContas } from '@/hooks/useContas';
-import { Conta } from '@/types';
+import type { Conta } from '@/types';
 import { ContasList } from '@/modules/Configuracoes/Contas/ContasList';
 import { ContaForm } from '@/modules/Configuracoes/Contas/ContaForm';
 import { formatCurrency } from '@/utils';

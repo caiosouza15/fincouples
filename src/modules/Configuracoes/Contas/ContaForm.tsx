@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Conta } from '@/types';
+import type { Conta } from '@/types';
 import './Contas.css';
 
 interface ContaFormProps {

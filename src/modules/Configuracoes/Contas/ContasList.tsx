@@ -1,4 +1,4 @@
-import { Conta } from '@/types';
+import type { Conta } from '@/types';
 import { ContaItem } from './ContaItem';
 import './Contas.css';
 
