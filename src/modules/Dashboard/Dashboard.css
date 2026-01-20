@@ -39,7 +39,9 @@
   font-weight: 500;
 }
 
-.icon-button {
+/* Botão de ícone específico do Dashboard - não conflita com App.css */
+.dashboard .icon-button,
+.saldo-header .icon-button {
   background: none;
   border: none;
   cursor: pointer;
@@ -47,10 +49,13 @@
   font-size: var(--font-size-lg);
   opacity: 0.7;
   transition: opacity 0.2s;
+  color: var(--color-text-secondary);
 }
 
-.icon-button:hover {
+.dashboard .icon-button:hover,
+.saldo-header .icon-button:hover {
   opacity: 1;
+  color: var(--color-text-primary);
 }
 
 .saldo-valor {

@@ -63,6 +63,23 @@
   gap: var(--spacing-md);
 }
 
+/* Botões de ícone específicos do header */
+.app-header .icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  font-size: var(--font-size-lg);
+  color: rgba(255, 255, 255, 0.9);
+  transition: opacity 0.2s, color 0.2s;
+  opacity: 0.9;
+}
+
+.app-header .icon-button:hover {
+  opacity: 1;
+  color: white;
+}
+
 .user-avatar {
   width: 32px;
   height: 32px;
