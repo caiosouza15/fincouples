@@ -1,12 +1,51 @@
+import { useState } from 'react';
 import { Card } from '@/components/Card';
+import { useContas } from '@/hooks/useContas';
+import { Conta } from '@/types';
+import { ContasList } from '@/modules/Configuracoes/Contas/ContasList';
+import { ContaForm } from '@/modules/Configuracoes/Contas/ContaForm';
+import { formatCurrency } from '@/utils';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  // Dados mockados para o layout inicial
+  const { contas, getSaldoGeral, addConta, editConta, removeConta, toggleContaAtiva } = useContas();
+  const [hidePoupancaInvestimento, setHidePoupancaInvestimento] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [contaEditando, setContaEditando] = useState<Conta | null>(null);
+
   const saudacao = "Boa tarde, Casal! 👋";
-  const saldoGeral = 0; // Será calculado dinamicamente depois
+  const saldoGeral = getSaldoGeral();
   const receitaMensal = 0;
   const despesaMensal = 0;
+
+  const handleAddConta = () => {
+    setContaEditando(null);
+    setShowForm(true);
+  };
+
+  const handleEditConta = (conta: Conta) => {
+    setContaEditando(conta);
+    setShowForm(true);
+  };
+
+  const handleSaveConta = async (contaData: Omit<Conta, 'id'> | Conta) => {
+    if ('id' in contaData) {
+      await editConta(contaData.id, contaData);
+    } else {
+      await addConta(contaData);
+    }
+    setShowForm(false);
+    setContaEditando(null);
+  };
+
+  const handleDeleteConta = async (id: string) => {
+    await removeConta(id);
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setContaEditando(null);
+  };
 
   return (
     <div className="dashboard">
@@ -22,7 +61,7 @@ const Dashboard = () => {
               </button>
             </div>
             <div className="saldo-valor">
-              R$ {saldoGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {formatCurrency(saldoGeral)}
             </div>
             <a href="#" className="link-secondary">Ver relatórios</a>
           </div>
@@ -95,18 +134,46 @@ const Dashboard = () => {
         title="Minhas contas"
         actions={
           <label className="checkbox-label">
-            <input type="checkbox" />
+            <input 
+              type="checkbox" 
+              checked={hidePoupancaInvestimento}
+              onChange={(e) => setHidePoupancaInvestimento(e.target.checked)}
+            />
             <span className="checkbox-text">Esconder saldo das contas poupanças / investimentos</span>
           </label>
         }
       >
-        <div className="contas-lista">
+        {contas.length === 0 ? (
           <div className="empty-state">
             <p>Nenhuma conta cadastrada ainda</p>
-            <button className="btn-secondary">Adicionar conta</button>
+            <button className="btn-secondary" onClick={handleAddConta}>Adicionar conta</button>
           </div>
-        </div>
+        ) : (
+          <>
+            <ContasList
+              contas={contas}
+              hidePoupancaInvestimento={hidePoupancaInvestimento}
+              onEdit={handleEditConta}
+              onDelete={handleDeleteConta}
+              onToggleAtiva={toggleContaAtiva}
+            />
+            <div style={{ marginTop: 'var(--spacing-md)' }}>
+              <button className="btn-secondary" onClick={handleAddConta}>
+                + Adicionar conta
+              </button>
+            </div>
+          </>
+        )}
       </Card>
+
+      {/* Modal de Formulário */}
+      {showForm && (
+        <ContaForm
+          conta={contaEditando}
+          onClose={handleCloseForm}
+          onSave={handleSaveConta}
+        />
+      )}
 
       {/* Cartões de Crédito */}
       <Card title="Cartões de crédito">

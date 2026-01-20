@@ -1,4 +1,4 @@
-import { Conta } from "@/types";
+import type { Conta } from "@/types";
 
 const STORAGE_KEY = 'fincouples_contas';
 
@@ -45,7 +45,7 @@ export async function deleteConta(id: string): Promise<void> {
     if (index !== -1) {
         contas.splice(index, 1);
         saveToStorage(contas);
+        return;
     }
     throw new Error('Conta não encontrada');
-
 }
