@@ -1,0 +1,243 @@
+/* Sidebar Component */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 64px; /* Altura do header */
+  bottom: 0;
+  width: 64px; /* Largura quando colapsada */
+  background-color: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 90;
+  overflow: hidden;
+}
+
+.sidebar-expanded {
+  width: 240px;
+  box-shadow: var(--shadow-md);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-md) var(--spacing-sm);
+  gap: var(--spacing-xs);
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Scrollbar customizada para sidebar */
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--border-radius-sm);
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: relative;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sidebar-item:hover {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+}
+
+.sidebar-item-active {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: var(--color-positive);
+  font-weight: 500;
+}
+
+.sidebar-item-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 24px;
+  background-color: var(--color-positive);
+  border-radius: 0 2px 2px 0;
+}
+
+.sidebar-icon {
+  font-size: var(--font-size-xl);
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.sidebar-item:hover .sidebar-icon {
+  transform: scale(1.1);
+}
+
+.sidebar-label {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  font-size: var(--font-size-base);
+  font-weight: 500;
+}
+
+.sidebar-expanded .sidebar-label {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Tooltip quando colapsada */
+.sidebar:not(.sidebar-expanded) .sidebar-item {
+  position: relative;
+}
+
+.sidebar:not(.sidebar-expanded) .sidebar-item:hover::after {
+  content: attr(aria-label);
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-text-primary);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  z-index: 1000;
+  opacity: 1;
+  pointer-events: none;
+  box-shadow: var(--shadow-md);
+  animation: tooltipFadeIn 0.2s ease;
+}
+
+.sidebar:not(.sidebar-expanded) .sidebar-item:hover::before {
+  content: '';
+  position: absolute;
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 6px solid transparent;
+  border-right-color: var(--color-text-primary);
+  z-index: 1001;
+  animation: tooltipFadeIn 0.2s ease;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+/* Botão de fechar no mobile */
+.sidebar-close-btn {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  width: 32px;
+  height: 32px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-md);
+  background-color: var(--color-background);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  border: 1px solid var(--color-border);
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.sidebar-close-btn:hover {
+  background-color: var(--color-negative);
+  color: white;
+  border-color: var(--color-negative);
+}
+
+/* Overlay para mobile */
+.sidebar-overlay {
+  display: none;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar-expanded {
+    transform: translateX(0);
+    width: 240px;
+  }
+
+  .sidebar-close-btn {
+    display: flex;
+  }
+
+  /* Overlay quando sidebar aberta no mobile */
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 85;
+    animation: overlayFadeIn 0.3s ease;
+  }
+
+  /* Remove hover effects no mobile */
+  .sidebar:not(.sidebar-expanded) .sidebar-item:hover::after,
+  .sidebar:not(.sidebar-expanded) .sidebar-item:hover::before {
+    display: none;
+  }
+
+  /* Sempre mostra os labels quando expandida no mobile */
+  .sidebar-expanded .sidebar-label {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
