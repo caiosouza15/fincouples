@@ -5,7 +5,6 @@ import type { Conta } from '@/types';
 import { ContasList } from '@/modules/Configuracoes/Contas/ContasList';
 import { ContaForm } from '@/modules/Configuracoes/Contas/ContaForm';
 import { formatCurrency } from '@/utils';
-import './Dashboard.css';
 
 const Dashboard = () => {
   const { contas, getSaldoGeral, addConta, editConta, removeConta, toggleContaAtiva } = useContas();
@@ -48,38 +47,38 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="dashboard">
+    <div className="max-w-[1280px] mx-auto pb-xl">
       {/* Saudação e Saldo Geral */}
-      <section className="dashboard-header">
-        <h2 className="dashboard-greeting">{saudacao}</h2>
-        <Card className="saldo-geral-card">
-          <div className="saldo-geral-content">
-            <div className="saldo-header">
-              <span className="saldo-label">Saldo geral</span>
-              <button className="icon-button" aria-label="Mostrar/Ocultar saldo">
-                <span className="icon-eye">👁️</span>
+      <section className="mb-lg">
+        <h2 className="text-xl font-semibold text-text-primary mb-md">{saudacao}</h2>
+        <Card className="bg-gradient-to-br from-surface to-[#f0f9ff]">
+          <div className="flex flex-col gap-sm">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-text-secondary uppercase font-medium">Saldo geral</span>
+              <button className="bg-transparent border-none cursor-pointer p-xs text-lg opacity-70 transition-opacity duration-200 text-text-secondary hover:opacity-100 hover:text-text-primary" aria-label="Mostrar/Ocultar saldo">
+                <span>👁️</span>
               </button>
             </div>
-            <div className="saldo-valor">
+            <div className="text-3xl md:text-[2rem] lg:text-[3rem] font-bold text-text-primary leading-none">
               {formatCurrency(saldoGeral)}
             </div>
-            <a href="#" className="link-secondary">Ver relatórios</a>
+            <a href="#" className="text-text-secondary text-sm underline">Ver relatórios</a>
           </div>
         </Card>
       </section>
 
       {/* Resumo Mensal */}
-      <section className="resumo-mensal">
-        <Card className="resumo-card receita">
-          <div className="resumo-label">Receita mensal</div>
-          <div className="resumo-valor positivo">
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-md mb-md">
+        <Card className="text-center">
+          <div className="text-sm text-text-secondary uppercase mb-sm">Receita mensal</div>
+          <div className="text-2xl font-bold text-positive">
             + R$ {receitaMensal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
         </Card>
         
-        <Card className="resumo-card despesa">
-          <div className="resumo-label">Despesa mensal</div>
-          <div className="resumo-valor negativo">
+        <Card className="text-center">
+          <div className="text-sm text-text-secondary uppercase mb-sm">Despesa mensal</div>
+          <div className="text-2xl font-bold text-negative">
             + R$ {despesaMensal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
         </Card>
@@ -87,44 +86,44 @@ const Dashboard = () => {
 
       {/* Acesso Rápido */}
       <Card title="Acesso rápido">
-        <div className="acesso-rapido">
-          <button className="btn-rapido despesa">
-            <span className="btn-rapido-icon">−</span>
-            <span className="btn-rapido-texto">DESPESA</span>
+        <div className="flex flex-col md:flex-row gap-md justify-center items-center">
+          <button className="flex flex-col items-center justify-center w-[100px] h-[100px] rounded-full border-none cursor-pointer font-semibold transition-transform duration-200 shadow-md hover:scale-105 hover:shadow-lg bg-negative text-white">
+            <span className="text-3xl font-light leading-none">−</span>
+            <span className="text-xs uppercase tracking-wider">DESPESA</span>
           </button>
-          <button className="btn-rapido receita">
-            <span className="btn-rapido-icon">+</span>
-            <span className="btn-rapido-texto">RECEITA</span>
+          <button className="flex flex-col items-center justify-center w-[100px] h-[100px] rounded-full border-none cursor-pointer font-semibold transition-transform duration-200 shadow-md hover:scale-105 hover:shadow-lg bg-positive text-white">
+            <span className="text-3xl font-light leading-none">+</span>
+            <span className="text-xs uppercase tracking-wider">RECEITA</span>
           </button>
         </div>
       </Card>
 
       {/* Primeiros Passos (Onboarding) */}
       <Card title="Primeiros passos">
-        <div className="onboarding">
-          <div className="onboarding-progress">
-            <div className="progress-bar">
-              <div className="progress-fill" style={{ width: '20%' }}></div>
+        <div className="flex flex-col gap-md">
+          <div className="flex flex-col gap-sm">
+            <div className="w-full h-2 bg-border rounded-sm overflow-hidden">
+              <div className="h-full bg-positive transition-[width] duration-300" style={{ width: '20%' }}></div>
             </div>
-            <span className="progress-text">1 de 5 tarefas completas</span>
+            <span className="text-sm text-text-secondary">1 de 5 tarefas completas</span>
           </div>
-          <button className="btn-primary">Continuar</button>
+          <button className="bg-positive text-white border-none py-md px-lg rounded-md text-base font-semibold cursor-pointer transition-colors duration-200 w-full hover:bg-[#20b255]">Continuar</button>
         </div>
       </Card>
 
       {/* Maiores Gastos */}
       <Card title="Maiores gastos nos últimos meses">
-        <div className="maiores-gastos">
-          <div className="gasto-item">
-            <div className="gasto-icone">🎓</div>
-            <div className="gasto-info">
-              <div className="gasto-categoria">Educação</div>
-              <div className="gasto-valor">R$ 0,00</div>
+        <div className="flex flex-col gap-md">
+          <div className="flex items-center gap-md p-md bg-background rounded-md">
+            <div className="text-2xl w-12 h-12 flex items-center justify-center bg-surface rounded-md">🎓</div>
+            <div className="flex-1">
+              <div className="font-medium text-text-primary mb-xs">Educação</div>
+              <div className="text-sm text-text-secondary">R$ 0,00</div>
             </div>
           </div>
           {/* Mais itens serão adicionados dinamicamente */}
-          <div className="empty-state">
-            <p>Nenhum gasto registrado ainda</p>
+          <div className="text-center py-xl text-text-muted">
+            <p className="mb-md">Nenhum gasto registrado ainda</p>
           </div>
         </div>
       </Card>
@@ -133,20 +132,20 @@ const Dashboard = () => {
       <Card 
         title="Minhas contas"
         actions={
-          <label className="checkbox-label">
+          <label className="flex items-center gap-sm text-sm text-text-secondary cursor-pointer">
             <input 
               type="checkbox" 
               checked={hidePoupancaInvestimento}
               onChange={(e) => setHidePoupancaInvestimento(e.target.checked)}
             />
-            <span className="checkbox-text">Esconder saldo das contas poupanças / investimentos</span>
+            <span className="text-xs">Esconder saldo das contas poupanças / investimentos</span>
           </label>
         }
       >
         {contas.length === 0 ? (
-          <div className="empty-state">
-            <p>Nenhuma conta cadastrada ainda</p>
-            <button className="btn-secondary" onClick={handleAddConta}>Adicionar conta</button>
+          <div className="text-center py-xl text-text-muted">
+            <p className="mb-md">Nenhuma conta cadastrada ainda</p>
+            <button className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background" onClick={handleAddConta}>Adicionar conta</button>
           </div>
         ) : (
           <>
@@ -157,8 +156,8 @@ const Dashboard = () => {
               onDelete={handleDeleteConta}
               onToggleAtiva={toggleContaAtiva}
             />
-            <div style={{ marginTop: 'var(--spacing-md)' }}>
-              <button className="btn-secondary" onClick={handleAddConta}>
+            <div className="mt-md">
+              <button className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background" onClick={handleAddConta}>
                 + Adicionar conta
               </button>
             </div>
@@ -177,35 +176,31 @@ const Dashboard = () => {
 
       {/* Cartões de Crédito */}
       <Card title="Cartões de crédito">
-        <div className="cartoes-lista">
-          <div className="empty-state">
-            <p>Nenhum cartão cadastrado ainda</p>
-            <button className="btn-secondary">Adicionar cartão</button>
-          </div>
+        <div className="text-center py-xl text-text-muted">
+          <p className="mb-md">Nenhum cartão cadastrado ainda</p>
+          <button className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background">Adicionar cartão</button>
         </div>
       </Card>
 
       {/* Metas do Mês */}
       <Card title="Metas de Novembro">
-        <div className="metas-lista">
-          <div className="empty-state">
-            <p>Nenhuma meta criada ainda</p>
-            <button className="btn-secondary">Criar meta</button>
-          </div>
+        <div className="text-center py-xl text-text-muted">
+          <p className="mb-md">Nenhuma meta criada ainda</p>
+          <button className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background">Criar meta</button>
         </div>
       </Card>
 
       {/* Equilíbrio Financeiro */}
       <Card 
         title="Equilíbrio financeiro"
-        actions={<a href="#" className="link-secondary">Saiba mais</a>}
+        actions={<a href="#" className="text-text-secondary text-sm underline">Saiba mais</a>}
       >
-        <div className="equilibrio">
-          <div className="equilibrio-item">
-            <div className="equilibrio-label">Gastos essenciais</div>
-            <div className="equilibrio-info">
-              <div className="equilibrio-valor">R$ 0,00</div>
-              <div className="equilibrio-limite">Limite recomendado: R$ 0,00</div>
+        <div>
+          <div className="p-md bg-background rounded-md">
+            <div className="font-medium text-text-primary mb-sm">Gastos essenciais</div>
+            <div>
+              <div className="text-xl font-bold text-text-primary mb-xs">R$ 0,00</div>
+              <div className="text-sm text-text-secondary">Limite recomendado: R$ 0,00</div>
             </div>
           </div>
         </div>

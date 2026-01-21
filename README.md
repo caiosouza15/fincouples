@@ -49,6 +49,8 @@ src/
 - **React 19** - Biblioteca UI
 - **TypeScript** - Tipagem estática
 - **Vite** - Build tool e dev server
+- **Tailwind CSS 3.4** - Framework CSS utilitário
+- **PostCSS** - Processamento CSS
 - **ESLint** - Linting
 
 ## 📦 Instalação
@@ -81,6 +83,41 @@ npm run lint
 - Números mais visíveis que textos
 - Ações sempre próximas do contexto
 - Linguagem simples e direta
+
+## 🎨 Tailwind CSS
+
+O projeto utiliza **Tailwind CSS 3.4** para estilização. O tema foi customizado para manter a identidade visual do projeto.
+
+### Tema Customizado
+
+As cores, espaçamentos e outros tokens de design estão configurados em `tailwind.config.js`:
+
+**Cores:**
+- `positive` - Verde para valores positivos
+- `negative` - Vermelho para valores negativos
+- `background` - Cor de fundo
+- `surface` - Cor de superfície (cards)
+- `border` - Cor de borda
+- `text-primary` - Texto principal
+- `text-secondary` - Texto secundário
+- `text-muted` - Texto desativado
+
+**Espaçamentos:**
+- `xs`, `sm`, `md`, `lg`, `xl`, `2xl` - Escala de espaçamento personalizada
+
+**Exemplo de uso:**
+```tsx
+<div className="bg-surface border border-border rounded-lg p-lg">
+  <h2 className="text-xl font-semibold text-text-primary">Título</h2>
+  <p className="text-text-secondary">Conteúdo</p>
+</div>
+```
+
+### Estrutura CSS
+
+- `src/index.css` - Contém as diretivas Tailwind e estilos globais
+- Componentes utilizam classes Tailwind inline
+- Estilos complexos (animações, tooltips) podem usar CSS tradicional quando necessário
 
 ## 📝 Path Aliases
 

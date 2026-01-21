@@ -1,6 +1,5 @@
 import type { Conta } from '@/types';
 import { ContaItem } from './ContaItem';
-import './Contas.css';
 
 interface ContasListProps {
   contas: Conta[];
@@ -31,9 +30,9 @@ export function ContasList({
   }
 
   return (
-    <div className="contas-lista">
+    <div className="flex flex-col gap-md">
       {contasAtivas.length > 0 && (
-        <div className="contas-grupo">
+        <div className="flex flex-col gap-sm">
           {contasAtivas.map((conta) => (
             <ContaItem
               key={conta.id}
@@ -47,8 +46,8 @@ export function ContasList({
       )}
 
       {contasInativas.length > 0 && (
-        <div className="contas-grupo">
-          <div className="contas-grupo-titulo">Contas Inativas</div>
+        <div className="flex flex-col gap-sm">
+          <div className="text-sm font-semibold text-text-secondary uppercase mb-xs py-xs">Contas Inativas</div>
           {contasInativas.map((conta) => (
             <ContaItem
               key={conta.id}

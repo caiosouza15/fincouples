@@ -1,6 +1,5 @@
 import type { Conta } from '@/types';
 import { formatCurrency } from '@/utils';
-import './Contas.css';
 
 interface ContaItemProps {
   conta: Conta;
@@ -29,20 +28,20 @@ export function ContaItem({ conta, onEdit, onDelete, onToggleAtiva }: ContaItemP
   };
 
   return (
-    <div className={`conta-item ${!conta.ativa ? 'conta-item-inativa' : ''}`}>
-      <div className="conta-item-content">
-        <div className="conta-item-icon">{conta.icone || tipoIcons[conta.tipo]}</div>
-        <div className="conta-item-info">
-          <div className="conta-item-nome">{conta.nome}</div>
-          <div className="conta-item-tipo">{tipoLabels[conta.tipo]}</div>
+    <div className={`flex md:flex-row flex-col md:items-center md:justify-between p-md bg-surface border border-border rounded-md transition-all duration-200 gap-md ${!conta.ativa ? 'opacity-60' : ''} hover:border-positive hover:shadow-sm`}>
+      <div className="flex items-center gap-md flex-1 min-w-0 md:flex-row flex-col md:items-center">
+        <div className="text-2xl shrink-0 w-10 h-10 flex items-center justify-center bg-background rounded-md">{conta.icone || tipoIcons[conta.tipo]}</div>
+        <div className="flex-1 min-w-0">
+          <div className="text-base font-medium text-text-primary mb-xs">{conta.nome}</div>
+          <div className="text-sm text-text-secondary">{tipoLabels[conta.tipo]}</div>
         </div>
-        <div className={`conta-item-saldo ${conta.saldo >= 0 ? 'positivo' : 'negativo'}`}>
+        <div className={`text-lg font-semibold shrink-0 md:text-right ${conta.saldo >= 0 ? 'text-positive' : 'text-negative'} md:mt-0 mt-xs`}>
           {formatCurrency(conta.saldo)}
         </div>
       </div>
-      <div className="conta-item-actions">
+      <div className="flex gap-xs shrink-0 md:justify-start justify-end md:border-0 border-t border-border md:pt-0 pt-sm">
         <button
-          className="conta-item-btn"
+          className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer text-base transition-all duration-200 p-0 hover:bg-background hover:border-text-muted"
           onClick={() => onToggleAtiva(conta.id)}
           aria-label={conta.ativa ? 'Desativar conta' : 'Ativar conta'}
           title={conta.ativa ? 'Desativar conta' : 'Ativar conta'}
@@ -50,7 +49,7 @@ export function ContaItem({ conta, onEdit, onDelete, onToggleAtiva }: ContaItemP
           {conta.ativa ? '👁️' : '👁️‍🗨️'}
         </button>
         <button
-          className="conta-item-btn"
+          className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer text-base transition-all duration-200 p-0 hover:bg-background hover:border-text-muted"
           onClick={() => onEdit(conta)}
           aria-label="Editar conta"
           title="Editar conta"
@@ -58,7 +57,7 @@ export function ContaItem({ conta, onEdit, onDelete, onToggleAtiva }: ContaItemP
           ✏️
         </button>
         <button
-          className="conta-item-btn conta-item-btn-danger"
+          className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer text-base transition-all duration-200 p-0 hover:bg-negative hover:border-negative hover:text-white"
           onClick={handleDelete}
           aria-label="Excluir conta"
           title="Excluir conta"
