@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Eye, Minus, Plus, GraduationCap } from 'lucide-react';
 import { Card } from '@/components/Card';
 import { useContas } from '@/hooks/useContas';
 import type { Conta } from '@/types';
@@ -55,8 +56,8 @@ const Dashboard = () => {
           <div className="flex flex-col gap-sm">
             <div className="flex justify-between items-center">
               <span className="text-sm text-text-secondary uppercase font-medium">Saldo geral</span>
-              <button className="bg-transparent border-none cursor-pointer p-xs text-lg opacity-70 transition-opacity duration-200 text-text-secondary hover:opacity-100 hover:text-text-primary" aria-label="Mostrar/Ocultar saldo">
-                <span>👁️</span>
+              <button className="bg-transparent border-none cursor-pointer p-xs opacity-70 transition-opacity duration-200 text-text-secondary hover:opacity-100 hover:text-text-primary" aria-label="Mostrar/Ocultar saldo">
+                <Eye size={20} />
               </button>
             </div>
             <div className="text-3xl md:text-[2rem] lg:text-[3rem] font-bold text-text-primary leading-none">
@@ -85,15 +86,15 @@ const Dashboard = () => {
       </section>
 
       {/* Acesso Rápido */}
-      <Card title="Acesso rápido">
+      <Card title="Acesso rapido">
         <div className="flex flex-col md:flex-row gap-md justify-center items-center">
           <button className="flex flex-col items-center justify-center w-[100px] h-[100px] rounded-full border-none cursor-pointer font-semibold transition-transform duration-200 shadow-md hover:scale-105 hover:shadow-lg bg-negative text-white">
-            <span className="text-3xl font-light leading-none">−</span>
-            <span className="text-xs uppercase tracking-wider">DESPESA</span>
+            <Minus size={32} strokeWidth={3} />
+            <span className="text-xs uppercase tracking-wider mt-1">DESPESA</span>
           </button>
           <button className="flex flex-col items-center justify-center w-[100px] h-[100px] rounded-full border-none cursor-pointer font-semibold transition-transform duration-200 shadow-md hover:scale-105 hover:shadow-lg bg-positive text-white">
-            <span className="text-3xl font-light leading-none">+</span>
-            <span className="text-xs uppercase tracking-wider">RECEITA</span>
+            <Plus size={32} strokeWidth={3} />
+            <span className="text-xs uppercase tracking-wider mt-1">RECEITA</span>
           </button>
         </div>
       </Card>
@@ -115,9 +116,11 @@ const Dashboard = () => {
       <Card title="Maiores gastos nos últimos meses">
         <div className="flex flex-col gap-md">
           <div className="flex items-center gap-md p-md bg-background rounded-md">
-            <div className="text-2xl w-12 h-12 flex items-center justify-center bg-surface rounded-md">🎓</div>
+            <div className="w-12 h-12 flex items-center justify-center bg-surface rounded-md text-text-secondary">
+              <GraduationCap size={24} />
+            </div>
             <div className="flex-1">
-              <div className="font-medium text-text-primary mb-xs">Educação</div>
+              <div className="font-medium text-text-primary mb-xs">Educacao</div>
               <div className="text-sm text-text-secondary">R$ 0,00</div>
             </div>
           </div>

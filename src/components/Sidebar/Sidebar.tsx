@@ -1,5 +1,7 @@
 import './Sidebar.css';
 import { NavLink } from 'react-router-dom';
+import { iconMap } from '@/utils/iconMap';
+import { X } from 'lucide-react';
 
 interface SidebarProps {
   expanded: boolean;
@@ -11,15 +13,15 @@ interface SidebarProps {
 interface NavItem {
   path: string;
   label: string;
-  icon: string;
+  iconName: string;
 }
 
 const navItems: NavItem[] = [
-  { path: '/dashboard', label: 'Visao Geral', icon: '📊' },
-  { path: '/lancamentos', label: 'Lancamentos', icon: '💰' },
-  { path: '/relatorios', label: 'Relatorios', icon: '📈' },
-  { path: '/metas', label: 'Metas', icon: '🎯' },
-  { path: '/configuracoes', label: 'Configuracoes', icon: '⚙️' },
+  { path: '/dashboard', label: 'Visao Geral', iconName: 'dashboard' },
+  { path: '/lancamentos', label: 'Lancamentos', iconName: 'lancamentos' },
+  { path: '/relatorios', label: 'Relatorios', iconName: 'relatorios' },
+  { path: '/metas', label: 'Metas', iconName: 'metas' },
+  { path: '/configuracoes', label: 'Configuracoes', iconName: 'configuracoes' },
 ];
 
 export const Sidebar = ({ expanded, onMouseEnter, onMouseLeave, onClose }: SidebarProps) => {
@@ -48,41 +50,44 @@ export const Sidebar = ({ expanded, onMouseEnter, onMouseLeave, onClose }: Sideb
       >
         {expanded && onClose && (
           <button 
-            className="absolute top-md right-md w-8 h-8 flex md:hidden items-center justify-center rounded-md bg-background text-text-secondary text-lg border border-border transition-all duration-200 z-10 hover:bg-negative hover:text-white hover:border-negative"
+            className="absolute top-md right-md w-8 h-8 flex md:hidden items-center justify-center rounded-md bg-background text-text-secondary border border-border transition-all duration-200 z-10 hover:bg-negative hover:text-white hover:border-negative"
             onClick={onClose}
             aria-label="Fechar menu"
           >
-            ✕
+            <X size={18} />
           </button>
         )}
         
         <nav className="flex flex-col p-md px-sm gap-xs h-full overflow-y-auto overflow-x-hidden sidebar-nav">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              onClick={handleItemClick}
-              className={({ isActive }) =>
-                `group relative flex items-center gap-md p-md rounded-md text-text-secondary no-underline transition-all duration-200 whitespace-nowrap cursor-pointer select-none sidebar-item border-none bg-transparent w-full text-left ${
-                  isActive 
-                    ? 'bg-positive/10 text-positive font-medium sidebar-item-active' 
-                    : 'hover:bg-background hover:text-text-primary'
-                }`
-              }
-              aria-label={item.label}
-            >
-              {({ isActive }) => (
-                <>
-                  <span className={`text-xl shrink-0 w-6 h-6 text-center flex items-center justify-center transition-transform duration-200 ${!isActive && 'group-hover:scale-110'}`}>
-                    {item.icon}
-                  </span>
-                  <span className={`text-base font-medium transition-all duration-300 sidebar-label ${expanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2.5 md:group-hover:opacity-100 md:group-hover:translate-x-0'}`}>
-                    {item.label}
-                  </span>
-                </>
-              )}
-            </NavLink>
-          ))}
+          {navItems.map((item) => {
+            const IconComponent = iconMap[item.iconName];
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={handleItemClick}
+                className={({ isActive }) =>
+                  `group relative flex items-center gap-md p-md rounded-md text-text-secondary no-underline transition-all duration-200 whitespace-nowrap cursor-pointer select-none sidebar-item border-none bg-transparent w-full text-left ${
+                    isActive 
+                      ? 'bg-positive/10 text-positive font-medium sidebar-item-active' 
+                      : 'hover:bg-background hover:text-text-primary'
+                  }`
+                }
+                aria-label={item.label}
+              >
+                {({ isActive }) => (
+                  <>
+                    <span className={`shrink-0 w-6 h-6 flex items-center justify-center transition-transform duration-200 ${!isActive && 'group-hover:scale-110'}`}>
+                      {IconComponent && <IconComponent size={20} className={isActive ? 'text-positive' : 'text-text-secondary'} />}
+                    </span>
+                    <span className={`text-base font-medium transition-all duration-300 sidebar-label ${expanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2.5 md:group-hover:opacity-100 md:group-hover:translate-x-0'}`}>
+                      {item.label}
+                    </span>
+                  </>
+                )}
+              </NavLink>
+            );
+          })}
         </nav>
       </aside>
     </>

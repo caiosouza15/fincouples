@@ -115,20 +115,20 @@ export async function deleteCategoria(id: string): Promise<void> {
 function initCategoriasPadrao(): Categoria[] {
     return [
         // Despesas
-        { id: 'padrao-moradia', nome: 'Moradia', tipo: 'despesa' as const, cor: '#ef4444', icone: '🏠' },
-        { id: 'padrao-alimentacao', nome: 'Alimentação', tipo: 'despesa' as const, cor: '#ef4444', icone: '🍽️' },
-        { id: 'padrao-transporte', nome: 'Transporte', tipo: 'despesa' as const, cor: '#f97316', icone: '🚗' },
-        { id: 'padrao-saude', nome: 'Saúde', tipo: 'despesa' as const, cor: '#ef4444', icone: '💊' },
-        { id: 'padrao-educacao', nome: 'Educação', tipo: 'despesa' as const, cor: '#3b82f6', icone: '🎓' },
-        { id: 'padrao-compras', nome: 'Compras', tipo: 'despesa' as const, cor: '#f97316', icone: '🛒' },
-        { id: 'padrao-contas', nome: 'Contas', tipo: 'despesa' as const, cor: '#ef4444', icone: '💰' },
-        { id: 'padrao-lazer', nome: 'Lazer', tipo: 'despesa' as const, cor: '#3b82f6', icone: '🎮' },
-        { id: 'padrao-roupas', nome: 'Roupas', tipo: 'despesa' as const, cor: '#f97316', icone: '👕' },
-        { id: 'padrao-assinaturas', nome: 'Assinaturas', tipo: 'despesa' as const, cor: '#3b82f6', icone: '📱' },
+        { id: 'padrao-moradia', nome: 'Moradia', tipo: 'despesa' as const, cor: '#ef4444', icone: 'moradia' },
+        { id: 'padrao-alimentacao', nome: 'Alimentacao', tipo: 'despesa' as const, cor: '#ef4444', icone: 'alimentacao' },
+        { id: 'padrao-transporte', nome: 'Transporte', tipo: 'despesa' as const, cor: '#f97316', icone: 'transporte' },
+        { id: 'padrao-saude', nome: 'Saude', tipo: 'despesa' as const, cor: '#ef4444', icone: 'saude' },
+        { id: 'padrao-educacao', nome: 'Educacao', tipo: 'despesa' as const, cor: '#3b82f6', icone: 'educacao' },
+        { id: 'padrao-compras', nome: 'Compras', tipo: 'despesa' as const, cor: '#f97316', icone: 'compras' },
+        { id: 'padrao-contas', nome: 'Contas', tipo: 'despesa' as const, cor: '#ef4444', icone: 'contas' },
+        { id: 'padrao-lazer', nome: 'Lazer', tipo: 'despesa' as const, cor: '#3b82f6', icone: 'lazer' },
+        { id: 'padrao-roupas', nome: 'Roupas', tipo: 'despesa' as const, cor: '#f97316', icone: 'roupas' },
+        { id: 'padrao-assinaturas', nome: 'Assinaturas', tipo: 'despesa' as const, cor: '#3b82f6', icone: 'assinaturas' },
         // Receitas
-        { id: 'padrao-salario', nome: 'Salário', tipo: 'receita' as const, cor: '#22c55e', icone: '💼' },
-        { id: 'padrao-outras-receitas', nome: 'Outras Receitas', tipo: 'receita' as const, cor: '#22c55e', icone: '💵' },
-        { id: 'padrao-presentes', nome: 'Presentes', tipo: 'receita' as const, cor: '#22c55e', icone: '🎁' },
-        { id: 'padrao-rendimentos', nome: 'Rendimentos', tipo: 'receita' as const, cor: '#22c55e', icone: '💰' },
+        { id: 'padrao-salario', nome: 'Salario', tipo: 'receita' as const, cor: '#22c55e', icone: 'salario' },
+        { id: 'padrao-outras-receitas', nome: 'Outras Receitas', tipo: 'receita' as const, cor: '#22c55e', icone: 'outras-receitas' },
+        { id: 'padrao-presentes', nome: 'Presentes', tipo: 'receita' as const, cor: '#22c55e', icone: 'presentes' },
+        { id: 'padrao-rendimentos', nome: 'Rendimentos', tipo: 'receita' as const, cor: '#22c55e', icone: 'rendimentos' },
     ];
 }

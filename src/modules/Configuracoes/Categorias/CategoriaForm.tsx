@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 import type { Categoria } from '@/types';
 
 interface CategoriaFormProps {
@@ -95,12 +96,12 @@ export function CategoriaForm({ categoria, onClose, onSave, isPadrao }: Categori
             {isEditMode ? 'Editar Categoria' : 'Nova Categoria'}
           </h3>
           <button
-            className="w-8 h-8 flex items-center justify-center bg-transparent border-none rounded-sm cursor-pointer text-lg text-text-secondary transition-all duration-200 hover:bg-background hover:text-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-8 h-8 flex items-center justify-center bg-transparent border-none rounded-sm cursor-pointer text-text-secondary transition-all duration-200 hover:bg-background hover:text-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleClose}
             aria-label="Fechar"
             disabled={loading}
           >
-            ✕
+            <X size={20} />
           </button>
         </div>
 
@@ -180,7 +181,7 @@ export function CategoriaForm({ categoria, onClose, onSave, isPadrao }: Categori
 
           <div className="flex flex-col gap-xs">
             <label htmlFor="categoria-icone" className="text-sm font-medium text-text-primary">
-              Ícone (emoji)
+              Icone (nome do icone)
             </label>
             <input
               id="categoria-icone"
@@ -188,7 +189,7 @@ export function CategoriaForm({ categoria, onClose, onSave, isPadrao }: Categori
               className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
               value={icone}
               onChange={(e) => setIcone(e.target.value)}
-              placeholder="Ex: 🍽️ 💼"
+              placeholder="Ex: alimentacao, salario"
               maxLength={4}
               disabled={loading}
             />

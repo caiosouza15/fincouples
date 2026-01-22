@@ -1,4 +1,6 @@
 import type { Categoria } from '@/types';
+import { iconMap } from '@/utils/iconMap';
+import { Pencil, Trash2 } from 'lucide-react';
 
 interface CategoriaItemProps {
   categoria: Categoria;
@@ -25,10 +27,20 @@ export function CategoriaItem({ categoria, onEdit, onDelete, canDelete }: Catego
     <div className="flex flex-col md:flex-row md:items-center md:justify-between p-md bg-surface border border-border rounded-md transition-all duration-200 gap-md hover:border-positive hover:shadow-sm">
       <div className="flex items-center gap-md flex-1 min-w-0">
         <div
-          className="text-xl shrink-0 w-10 h-10 flex items-center justify-center rounded-md"
+          className="shrink-0 w-10 h-10 flex items-center justify-center rounded-md text-text-secondary"
           style={{ backgroundColor: categoria.cor ? `${categoria.cor}20` : '#f1f5f9' }}
         >
-          {categoria.icone || (categoria.tipo === 'receita' ? '💰' : '📋')}
+          {(() => {
+            if (categoria.icone) {
+              const IconComponent = iconMap[categoria.icone];
+              if (IconComponent) {
+                return <IconComponent size={20} style={{ color: categoria.cor }} />;
+              }
+            }
+            const defaultIconName = categoria.tipo === 'receita' ? 'rendimentos' : 'despesa-padrao';
+            const DefaultIcon = iconMap[defaultIconName];
+            return DefaultIcon ? <DefaultIcon size={20} style={{ color: categoria.cor }} /> : null;
+          })()}
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-base font-medium text-text-primary mb-xs">{categoria.nome}</div>
@@ -41,21 +53,21 @@ export function CategoriaItem({ categoria, onEdit, onDelete, canDelete }: Catego
       </div>
       <div className="flex gap-xs shrink-0 md:border-0 border-t border-border md:pt-0 pt-sm">
         <button
-          className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer text-base transition-all duration-200 p-0 hover:bg-background hover:border-text-muted"
+          className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer transition-all duration-200 p-0 hover:bg-background hover:border-text-muted"
           onClick={() => onEdit(categoria)}
           aria-label="Editar categoria"
           title="Editar categoria"
         >
-          ✏️
+          <Pencil size={16} />
         </button>
         <button
-          className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer text-base transition-all duration-200 p-0 hover:bg-background hover:border-text-muted disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-border"
+          className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer transition-all duration-200 p-0 hover:bg-background hover:border-text-muted disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-border"
           onClick={handleDelete}
           disabled={!canDelete}
-          aria-label={canDelete ? 'Excluir categoria' : 'Categoria padrão não pode ser excluída'}
-          title={canDelete ? 'Excluir categoria' : 'Categoria padrão não pode ser excluída'}
+          aria-label={canDelete ? 'Excluir categoria' : 'Categoria padrao nao pode ser excluida'}
+          title={canDelete ? 'Excluir categoria' : 'Categoria padrao nao pode ser excluida'}
         >
-          🗑️
+          <Trash2 size={16} />
         </button>
       </div>
     </div>

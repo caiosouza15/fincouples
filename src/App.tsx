@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, Navigate } from 'react-router-dom';
+import { Menu, Bell, Settings, User } from 'lucide-react';
 import { ContasProvider } from './contexts/ContasContext';
 import { CategoriasProvider } from './contexts/CategoriasContext';
 import { Dashboard } from './modules/Dashboard';
@@ -22,23 +23,27 @@ function AppContent() {
       <header className="bg-positive text-white shadow-md fixed top-0 left-0 right-0 z-[100] h-16">
         <div className="w-full h-full px-lg py-md flex items-center justify-between gap-lg md:px-md">
           <button 
-            className="flex md:hidden w-9 h-9 items-center justify-center bg-transparent text-white border-none rounded-md text-xl cursor-pointer transition-colors duration-200 hover:bg-white/10"
+            className="flex md:hidden w-9 h-9 items-center justify-center bg-transparent text-white border-none rounded-md cursor-pointer transition-colors duration-200 hover:bg-white/10"
             onClick={() => setSidebarExpanded(!sidebarExpanded)}
             aria-label="Abrir menu"
           >
-            ☰
+            <Menu size={24} />
           </button>
           <h1 className="text-xl font-bold m-0 text-white">fincouples</h1>
           <div className="flex items-center gap-md">
-            <button className="w-9 h-9 flex items-center justify-center rounded-md bg-transparent text-white/90 transition-colors duration-200 cursor-pointer text-lg hover:bg-white/10" aria-label="Notificações">🔔</button>
+            <button className="w-9 h-9 flex items-center justify-center rounded-md bg-transparent text-white/90 transition-colors duration-200 cursor-pointer hover:bg-white/10" aria-label="Notificacoes">
+              <Bell size={20} />
+            </button>
             <button 
-              className="w-9 h-9 flex items-center justify-center rounded-md bg-transparent text-white/90 transition-colors duration-200 cursor-pointer text-lg hover:bg-white/10" 
+              className="w-9 h-9 flex items-center justify-center rounded-md bg-transparent text-white/90 transition-colors duration-200 cursor-pointer hover:bg-white/10" 
               aria-label="Configuracoes"
               onClick={handleConfigClick}
             >
-              ⚙️
+              <Settings size={20} />
             </button>
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg cursor-pointer transition-colors duration-200 hover:bg-white/30">👤</div>
+            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center cursor-pointer transition-colors duration-200 hover:bg-white/30">
+              <User size={18} />
+            </div>
           </div>
         </div>
       </header>
