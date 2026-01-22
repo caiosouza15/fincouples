@@ -1,4 +1,5 @@
 import './Sidebar.css';
+import { NavLink } from 'react-router-dom';
 
 interface SidebarProps {
   expanded: boolean;
@@ -8,22 +9,26 @@ interface SidebarProps {
 }
 
 interface NavItem {
-  id: string;
+  path: string;
   label: string;
   icon: string;
-  href: string;
-  active?: boolean;
 }
 
 const navItems: NavItem[] = [
-  { id: 'dashboard', label: 'Visão Geral', icon: '📊', href: '#', active: true },
-  { id: 'lancamentos', label: 'Lançamentos', icon: '💰', href: '#' },
-  { id: 'relatorios', label: 'Relatórios', icon: '📈', href: '#' },
-  { id: 'metas', label: 'Metas', icon: '🎯', href: '#' },
-  { id: 'configuracoes', label: 'Configurações', icon: '⚙️', href: '#' },
+  { path: '/dashboard', label: 'Visao Geral', icon: '📊' },
+  { path: '/lancamentos', label: 'Lancamentos', icon: '💰' },
+  { path: '/relatorios', label: 'Relatorios', icon: '📈' },
+  { path: '/metas', label: 'Metas', icon: '🎯' },
+  { path: '/configuracoes', label: 'Configuracoes', icon: '⚙️' },
 ];
 
 export const Sidebar = ({ expanded, onMouseEnter, onMouseLeave, onClose }: SidebarProps) => {
+  const handleItemClick = () => {
+    if (window.innerWidth <= 768 && onClose) {
+      onClose();
+    }
+  };
+
   return (
     <>
       {expanded && (
@@ -53,28 +58,30 @@ export const Sidebar = ({ expanded, onMouseEnter, onMouseLeave, onClose }: Sideb
         
         <nav className="flex flex-col p-md px-sm gap-xs h-full overflow-y-auto overflow-x-hidden sidebar-nav">
           {navItems.map((item) => (
-            <a
-              key={item.id}
-              href={item.href}
-              className={`group relative flex items-center gap-md p-md rounded-md text-text-secondary no-underline transition-all duration-200 whitespace-nowrap cursor-pointer select-none sidebar-item ${
-                item.active 
-                  ? 'bg-positive/10 text-positive font-medium sidebar-item-active' 
-                  : 'hover:bg-background hover:text-text-primary'
-              }`}
+            <NavLink
+              key={item.path}
+              to={item.path}
+              onClick={handleItemClick}
+              className={({ isActive }) =>
+                `group relative flex items-center gap-md p-md rounded-md text-text-secondary no-underline transition-all duration-200 whitespace-nowrap cursor-pointer select-none sidebar-item border-none bg-transparent w-full text-left ${
+                  isActive 
+                    ? 'bg-positive/10 text-positive font-medium sidebar-item-active' 
+                    : 'hover:bg-background hover:text-text-primary'
+                }`
+              }
               aria-label={item.label}
-              onClick={() => {
-                if (window.innerWidth <= 768 && onClose) {
-                  onClose();
-                }
-              }}
             >
-              <span className={`text-xl shrink-0 w-6 h-6 text-center flex items-center justify-center transition-transform duration-200 ${!item.active && 'group-hover:scale-110'}`}>
-                {item.icon}
-              </span>
-              <span className={`text-base font-medium transition-all duration-300 sidebar-label ${expanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2.5 md:group-hover:opacity-100 md:group-hover:translate-x-0'}`}>
-                {item.label}
-              </span>
-            </a>
+              {({ isActive }) => (
+                <>
+                  <span className={`text-xl shrink-0 w-6 h-6 text-center flex items-center justify-center transition-transform duration-200 ${!isActive && 'group-hover:scale-110'}`}>
+                    {item.icon}
+                  </span>
+                  <span className={`text-base font-medium transition-all duration-300 sidebar-label ${expanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2.5 md:group-hover:opacity-100 md:group-hover:translate-x-0'}`}>
+                    {item.label}
+                  </span>
+                </>
+              )}
+            </NavLink>
           ))}
         </nav>
       </aside>
