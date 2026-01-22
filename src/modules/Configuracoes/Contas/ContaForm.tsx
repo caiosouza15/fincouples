@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 import type { Conta } from '@/types';
 
 interface ContaFormProps {
@@ -78,12 +79,12 @@ export function ContaForm({ conta, onClose, onSave }: ContaFormProps) {
             {isEditMode ? 'Editar Conta' : 'Nova Conta'}
           </h3>
           <button
-            className="w-8 h-8 flex items-center justify-center bg-transparent border-none rounded-sm cursor-pointer text-lg text-text-secondary transition-all duration-200 hover:bg-background hover:text-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-8 h-8 flex items-center justify-center bg-transparent border-none rounded-sm cursor-pointer text-text-secondary transition-all duration-200 hover:bg-background hover:text-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleClose}
             aria-label="Fechar"
             disabled={loading}
           >
-            ✕
+            <X size={20} />
           </button>
         </div>
 
