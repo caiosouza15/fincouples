@@ -1,6 +1,5 @@
 import type { Categoria } from '@/types';
 import { iconMap } from '@/utils/iconMap';
-import { migrateEmojiToIconName } from '@/utils';
 import { Pencil, Trash2 } from 'lucide-react';
 
 interface CategoriaItemProps {
@@ -33,8 +32,7 @@ export function CategoriaItem({ categoria, onEdit, onDelete, canDelete }: Catego
         >
           {(() => {
             if (categoria.icone) {
-              const iconName = migrateEmojiToIconName(categoria.icone);
-              const IconComponent = iconMap[iconName || ''];
+              const IconComponent = iconMap[categoria.icone];
               if (IconComponent) {
                 return <IconComponent size={20} style={{ color: categoria.cor }} />;
               }

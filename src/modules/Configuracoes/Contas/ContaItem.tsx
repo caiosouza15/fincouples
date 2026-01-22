@@ -1,5 +1,5 @@
 import type { Conta } from '@/types';
-import { formatCurrency, migrateEmojiToIconName } from '@/utils';
+import { formatCurrency } from '@/utils';
 import { iconMap } from '@/utils/iconMap';
 import { Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
 
@@ -25,8 +25,7 @@ export function ContaItem({ conta, onEdit, onDelete, onToggleAtiva }: ContaItemP
 
   const getContaIcon = () => {
     if (conta.icone) {
-      const iconName = migrateEmojiToIconName(conta.icone);
-      const IconComponent = iconMap[iconName || ''];
+      const IconComponent = iconMap[conta.icone];
       if (IconComponent) {
         return <IconComponent size={24} />;
       }
