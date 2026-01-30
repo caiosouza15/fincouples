@@ -99,19 +99,6 @@ const Dashboard = () => {
         </div>
       </Card>
 
-      {/* Primeiros Passos (Onboarding) */}
-      <Card title="Primeiros passos">
-        <div className="flex flex-col gap-md">
-          <div className="flex flex-col gap-sm">
-            <div className="w-full h-2 bg-border rounded-sm overflow-hidden">
-              <div className="h-full bg-positive transition-[width] duration-300" style={{ width: '20%' }}></div>
-            </div>
-            <span className="text-sm text-text-secondary">1 de 5 tarefas completas</span>
-          </div>
-          <button className="bg-positive text-white border-none py-md px-lg rounded-md text-base font-semibold cursor-pointer transition-colors duration-200 w-full hover:bg-[#20b255]">Continuar</button>
-        </div>
-      </Card>
-
       {/* Maiores Gastos */}
       <Card title="Maiores gastos nos últimos meses">
         <div className="flex flex-col gap-md">
@@ -151,20 +138,13 @@ const Dashboard = () => {
             <button className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background" onClick={handleAddConta}>Adicionar conta</button>
           </div>
         ) : (
-          <>
-            <ContasList
-              contas={contas}
-              hidePoupancaInvestimento={hidePoupancaInvestimento}
-              onEdit={handleEditConta}
-              onDelete={handleDeleteConta}
-              onToggleAtiva={toggleContaAtiva}
-            />
-            <div className="mt-md">
-              <button className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background" onClick={handleAddConta}>
-                + Adicionar conta
-              </button>
-            </div>
-          </>
+          <ContasList
+            contas={contas}
+            hidePoupancaInvestimento={hidePoupancaInvestimento}
+            onEdit={handleEditConta}
+            onDelete={handleDeleteConta}
+            onToggleAtiva={toggleContaAtiva}
+          />
         )}
       </Card>
 

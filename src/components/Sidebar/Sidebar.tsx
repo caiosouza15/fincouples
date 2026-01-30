@@ -21,6 +21,7 @@ const navItems: NavItem[] = [
   { path: '/lancamentos', label: 'Lancamentos', iconName: 'lancamentos' },
   { path: '/relatorios', label: 'Relatorios', iconName: 'relatorios' },
   { path: '/metas', label: 'Metas', iconName: 'metas' },
+  { path: '/contas', label: 'Minhas Contas', iconName: 'bank' },
   { path: '/configuracoes', label: 'Configuracoes', iconName: 'configuracoes' },
 ];
 
