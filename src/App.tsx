@@ -9,6 +9,7 @@ import { Configuracoes } from './modules/Configuracoes';
 import { Lancamentos } from './modules/Lancamentos';
 import { Relatorios } from './modules/Relatorios';
 import { Metas } from './modules/Metas';
+import { Contas } from './modules/Contas';
 
 function AppContent() {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
@@ -67,6 +68,7 @@ function AppContent() {
             <Route path="/lancamentos" element={<Lancamentos />} />
             <Route path="/relatorios" element={<Relatorios />} />
             <Route path="/metas" element={<Metas />} />
+            <Route path="/contas" element={<Contas />} />
             <Route path="/configuracoes" element={<Configuracoes />} />
           </Routes>
         </main>
