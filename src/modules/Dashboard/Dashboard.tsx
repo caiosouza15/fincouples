@@ -2,21 +2,76 @@ import { useState } from 'react';
 import { Eye, Minus, Plus, GraduationCap } from 'lucide-react';
 import { Card } from '@/components/Card';
 import { useContas } from '@/hooks/useContas';
-import type { Conta } from '@/types';
+import { useLancamentos } from '@/hooks/useLancamentos';
+import { useCategorias } from '@/hooks/useCategorias';
+import { useSelectedMonth } from '@/contexts/SelectedMonthContext';
+import type { Conta, Lancamento } from '@/types';
 import { ContasList } from '@/modules/Configuracoes/Contas/ContasList';
 import { ContaForm } from '@/modules/Configuracoes/Contas/ContaForm';
+import { LancamentoForm } from '@/modules/Lancamentos/LancamentoForm';
 import { formatCurrency } from '@/utils';
+import { iconMap } from '@/utils/iconMap';
 
 const Dashboard = () => {
   const { contas, getSaldoGeral, addConta, editConta, removeConta, toggleContaAtiva } = useContas();
+  const {
+    lancamentos: allLancamentos,
+    getReceitaMensal,
+    getDespesaMensal,
+    getMaioresGastos,
+    getUltimosGastos,
+    getSaldoDisponivelMes,
+    addLancamento,
+    editLancamento,
+  } = useLancamentos();
+  const { categorias } = useCategorias();
+
   const [hidePoupancaInvestimento, setHidePoupancaInvestimento] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [contaEditando, setContaEditando] = useState<Conta | null>(null);
+  const [showLancamentoForm, setShowLancamentoForm] = useState(false);
+  const [lancamentoEditando, setLancamentoEditando] = useState<Lancamento | null>(null);
+  const [tipoPreSelecionado, setTipoPreSelecionado] = useState<'receita' | 'despesa' | undefined>();
+  
+  // Usar mês selecionado do contexto global
+  const { selectedMonth } = useSelectedMonth();
 
   const saudacao = "Boa tarde, Casal! 👋";
-  const saldoGeral = getSaldoGeral();
-  const receitaMensal = 0;
-  const despesaMensal = 0;
+  
+  // Calcular saldo disponível do mês selecionado
+  const saldoAtualContas = getSaldoGeral();
+  const saldoGeral = getSaldoDisponivelMes(saldoAtualContas, selectedMonth);
+  
+  // Debug: verificar lançamentos e cálculos
+  console.log('🔍 [Dashboard] Total de lançamentos no contexto:', allLancamentos.length);
+  console.log('🔍 [Dashboard] Mês selecionado:', selectedMonth);
+  
+  const receitaMensal = getReceitaMensal(selectedMonth);
+  const despesaMensal = getDespesaMensal(selectedMonth);
+  
+  console.log('🔍 [Dashboard] Receita mensal calculada:', receitaMensal);
+  console.log('🔍 [Dashboard] Despesa mensal calculada:', despesaMensal);
+  console.log('🔍 [Dashboard] Saldo disponível do mês:', saldoGeral);
+  
+  // Debug: verificar lançamentos do mês selecionado
+  const lancamentosDoMes = allLancamentos.filter(l => {
+    const year = l.data.getFullYear();
+    const month = String(l.data.getMonth() + 1).padStart(2, '0');
+    const mesKey = `${year}-${month}`;
+    return mesKey === selectedMonth;
+  });
+  console.log('🔍 [Dashboard] Lançamentos do mês selecionado:', lancamentosDoMes.length);
+  if (lancamentosDoMes.length > 0) {
+    console.log('🔍 [Dashboard] Primeiro lançamento do mês:', {
+      tipo: lancamentosDoMes[0].tipo,
+      valor: lancamentosDoMes[0].valor,
+      data: lancamentosDoMes[0].data,
+      dataString: lancamentosDoMes[0].data.toString(),
+    });
+  }
+  
+  const maioresGastos = getMaioresGastos(categorias, 5, selectedMonth);
+  const ultimosGastos = getUltimosGastos(selectedMonth, 5);
 
   const handleAddConta = () => {
     setContaEditando(null);
@@ -47,6 +102,39 @@ const Dashboard = () => {
     setContaEditando(null);
   };
 
+  const handleAddDespesa = () => {
+    setLancamentoEditando(null);
+    setTipoPreSelecionado('despesa');
+    setShowLancamentoForm(true);
+  };
+
+  const handleAddReceita = () => {
+    setLancamentoEditando(null);
+    setTipoPreSelecionado('receita');
+    setShowLancamentoForm(true);
+  };
+
+  const handleSaveLancamento = async (lancamentoData: Omit<Lancamento, 'id'> | Lancamento) => {
+    try {
+      if ('id' in lancamentoData) {
+        await editLancamento(lancamentoData.id, lancamentoData);
+      } else {
+        await addLancamento(lancamentoData);
+      }
+      setShowLancamentoForm(false);
+      setLancamentoEditando(null);
+      setTipoPreSelecionado(undefined);
+    } catch (error) {
+      console.error('Erro ao salvar lançamento:', error);
+    }
+  };
+
+  const handleCloseLancamentoForm = () => {
+    setShowLancamentoForm(false);
+    setLancamentoEditando(null);
+    setTipoPreSelecionado(undefined);
+  };
+
   return (
     <div className="max-w-[1280px] mx-auto pb-xl">
       {/* Saudação e Saldo Geral */}
@@ -69,54 +157,144 @@ const Dashboard = () => {
       </section>
 
       {/* Resumo Mensal */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-md mb-md">
-        <Card className="text-center">
-          <div className="text-sm text-text-secondary uppercase mb-sm">Receita mensal</div>
-          <div className="text-2xl font-bold text-positive">
-            + R$ {receitaMensal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </div>
-        </Card>
-        
-        <Card className="text-center">
-          <div className="text-sm text-text-secondary uppercase mb-sm">Despesa mensal</div>
-          <div className="text-2xl font-bold text-negative">
-            + R$ {despesaMensal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </div>
-        </Card>
+      <section className="mb-md">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+          <Card className="text-center relative">
+            <button
+              onClick={handleAddReceita}
+              className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-md bg-positive/10 hover:bg-positive/20 text-positive transition-colors duration-200 cursor-pointer text-xs font-medium"
+              aria-label="Adicionar receita"
+            >
+              <Plus size={16} />
+              <span>Adicionar</span>
+            </button>
+            <div className="text-sm text-text-secondary uppercase mb-sm">Receita mensal</div>
+            {receitaMensal > 0 ? (
+              <div className="text-2xl font-bold text-positive">
+                + {formatCurrency(receitaMensal)}
+              </div>
+            ) : (
+              <div className="text-lg text-text-muted">
+                Nenhuma receita registrada
+              </div>
+            )}
+          </Card>
+          
+          <Card className="text-center relative">
+            <button
+              onClick={handleAddDespesa}
+              className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-md bg-negative/10 hover:bg-negative/20 text-negative transition-colors duration-200 cursor-pointer text-xs font-medium"
+              aria-label="Adicionar despesa"
+            >
+              <Minus size={16} />
+              <span>Adicionar</span>
+            </button>
+            <div className="text-sm text-text-secondary uppercase mb-sm">Despesa mensal</div>
+            {despesaMensal > 0 ? (
+              <div className="text-2xl font-bold text-negative">
+                - {formatCurrency(despesaMensal)}
+              </div>
+            ) : (
+              <div className="text-lg text-text-muted">
+                Nenhuma despesa registrada
+              </div>
+            )}
+          </Card>
+        </div>
       </section>
 
-      {/* Acesso Rápido */}
-      <Card title="Acesso rapido">
-        <div className="flex flex-col md:flex-row gap-md justify-center items-center">
-          <button className="flex flex-col items-center justify-center w-[100px] h-[100px] rounded-full border-none cursor-pointer font-semibold transition-transform duration-200 shadow-md hover:scale-105 hover:shadow-lg bg-negative text-white">
-            <Minus size={32} strokeWidth={3} />
-            <span className="text-xs uppercase tracking-wider mt-1">DESPESA</span>
-          </button>
-          <button className="flex flex-col items-center justify-center w-[100px] h-[100px] rounded-full border-none cursor-pointer font-semibold transition-transform duration-200 shadow-md hover:scale-105 hover:shadow-lg bg-positive text-white">
-            <Plus size={32} strokeWidth={3} />
-            <span className="text-xs uppercase tracking-wider mt-1">RECEITA</span>
-          </button>
-        </div>
-      </Card>
+      {/* Últimos Gastos, Maiores Gastos e Últimas Faturas */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-md mb-md">
+        {/* Card 1: Últimos Gastos */}
+        <Card title="Últimos gastos">
+          <div className="flex flex-col gap-md">
+            {ultimosGastos.length === 0 ? (
+              <div className="text-center py-md text-text-muted">
+                <p className="text-sm">Nenhum gasto registrado ainda</p>
+              </div>
+            ) : (
+              ultimosGastos.map((gasto) => {
+                const categoria = categorias.find((c) => c.id === gasto.categoriaId);
+                const IconComponent = categoria?.icone
+                  ? iconMap[categoria.icone]
+                  : null;
+                const dataFormatada = gasto.data.toLocaleDateString('pt-BR', {
+                  day: '2-digit',
+                  month: '2-digit',
+                });
+                return (
+                  <div key={gasto.id} className="flex items-center gap-md p-sm bg-background rounded-md">
+                    <div className="w-10 h-10 flex items-center justify-center bg-surface rounded-md text-text-secondary flex-shrink-0">
+                      {IconComponent ? (
+                        <IconComponent size={20} />
+                      ) : (
+                        <GraduationCap size={20} />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-text-primary text-sm mb-xs truncate">
+                        {gasto.descricao || categoria?.nome || 'Sem descrição'}
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-xs text-text-secondary">{dataFormatada}</div>
+                        <div className="text-sm font-semibold text-negative">
+                          {formatCurrency(gasto.valor)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </Card>
 
-      {/* Maiores Gastos */}
-      <Card title="Maiores gastos nos últimos meses">
-        <div className="flex flex-col gap-md">
-          <div className="flex items-center gap-md p-md bg-background rounded-md">
-            <div className="w-12 h-12 flex items-center justify-center bg-surface rounded-md text-text-secondary">
-              <GraduationCap size={24} />
-            </div>
-            <div className="flex-1">
-              <div className="font-medium text-text-primary mb-xs">Educacao</div>
-              <div className="text-sm text-text-secondary">R$ 0,00</div>
-            </div>
+        {/* Card 2: Maiores Gastos */}
+        <Card title="Maiores gastos">
+          <div className="flex flex-col gap-md">
+            {maioresGastos.length === 0 ? (
+              <div className="text-center py-md text-text-muted">
+                <p className="text-sm">Nenhum gasto registrado ainda</p>
+              </div>
+            ) : (
+              maioresGastos.map((gasto) => {
+                const IconComponent = gasto.categoria.icone
+                  ? iconMap[gasto.categoria.icone]
+                  : null;
+                return (
+                  <div key={gasto.categoriaId} className="flex items-center gap-md p-sm bg-background rounded-md">
+                    <div className="w-10 h-10 flex items-center justify-center bg-surface rounded-md text-text-secondary flex-shrink-0">
+                      {IconComponent ? (
+                        <IconComponent size={20} />
+                      ) : (
+                        <GraduationCap size={20} />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-text-primary text-sm mb-xs truncate">
+                        {gasto.categoria.nome}
+                      </div>
+                      <div className="text-sm text-text-secondary font-semibold">
+                        {formatCurrency(gasto.valor)}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
-          {/* Mais itens serão adicionados dinamicamente */}
-          <div className="text-center py-xl text-text-muted">
-            <p className="mb-md">Nenhum gasto registrado ainda</p>
+        </Card>
+
+        {/* Card 3: Últimas Faturas */}
+        <Card title="Últimas faturas">
+          <div className="text-center py-md text-text-muted">
+            <p className="text-sm mb-md">Nenhum cartão cadastrado ainda</p>
+            <button className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-xs font-medium cursor-pointer transition-colors duration-200 hover:bg-background">
+              Adicionar cartão
+            </button>
           </div>
-        </div>
-      </Card>
+        </Card>
+      </div>
 
       {/* Minhas Contas */}
       <Card 
@@ -153,6 +331,15 @@ const Dashboard = () => {
           conta={contaEditando}
           onClose={handleCloseForm}
           onSave={handleSaveConta}
+        />
+      )}
+
+      {showLancamentoForm && (
+        <LancamentoForm
+          lancamento={lancamentoEditando}
+          tipoPreSelecionado={tipoPreSelecionado}
+          onClose={handleCloseLancamentoForm}
+          onSave={handleSaveLancamento}
         />
       )}
 

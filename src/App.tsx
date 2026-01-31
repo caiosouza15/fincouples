@@ -3,6 +3,9 @@ import { BrowserRouter, Routes, Route, useNavigate, Navigate } from 'react-route
 import { Menu, Bell, Settings, User } from 'lucide-react';
 import { ContasProvider } from './contexts/ContasContext';
 import { CategoriasProvider } from './contexts/CategoriasContext';
+import { LancamentosProvider } from './contexts/LancamentosContext';
+import { SelectedMonthProvider, useSelectedMonth } from './contexts/SelectedMonthContext';
+import { MonthSelector } from './components/MonthSelector';
 import { Dashboard } from './modules/Dashboard';
 import { Sidebar } from './components/Sidebar';
 import { Configuracoes } from './modules/Configuracoes';
@@ -14,6 +17,7 @@ import { Contas } from './modules/Contas';
 function AppContent() {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const navigate = useNavigate();
+  const { selectedMonth, setSelectedMonth } = useSelectedMonth();
 
   const handleConfigClick = () => {
     navigate('/configuracoes');
@@ -22,16 +26,30 @@ function AppContent() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="bg-positive text-white shadow-md fixed top-0 left-0 right-0 z-[100] h-16">
-        <div className="w-full h-full px-lg py-md flex items-center justify-between gap-lg md:px-md">
-          <button 
-            className="flex md:hidden w-9 h-9 items-center justify-center bg-transparent text-white border-none rounded-md cursor-pointer transition-colors duration-200 hover:bg-white/10"
-            onClick={() => setSidebarExpanded(!sidebarExpanded)}
-            aria-label="Abrir menu"
-          >
-            <Menu size={24} />
-          </button>
-          <h1 className="text-xl font-bold m-0 text-white">fincouples</h1>
-          <div className="flex items-center gap-md">
+        <div className="w-full h-full px-lg py-md flex items-center gap-lg md:px-md">
+          {/* Seção Esquerda: Menu e Logo */}
+          <div className="flex items-center gap-md flex-shrink-0">
+            <button 
+              className="flex md:hidden w-9 h-9 items-center justify-center bg-transparent text-white border-none rounded-md cursor-pointer transition-colors duration-200 hover:bg-white/10"
+              onClick={() => setSidebarExpanded(!sidebarExpanded)}
+              aria-label="Abrir menu"
+            >
+              <Menu size={24} />
+            </button>
+            <h1 className="text-xl font-bold m-0 text-white">fincouples</h1>
+          </div>
+          
+          {/* Seção Central: MonthSelector */}
+          <div className="flex-1 flex items-center justify-center">
+            <MonthSelector 
+              selectedMonth={selectedMonth} 
+              onMonthChange={setSelectedMonth}
+              className="text-white"
+            />
+          </div>
+          
+          {/* Seção Direita: Ícones */}
+          <div className="flex items-center gap-md flex-shrink-0">
             <button className="w-9 h-9 flex items-center justify-center rounded-md bg-transparent text-white/90 transition-colors duration-200 cursor-pointer hover:bg-white/10" aria-label="Notificacoes">
               <Bell size={20} />
             </button>
@@ -80,11 +98,15 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
-      <CategoriasProvider>
-        <ContasProvider>
-          <AppContent />
-        </ContasProvider>
-      </CategoriasProvider>
+      <SelectedMonthProvider>
+        <CategoriasProvider>
+          <ContasProvider>
+            <LancamentosProvider>
+              <AppContent />
+            </LancamentosProvider>
+          </ContasProvider>
+        </CategoriasProvider>
+      </SelectedMonthProvider>
     </BrowserRouter>
   );
 }

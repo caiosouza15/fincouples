@@ -3,3 +3,4 @@
 
 export { Card } from './Card';
 export { Sidebar } from './Sidebar';
+export { MonthSelector } from './MonthSelector';

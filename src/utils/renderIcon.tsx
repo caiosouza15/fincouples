@@ -1,5 +1,4 @@
 import { iconMap } from './iconMap';
-import type { LucideProps } from 'lucide-react';
 
 interface RenderIconProps {
   size?: number;
