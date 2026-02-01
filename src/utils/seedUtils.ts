@@ -1,0 +1,26 @@
+import { seedDatabase, seedAllData, shouldSeed, clearAllData } from '@/data/mockData';
+
+// Função para popular dados apenas se localStorage estiver vazio (apenas lançamentos)
+export function seedIfEmpty(): void {
+  if (shouldSeed()) {
+    seedDatabase();
+  }
+}
+
+// Função para popular TODOS os dados mock (contas + categorias + lançamentos)
+export async function seedAllIfEmpty(): Promise<void> {
+  await seedAllData();
+}
+
+// Função para forçar seed (útil para desenvolvimento)
+export function forceSeed(): void {
+  seedDatabase();
+}
+
+// Função para forçar seed completo (útil para desenvolvimento)
+export async function forceSeedAll(): Promise<void> {
+  await seedAllData();
+}
+
+// Exportar funções do mockData
+export { seedDatabase, seedAllData, shouldSeed, clearAllData };
