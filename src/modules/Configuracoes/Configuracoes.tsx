@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Card } from '@/components/Card';
+import { EmptyState } from '@/components/EmptyState';
 import { useContas } from '@/hooks/useContas';
 import { useCategorias } from '@/hooks/useCategorias';
 import type { Conta } from '@/types';
@@ -130,15 +131,17 @@ const Configuracoes = () => {
           }
         >
           {contas.length === 0 ? (
-            <div className="text-center py-xl text-text-muted">
-              <p className="mb-md">Nenhuma conta cadastrada ainda</p>
-              <button
-                className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background"
-                onClick={handleAddConta}
-              >
-                Adicionar conta
-              </button>
-            </div>
+            <EmptyState 
+              hideText={true}
+              actionButton={
+                <button
+                  className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background"
+                  onClick={handleAddConta}
+                >
+                  Adicionar conta
+                </button>
+              }
+            />
           ) : (
             <>
               <ContasList
@@ -178,15 +181,17 @@ const Configuracoes = () => {
           }
         >
           {categorias.length === 0 ? (
-            <div className="text-center py-xl text-text-muted">
-              <p className="mb-md">Nenhuma categoria cadastrada</p>
-              <button
-                className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background"
-                onClick={handleAddCategoria}
-              >
-                Adicionar categoria
-              </button>
-            </div>
+            <EmptyState 
+              hideText={true}
+              actionButton={
+                <button
+                  className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background"
+                  onClick={handleAddCategoria}
+                >
+                  Adicionar categoria
+                </button>
+              }
+            />
           ) : (
             <>
               <CategoriasList

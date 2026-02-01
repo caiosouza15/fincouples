@@ -13,6 +13,7 @@ import { Lancamentos } from './modules/Lancamentos';
 import { Relatorios } from './modules/Relatorios';
 import { Metas } from './modules/Metas';
 import { Contas } from './modules/Contas';
+import logo from './assets/logo.png';
 
 function AppContent() {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
@@ -23,33 +24,49 @@ function AppContent() {
     navigate('/configuracoes');
   };
 
+  const handleLogoClick = () => {
+    navigate('/dashboard');
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="bg-positive text-white shadow-md fixed top-0 left-0 right-0 z-[100] h-16">
-        <div className="w-full h-full px-lg py-md flex items-center gap-lg md:px-md">
+      <header className="bg-teal text-white shadow-md fixed top-0 left-0 right-0 z-[100] h-16">
+        <div className="w-full h-full px-md py-md flex items-center gap-md md:px-lg md:gap-lg relative">
           {/* Seção Esquerda: Menu e Logo */}
-          <div className="flex items-center gap-md flex-shrink-0">
+          <div className="flex items-center gap-md flex-shrink-0 relative z-10">
             <button 
-              className="flex md:hidden w-9 h-9 items-center justify-center bg-transparent text-white border-none rounded-md cursor-pointer transition-colors duration-200 hover:bg-white/10"
+              className="flex md:hidden w-7 h-7 items-center justify-center bg-transparent text-text-primary border-none rounded-md cursor-pointer transition-colors duration-200 hover:bg-white/10"
               onClick={() => setSidebarExpanded(!sidebarExpanded)}
               aria-label="Abrir menu"
             >
-              <Menu size={24} />
+              <Menu size={20} className="text-text-primary" />
             </button>
-            <h1 className="text-xl font-bold m-0 text-white">fincouples</h1>
+            <button
+              onClick={handleLogoClick}
+              className="hidden md:flex items-center cursor-pointer bg-transparent border-none p-0 transition-opacity duration-200 hover:opacity-80"
+              aria-label="Ir para dashboard"
+            >
+              <img 
+                src={logo} 
+                alt="fincouples" 
+                className="h-10 md:h-12 w-auto"
+              />
+            </button>
           </div>
           
-          {/* Seção Central: MonthSelector */}
-          <div className="flex-1 flex items-center justify-center">
-            <MonthSelector 
-              selectedMonth={selectedMonth} 
-              onMonthChange={setSelectedMonth}
-              className="text-white"
-            />
+          {/* Seção Central: MonthSelector - Centralizado absoluto no mobile */}
+          <div className="flex-1 flex items-center justify-center min-w-0 md:relative absolute left-0 right-0 md:left-auto md:right-auto pointer-events-none md:pointer-events-auto">
+            <div className="pointer-events-auto">
+              <MonthSelector 
+                selectedMonth={selectedMonth} 
+                onMonthChange={setSelectedMonth}
+                className="text-white"
+              />
+            </div>
           </div>
           
           {/* Seção Direita: Ícones */}
-          <div className="flex items-center gap-md flex-shrink-0">
+          <div className="hidden md:flex items-center gap-md flex-shrink-0">
             <button className="w-9 h-9 flex items-center justify-center rounded-md bg-transparent text-white/90 transition-colors duration-200 cursor-pointer hover:bg-white/10" aria-label="Notificacoes">
               <Bell size={20} />
             </button>
