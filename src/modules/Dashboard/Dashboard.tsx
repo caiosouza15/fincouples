@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Eye, Minus, Plus, GraduationCap } from 'lucide-react';
 import { Card } from '@/components/Card';
+import { EmptyState } from '@/components/EmptyState';
 import { useContas } from '@/hooks/useContas';
 import { useLancamentos } from '@/hooks/useLancamentos';
 import { useCategorias } from '@/hooks/useCategorias';
@@ -209,9 +210,10 @@ const Dashboard = () => {
         <Card title="Últimos gastos">
           <div className="flex flex-col gap-md">
             {ultimosGastos.length === 0 ? (
-              <div className="text-center py-md text-text-muted">
-                <p className="text-sm">Nenhum gasto registrado ainda</p>
-              </div>
+              <EmptyState 
+                title="Nenhum gasto registrado ainda"
+                message="Que tal começar registrando seus gastos?"
+              />
             ) : (
               ultimosGastos.map((gasto) => {
                 const categoria = categorias.find((c) => c.id === gasto.categoriaId);
@@ -253,9 +255,10 @@ const Dashboard = () => {
         <Card title="Maiores gastos">
           <div className="flex flex-col gap-md">
             {maioresGastos.length === 0 ? (
-              <div className="text-center py-md text-text-muted">
-                <p className="text-sm">Nenhum gasto registrado ainda</p>
-              </div>
+              <EmptyState 
+                title="Nenhum gasto registrado ainda"
+                message="Que tal começar registrando seus gastos?"
+              />
             ) : (
               maioresGastos.map((gasto) => {
                 const IconComponent = gasto.categoria.icone
@@ -287,12 +290,14 @@ const Dashboard = () => {
 
         {/* Card 3: Últimas Faturas */}
         <Card title="Últimas faturas">
-          <div className="text-center py-md text-text-muted">
-            <p className="text-sm mb-md">Nenhum cartão cadastrado ainda</p>
-            <button className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-xs font-medium cursor-pointer transition-colors duration-200 hover:bg-background">
-              Adicionar cartão
-            </button>
-          </div>
+          <EmptyState 
+            hideText={true}
+            actionButton={
+              <button className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-xs font-medium cursor-pointer transition-colors duration-200 hover:bg-background">
+                Adicionar cartão
+              </button>
+            }
+          />
         </Card>
       </div>
 
@@ -311,10 +316,17 @@ const Dashboard = () => {
         }
       >
         {contas.length === 0 ? (
-          <div className="text-center py-xl text-text-muted">
-            <p className="mb-md">Nenhuma conta cadastrada ainda</p>
-            <button className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background" onClick={handleAddConta}>Adicionar conta</button>
-          </div>
+          <EmptyState 
+            hideText={true}
+            actionButton={
+              <button 
+                className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background" 
+                onClick={handleAddConta}
+              >
+                Adicionar conta
+              </button>
+            }
+          />
         ) : (
           <ContasList
             contas={contas}
@@ -345,18 +357,26 @@ const Dashboard = () => {
 
       {/* Cartões de Crédito */}
       <Card title="Cartões de crédito">
-        <div className="text-center py-xl text-text-muted">
-          <p className="mb-md">Nenhum cartão cadastrado ainda</p>
-          <button className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background">Adicionar cartão</button>
-        </div>
+        <EmptyState 
+          hideText={true}
+          actionButton={
+            <button className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background">
+              Adicionar cartão
+            </button>
+          }
+        />
       </Card>
 
       {/* Metas do Mês */}
       <Card title="Metas de Novembro">
-        <div className="text-center py-xl text-text-muted">
-          <p className="mb-md">Nenhuma meta criada ainda</p>
-          <button className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background">Criar meta</button>
-        </div>
+        <EmptyState 
+          hideText={true}
+          actionButton={
+            <button className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background">
+              Criar meta
+            </button>
+          }
+        />
       </Card>
 
       {/* Equilíbrio Financeiro */}

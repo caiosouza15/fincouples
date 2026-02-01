@@ -9,6 +9,8 @@ export default {
       colors: {
         positive: '#22c55e',
         negative: '#ef4444',
+        teal: '#0FB9B1',
+        pink: '#F78FB3',
         background: '#f8fafc',
         surface: '#ffffff',
         border: '#e2e8f0',

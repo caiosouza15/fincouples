@@ -49,15 +49,15 @@ export const MonthSelector = ({ selectedMonth, onMonthChange, className = '' }: 
   
   // Classes condicionais baseadas no contexto
   const buttonClass = isInHeader
-    ? "bg-transparent border-none cursor-pointer p-xs text-white/90 hover:text-white transition-colors duration-200 flex items-center justify-center"
+    ? "bg-transparent border-none cursor-pointer p-xs text-text-primary hover:text-text-secondary transition-colors duration-200 flex items-center justify-center"
     : "bg-transparent border-none cursor-pointer p-xs text-text-secondary hover:text-text-primary transition-colors duration-200 flex items-center justify-center";
   
   const textClass = isInHeader
-    ? "text-sm font-medium text-white min-w-[140px] text-center"
+    ? "text-sm font-medium text-text-primary min-w-[140px] text-center"
     : "text-sm font-medium text-text-primary min-w-[140px] text-center";
   
   const disabledButtonClass = isInHeader
-    ? "bg-transparent border-none cursor-pointer p-xs text-white/50 hover:text-white/50 transition-colors duration-200 flex items-center justify-center opacity-50 cursor-not-allowed"
+    ? "bg-transparent border-none cursor-not-allowed p-xs text-text-muted hover:text-text-muted transition-colors duration-200 flex items-center justify-center opacity-50"
     : "bg-transparent border-none cursor-pointer p-xs text-text-secondary hover:text-text-primary transition-colors duration-200 flex items-center justify-center opacity-50 cursor-not-allowed";
 
   return (
