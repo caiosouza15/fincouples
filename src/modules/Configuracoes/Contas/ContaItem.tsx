@@ -1,7 +1,8 @@
 import type { Conta } from '@/types';
-import { formatCurrency } from '@/utils';
+import { formatCurrencyWithPrivacy } from '@/utils';
 import { iconMap } from '@/utils/iconMap';
-import { Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
+import { usePrivacy } from '@/hooks/usePrivacy';
+import { Power, Pencil, Trash2 } from 'lucide-react';
 
 interface ContaItemProps {
   conta: Conta;
@@ -11,6 +12,8 @@ interface ContaItemProps {
 }
 
 export function ContaItem({ conta, onEdit, onDelete, onToggleAtiva }: ContaItemProps) {
+  const { valuesHidden } = usePrivacy();
+  
   const tipoLabels: Record<Conta['tipo'], string> = {
     corrente: 'Conta Corrente',
     poupanca: 'Poupança',
@@ -52,17 +55,17 @@ export function ContaItem({ conta, onEdit, onDelete, onToggleAtiva }: ContaItemP
           <div className="text-sm text-text-secondary">{tipoLabels[conta.tipo]}</div>
         </div>
         <div className={`text-lg font-semibold shrink-0 md:text-right ${conta.saldo >= 0 ? 'text-positive' : 'text-negative'} md:mt-0 mt-xs`}>
-          {formatCurrency(conta.saldo)}
+          {formatCurrencyWithPrivacy(conta.saldo, valuesHidden)}
         </div>
       </div>
       <div className="flex gap-xs shrink-0 md:justify-start justify-end md:border-0 border-t border-border md:pt-0 pt-sm">
         <button
-          className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer transition-all duration-200 p-0 hover:bg-background hover:border-text-muted"
+          className={`w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer transition-all duration-200 p-0 hover:bg-background hover:border-text-muted ${conta.ativa ? '' : 'opacity-50'}`}
           onClick={() => onToggleAtiva(conta.id)}
           aria-label={conta.ativa ? 'Desativar conta' : 'Ativar conta'}
           title={conta.ativa ? 'Desativar conta' : 'Ativar conta'}
         >
-          {conta.ativa ? <Eye size={16} /> : <EyeOff size={16} />}
+          <Power size={16} className={conta.ativa ? 'text-positive' : 'text-text-secondary'} />
         </button>
         <button
           className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer transition-all duration-200 p-0 hover:bg-background hover:border-text-muted"
