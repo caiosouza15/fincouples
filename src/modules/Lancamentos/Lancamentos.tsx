@@ -26,9 +26,46 @@ const Lancamentos = () => {
   const handleSaveLancamento = async (lancamentoData: Omit<Lancamento, 'id'> | Lancamento) => {
     try {
       if ('id' in lancamentoData) {
+        // Edição: apenas atualizar o lançamento
         await editLancamento(lancamentoData.id, lancamentoData);
       } else {
-        await addLancamento(lancamentoData);
+        // Criação: verificar se é parcelado
+        if (lancamentoData.parcelado && lancamentoData.totalParcelas && lancamentoData.totalParcelas > 1) {
+          // Criar múltiplos lançamentos (parcelas)
+          const valorParcela = lancamentoData.valor / lancamentoData.totalParcelas;
+          const dataInicial = lancamentoData.data instanceof Date ? lancamentoData.data : new Date(lancamentoData.data);
+          
+          // Criar primeira parcela
+          const primeiraParcela = await addLancamento({
+            ...lancamentoData,
+            valor: valorParcela,
+            parcelaAtual: 1,
+            lancamentoPaiId: undefined, // Será definido após criar
+          });
+          
+          const lancamentoPaiId = primeiraParcela.id;
+          
+          // Atualizar primeira parcela com o ID pai
+          await editLancamento(primeiraParcela.id, { lancamentoPaiId: primeiraParcela.id });
+          
+          // Criar parcelas seguintes
+          for (let i = 2; i <= lancamentoData.totalParcelas; i++) {
+            const dataParcela = new Date(dataInicial);
+            dataParcela.setMonth(dataParcela.getMonth() + (i - 1));
+            
+            await addLancamento({
+              ...lancamentoData,
+              valor: valorParcela,
+              data: dataParcela,
+              parcelaAtual: i,
+              lancamentoPaiId: lancamentoPaiId,
+              descricao: `${lancamentoData.descricao} - Parcela ${i} de ${lancamentoData.totalParcelas}`,
+            });
+          }
+        } else {
+          // Criar lançamento único
+          await addLancamento(lancamentoData);
+        }
       }
       setShowForm(false);
       setLancamentoEditando(null);

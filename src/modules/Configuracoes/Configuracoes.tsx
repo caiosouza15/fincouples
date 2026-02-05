@@ -3,19 +3,23 @@ import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
 import { useContas } from '@/hooks/useContas';
 import { useCategorias } from '@/hooks/useCategorias';
+import { useCartoes } from '@/hooks/useCartoes';
 import type { Conta } from '@/types';
 import type { Categoria } from '@/types';
+import type { CartaoCredito } from '@/types';
 import { ContasList } from './Contas/ContasList';
 import { ContaForm } from './Contas/ContaForm';
 import { CategoriasList, CategoriaForm } from './Categorias';
+import { CartoesList, CartaoForm } from './Cartoes';
 
-type TabType = 'contas' | 'categorias';
+type TabType = 'contas' | 'categorias' | 'cartoes';
 type FiltroTipoCategoria = 'todas' | 'receita' | 'despesa';
 
 const Configuracoes = () => {
   const [activeTab, setActiveTab] = useState<TabType>('contas');
   const { contas, addConta, editConta, removeConta, toggleContaAtiva } = useContas();
   const { categorias, addCategoria, editCategoria, removeCategoria, isPadrao } = useCategorias();
+  const { cartoes, addCartao, editCartao, removeCartao, toggleCartaoAtivo } = useCartoes();
   
   // Estados para Contas
   const [hidePoupancaInvestimento, setHidePoupancaInvestimento] = useState(false);
@@ -26,6 +30,10 @@ const Configuracoes = () => {
   const [filtroTipoCategoria, setFiltroTipoCategoria] = useState<FiltroTipoCategoria>('todas');
   const [showFormCategoria, setShowFormCategoria] = useState(false);
   const [categoriaEditando, setCategoriaEditando] = useState<Categoria | null>(null);
+
+  // Estados para Cartões
+  const [showFormCartao, setShowFormCartao] = useState(false);
+  const [cartaoEditando, setCartaoEditando] = useState<CartaoCredito | null>(null);
 
   // Handlers para Contas
   const handleAddConta = () => {
@@ -87,6 +95,36 @@ const Configuracoes = () => {
     setCategoriaEditando(null);
   };
 
+  // Handlers para Cartões
+  const handleAddCartao = () => {
+    setCartaoEditando(null);
+    setShowFormCartao(true);
+  };
+
+  const handleEditCartao = (cartao: CartaoCredito) => {
+    setCartaoEditando(cartao);
+    setShowFormCartao(true);
+  };
+
+  const handleSaveCartao = async (cartaoData: Omit<CartaoCredito, 'id'> | CartaoCredito) => {
+    if ('id' in cartaoData) {
+      await editCartao(cartaoData.id, cartaoData);
+    } else {
+      await addCartao(cartaoData);
+    }
+    setShowFormCartao(false);
+    setCartaoEditando(null);
+  };
+
+  const handleDeleteCartao = async (id: string) => {
+    await removeCartao(id);
+  };
+
+  const handleCloseFormCartao = () => {
+    setShowFormCartao(false);
+    setCartaoEditando(null);
+  };
+
   return (
     <div className="max-w-[1280px] mx-auto pb-xl">
       <h1 className="text-2xl font-bold text-text-primary mb-lg">Configurações</h1>
@@ -112,6 +150,16 @@ const Configuracoes = () => {
           }`}
         >
           Categorias
+        </button>
+        <button
+          onClick={() => setActiveTab('cartoes')}
+          className={`px-lg py-md text-base font-medium transition-colors duration-200 border-b-2 ${
+            activeTab === 'cartoes'
+              ? 'border-positive text-positive'
+              : 'border-transparent text-text-secondary hover:text-text-primary'
+          }`}
+        >
+          Cartões
         </button>
       </div>
 
@@ -214,6 +262,42 @@ const Configuracoes = () => {
         </Card>
       )}
 
+      {/* Conteúdo da Aba Cartões */}
+      {activeTab === 'cartoes' && (
+        <Card title="Meus cartões">
+          {cartoes.length === 0 ? (
+            <EmptyState 
+              hideText={true}
+              actionButton={
+                <button
+                  className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background"
+                  onClick={handleAddCartao}
+                >
+                  Adicionar cartão
+                </button>
+              }
+            />
+          ) : (
+            <>
+              <CartoesList
+                cartoes={cartoes}
+                onEdit={handleEditCartao}
+                onDelete={handleDeleteCartao}
+                onToggleAtivo={toggleCartaoAtivo}
+              />
+              <div className="mt-md">
+                <button
+                  className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background"
+                  onClick={handleAddCartao}
+                >
+                  + Adicionar cartão
+                </button>
+              </div>
+            </>
+          )}
+        </Card>
+      )}
+
       {/* Modais de Formulários */}
       {showFormConta && (
         <ContaForm
@@ -229,6 +313,14 @@ const Configuracoes = () => {
           onClose={handleCloseFormCategoria}
           onSave={handleSaveCategoria}
           isPadrao={isPadrao}
+        />
+      )}
+
+      {showFormCartao && (
+        <CartaoForm
+          cartao={cartaoEditando}
+          onClose={handleCloseFormCartao}
+          onSave={handleSaveCartao}
         />
       )}
     </div>
