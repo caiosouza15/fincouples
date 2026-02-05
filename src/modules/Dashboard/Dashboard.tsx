@@ -1,19 +1,25 @@
-import { useState } from 'react';
-import { Eye, Minus, Plus, GraduationCap } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, Minus, Plus, GraduationCap } from 'lucide-react';
 import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
 import { useContas } from '@/hooks/useContas';
 import { useLancamentos } from '@/hooks/useLancamentos';
 import { useCategorias } from '@/hooks/useCategorias';
+import { useFaturas } from '@/hooks/useFaturas';
+import { useCartoes } from '@/hooks/useCartoes';
+import { usePrivacy } from '@/hooks/usePrivacy';
 import { useSelectedMonth } from '@/contexts/SelectedMonthContext';
-import type { Conta, Lancamento } from '@/types';
+import type { Conta, Lancamento, CartaoCredito } from '@/types';
 import { ContasList } from '@/modules/Configuracoes/Contas/ContasList';
 import { ContaForm } from '@/modules/Configuracoes/Contas/ContaForm';
 import { LancamentoForm } from '@/modules/Lancamentos/LancamentoForm';
-import { formatCurrency } from '@/utils';
+import { CartoesList } from '@/modules/Configuracoes/Cartoes/CartoesList';
+import { formatCurrencyWithPrivacy } from '@/utils';
 import { iconMap } from '@/utils/iconMap';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { contas, getSaldoGeral, addConta, editConta, removeConta, toggleContaAtiva } = useContas();
   const {
     lancamentos: allLancamentos,
@@ -26,6 +32,9 @@ const Dashboard = () => {
     editLancamento,
   } = useLancamentos();
   const { categorias } = useCategorias();
+  const { faturas, getFaturaAtual, fetchFaturas } = useFaturas();
+  const { cartoes, removeCartao, toggleCartaoAtivo } = useCartoes();
+  const { valuesHidden, toggleValuesVisibility } = usePrivacy();
 
   const [hidePoupancaInvestimento, setHidePoupancaInvestimento] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -74,6 +83,33 @@ const Dashboard = () => {
   const maioresGastos = getMaioresGastos(categorias, 5, selectedMonth);
   const ultimosGastos = getUltimosGastos(selectedMonth, 5);
 
+  // Filtrar faturas do mês selecionado
+  const faturasDoMes = faturas.filter(f => {
+    const [ano, mes] = selectedMonth.split('-');
+    return f.mesReferencia === `${ano}-${mes}`;
+  });
+
+  // Gerar faturas automaticamente quando há cartões e mudar de mês
+  useEffect(() => {
+    const gerarFaturasParaCartoes = async () => {
+      if (cartoes.length === 0) return;
+      
+      const cartoesAtivos = cartoes.filter(c => c.ativo);
+      for (const cartao of cartoesAtivos) {
+        try {
+          await getFaturaAtual(cartao.id, selectedMonth);
+        } catch (error) {
+          console.error(`Erro ao gerar fatura para cartão ${cartao.id}:`, error);
+        }
+      }
+      // Atualizar lista de faturas após gerar
+      await fetchFaturas();
+    };
+
+    gerarFaturasParaCartoes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMonth, cartoes.length]);
+
   const handleAddConta = () => {
     setContaEditando(null);
     setShowForm(true);
@@ -96,6 +132,18 @@ const Dashboard = () => {
 
   const handleDeleteConta = async (id: string) => {
     await removeConta(id);
+  };
+
+  const handleAddCartao = () => {
+    navigate('/cartoes');
+  };
+
+  const handleEditCartao = (_cartao: CartaoCredito) => {
+    navigate('/cartoes');
+  };
+
+  const handleDeleteCartao = async (id: string) => {
+    await removeCartao(id);
   };
 
   const handleCloseForm = () => {
@@ -145,12 +193,17 @@ const Dashboard = () => {
           <div className="flex flex-col gap-sm">
             <div className="flex justify-between items-center">
               <span className="text-sm text-text-secondary uppercase font-medium">Saldo geral</span>
-              <button className="bg-transparent border-none cursor-pointer p-xs opacity-70 transition-opacity duration-200 text-text-secondary hover:opacity-100 hover:text-text-primary" aria-label="Mostrar/Ocultar saldo">
-                <Eye size={20} />
+              <button 
+                onClick={toggleValuesVisibility}
+                className="bg-transparent border-none cursor-pointer p-xs opacity-70 transition-opacity duration-200 text-text-secondary hover:opacity-100 hover:text-text-primary" 
+                aria-label={valuesHidden ? "Mostrar valores" : "Ocultar valores"}
+                title={valuesHidden ? "Mostrar valores" : "Ocultar valores"}
+              >
+                {valuesHidden ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
             <div className="text-3xl md:text-[2rem] lg:text-[3rem] font-bold text-text-primary leading-none">
-              {formatCurrency(saldoGeral)}
+              {formatCurrencyWithPrivacy(saldoGeral, valuesHidden)}
             </div>
             <a href="#" className="text-text-secondary text-sm underline">Ver relatórios</a>
           </div>
@@ -172,7 +225,7 @@ const Dashboard = () => {
             <div className="text-sm text-text-secondary uppercase mb-sm">Receita mensal</div>
             {receitaMensal > 0 ? (
               <div className="text-2xl font-bold text-positive">
-                + {formatCurrency(receitaMensal)}
+                + {formatCurrencyWithPrivacy(receitaMensal, valuesHidden)}
               </div>
             ) : (
               <div className="text-lg text-text-muted">
@@ -193,7 +246,7 @@ const Dashboard = () => {
             <div className="text-sm text-text-secondary uppercase mb-sm">Despesa mensal</div>
             {despesaMensal > 0 ? (
               <div className="text-2xl font-bold text-negative">
-                - {formatCurrency(despesaMensal)}
+                - {formatCurrencyWithPrivacy(despesaMensal, valuesHidden)}
               </div>
             ) : (
               <div className="text-lg text-text-muted">
@@ -239,9 +292,9 @@ const Dashboard = () => {
                       </div>
                       <div className="flex items-center justify-between gap-2">
                         <div className="text-xs text-text-secondary">{dataFormatada}</div>
-                        <div className="text-sm font-semibold text-negative">
-                          {formatCurrency(gasto.valor)}
-                        </div>
+                      <div className="text-sm font-semibold text-negative">
+                        {formatCurrencyWithPrivacy(gasto.valor, valuesHidden)}
+                      </div>
                       </div>
                     </div>
                   </div>
@@ -278,7 +331,7 @@ const Dashboard = () => {
                         {gasto.categoria.nome}
                       </div>
                       <div className="text-sm text-text-secondary font-semibold">
-                        {formatCurrency(gasto.valor)}
+                        {formatCurrencyWithPrivacy(gasto.valor, valuesHidden)}
                       </div>
                     </div>
                   </div>
@@ -290,14 +343,64 @@ const Dashboard = () => {
 
         {/* Card 3: Últimas Faturas */}
         <Card title="Últimas faturas">
-          <EmptyState 
-            hideText={true}
-            actionButton={
-              <button className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-xs font-medium cursor-pointer transition-colors duration-200 hover:bg-background">
-                Adicionar cartão
-              </button>
-            }
-          />
+          {cartoes.length === 0 ? (
+            <EmptyState 
+              hideText={true}
+              actionButton={
+                <button 
+                  className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-xs font-medium cursor-pointer transition-colors duration-200 hover:bg-background"
+                  onClick={handleAddCartao}
+                >
+                  Ir para página de cartões
+                </button>
+              }
+            />
+          ) : faturasDoMes.length === 0 ? (
+            <EmptyState 
+              title="Nenhuma fatura encontrada"
+              message="Não há faturas para o mês selecionado."
+            />
+          ) : (
+            <div className="flex flex-col gap-sm">
+              {faturasDoMes.slice(0, 5).map((fatura) => {
+                const cartao = cartoes.find(c => c.id === fatura.cartaoId);
+                const formatMes = (mesRef: string) => {
+                  const [ano, mes] = mesRef.split('-');
+                  const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                  return `${meses[parseInt(mes) - 1]}/${ano}`;
+                };
+                const getStatusColor = () => {
+                  switch (fatura.status) {
+                    case 'pago_total': return 'text-positive';
+                    case 'pago_parcial': return 'text-warning';
+                    default: return 'text-negative';
+                  }
+                };
+                return (
+                  <div key={fatura.id} className="flex items-center justify-between p-sm bg-background rounded-md">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-text-primary text-sm mb-xs truncate">
+                        {cartao?.nome || 'Cartão'}
+                      </div>
+                      <div className="text-xs text-text-secondary">
+                        {formatMes(fatura.mesReferencia)}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`text-sm font-semibold ${getStatusColor()}`}>
+                        {formatCurrencyWithPrivacy(fatura.valorTotal, valuesHidden)}
+                      </div>
+                      {fatura.status === 'pago_parcial' && (
+                        <div className="text-xs text-text-secondary">
+                          Pago: {formatCurrencyWithPrivacy(fatura.valorPago, valuesHidden)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </Card>
       </div>
 
@@ -357,14 +460,26 @@ const Dashboard = () => {
 
       {/* Cartões de Crédito */}
       <Card title="Cartões de crédito">
-        <EmptyState 
-          hideText={true}
-          actionButton={
-            <button className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background">
-              Adicionar cartão
-            </button>
-          }
-        />
+        {cartoes.length === 0 ? (
+          <EmptyState 
+            hideText={true}
+            actionButton={
+              <button 
+                className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background"
+                onClick={handleAddCartao}
+              >
+                Adicionar cartão
+              </button>
+            }
+          />
+        ) : (
+          <CartoesList
+            cartoes={cartoes}
+            onEdit={handleEditCartao}
+            onDelete={handleDeleteCartao}
+            onToggleAtivo={toggleCartaoAtivo}
+          />
+        )}
       </Card>
 
       {/* Metas do Mês */}

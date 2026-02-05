@@ -3,6 +3,8 @@ import { X } from 'lucide-react';
 import type { Lancamento } from '@/types';
 import { useContas } from '@/hooks/useContas';
 import { useCategorias } from '@/hooks/useCategorias';
+import { useCartoes } from '@/hooks/useCartoes';
+import { formatNumberInput, parseNumberInput, handleNumberInputChange } from '@/utils/numberMask';
 
 interface LancamentoFormProps {
   lancamento?: Lancamento | null;
@@ -19,14 +21,18 @@ export function LancamentoForm({
 }: LancamentoFormProps) {
   const { contas } = useContas();
   const { categorias } = useCategorias();
+  const { cartoes } = useCartoes();
 
   const [tipo, setTipo] = useState<'receita' | 'despesa'>(
     tipoPreSelecionado || lancamento?.tipo || 'despesa'
   );
   const [valor, setValor] = useState('');
   const [categoriaId, setCategoriaId] = useState('');
+  const [metodoPagamento, setMetodoPagamento] = useState<'conta' | 'cartao'>('conta');
   const [contaId, setContaId] = useState('');
   const [cartaoId, setCartaoId] = useState('');
+  const [parcelado, setParcelado] = useState(false);
+  const [numeroParcelas, setNumeroParcelas] = useState('1');
   const [data, setData] = useState(new Date().toISOString().split('T')[0]);
   const [descricao, setDescricao] = useState('');
   const [pago, setPago] = useState(true);
@@ -41,19 +47,28 @@ export function LancamentoForm({
   // Filtrar contas ativas
   const contasAtivas = contas.filter((c) => c.ativa);
 
+  // Filtrar cartões ativos
+  const cartoesAtivos = cartoes.filter((c) => c.ativo);
+
   useEffect(() => {
     if (lancamento) {
       setTipo(lancamento.tipo);
-      setValor(lancamento.valor.toString());
+      setValor(formatNumberInput(lancamento.valor));
       setCategoriaId(lancamento.categoriaId);
       setContaId(lancamento.contaId || '');
       setCartaoId(lancamento.cartaoId || '');
+      setMetodoPagamento(lancamento.cartaoId ? 'cartao' : 'conta');
+      setParcelado(lancamento.parcelado || false);
+      setNumeroParcelas(formatNumberInput(lancamento.totalParcelas || 1, false));
       setData(new Date(lancamento.data).toISOString().split('T')[0]);
       setDescricao(lancamento.descricao);
       setPago(lancamento.pago !== undefined ? lancamento.pago : true);
     } else {
       // Valores padrão para novo lançamento
       setPago(tipo === 'receita');
+      setMetodoPagamento('conta');
+      setParcelado(false);
+      setNumeroParcelas('1');
     }
   }, [lancamento, tipo]);
 
@@ -69,7 +84,7 @@ export function LancamentoForm({
     setError(null);
 
     // Validações
-    const valorNum = parseFloat(valor);
+    const valorNum = parseNumberInput(valor);
     if (isNaN(valorNum) || valorNum <= 0) {
       setError('Valor deve ser maior que zero');
       return;
@@ -80,9 +95,28 @@ export function LancamentoForm({
       return;
     }
 
-    if (!contaId && !cartaoId) {
-      setError('Conta ou cartão deve ser informado');
-      return;
+    if (tipo === 'despesa') {
+      if (metodoPagamento === 'conta' && !contaId) {
+        setError('Conta deve ser informada');
+        return;
+      }
+      if (metodoPagamento === 'cartao' && !cartaoId) {
+        setError('Cartão deve ser informado');
+        return;
+      }
+      if (metodoPagamento === 'cartao' && parcelado) {
+        const parcelasNum = parseNumberInput(numeroParcelas);
+        if (isNaN(parcelasNum) || parcelasNum < 1 || parcelasNum > 24) {
+          setError('Número de parcelas deve ser entre 1 e 24');
+          return;
+        }
+      }
+    } else {
+      // Receita sempre usa conta
+      if (!contaId) {
+        setError('Conta deve ser informada');
+        return;
+      }
     }
 
     if (!data) {
@@ -105,21 +139,27 @@ export function LancamentoForm({
             tipo,
             valor: valorNum,
             categoriaId,
-            contaId: contaId || undefined,
-            cartaoId: cartaoId || undefined,
+            contaId: metodoPagamento === 'conta' ? (contaId || undefined) : undefined,
+            cartaoId: metodoPagamento === 'cartao' ? (cartaoId || undefined) : undefined,
             data: dataObj,
             descricao: descricao.trim(),
             pago,
+            parcelado: metodoPagamento === 'cartao' && parcelado,
+            totalParcelas: metodoPagamento === 'cartao' && parcelado ? parseNumberInput(numeroParcelas) : undefined,
+            parcelaAtual: lancamento.parcelaAtual,
+            lancamentoPaiId: lancamento.lancamentoPaiId,
           }
         : {
             tipo,
             valor: valorNum,
             categoriaId,
-            contaId: contaId || undefined,
-            cartaoId: cartaoId || undefined,
+            contaId: metodoPagamento === 'conta' ? (contaId || undefined) : undefined,
+            cartaoId: metodoPagamento === 'cartao' ? (cartaoId || undefined) : undefined,
             data: dataObj,
             descricao: descricao.trim(),
             pago,
+            parcelado: metodoPagamento === 'cartao' && parcelado,
+            totalParcelas: metodoPagamento === 'cartao' && parcelado ? parseNumberInput(numeroParcelas) : undefined,
             casalId: 'casal-1',
           };
 
@@ -209,12 +249,11 @@ export function LancamentoForm({
             </label>
             <input
               id="valor"
-              type="number"
-              step="0.01"
-              min="0.01"
+              type="text"
+              inputMode="decimal"
               className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
               value={valor}
-              onChange={(e) => setValor(e.target.value)}
+              onChange={(e) => setValor(handleNumberInputChange(e, true))}
               placeholder="0,00"
               required
               disabled={loading}
@@ -247,59 +286,179 @@ export function LancamentoForm({
             )}
           </div>
 
-          <div className="flex flex-col gap-xs">
-            <label htmlFor="conta" className="text-sm font-medium text-text-primary">
-              Conta {!cartaoId && '*'}
-            </label>
-            <select
-              id="conta"
-              className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
-              value={contaId}
-              onChange={(e) => {
-                setContaId(e.target.value);
-                if (e.target.value) {
-                  setCartaoId(''); // Limpar cartão se conta selecionada
-                }
-              }}
-              disabled={loading || contasAtivas.length === 0}
-            >
-              <option value="">Selecione uma conta</option>
-              {contasAtivas.map((conta) => (
-                <option key={conta.id} value={conta.id}>
-                  {conta.nome} ({conta.tipo === 'corrente' ? 'Corrente' : conta.tipo === 'poupanca' ? 'Poupança' : 'Investimento'})
-                </option>
-              ))}
-            </select>
-            {contasAtivas.length === 0 && (
-              <p className="text-sm text-text-muted">
-                Nenhuma conta cadastrada. Cadastre uma conta primeiro.
-              </p>
-            )}
-          </div>
+          {tipo === 'despesa' && (
+            <>
+              <div className="flex flex-col gap-xs">
+                <label className="text-sm font-medium text-text-primary">Método de Pagamento *</label>
+                <div className="flex gap-md">
+                  <label className="flex items-center gap-sm cursor-pointer flex-1 p-md border border-border rounded-md hover:bg-background transition-colors">
+                    <input
+                      type="radio"
+                      name="metodoPagamento"
+                      value="conta"
+                      checked={metodoPagamento === 'conta'}
+                      onChange={() => {
+                        setMetodoPagamento('conta');
+                        setCartaoId('');
+                        setParcelado(false);
+                      }}
+                      disabled={loading}
+                      className="cursor-pointer"
+                    />
+                    <span className="text-text-primary">Conta</span>
+                  </label>
+                  <label className="flex items-center gap-sm cursor-pointer flex-1 p-md border border-border rounded-md hover:bg-background transition-colors">
+                    <input
+                      type="radio"
+                      name="metodoPagamento"
+                      value="cartao"
+                      checked={metodoPagamento === 'cartao'}
+                      onChange={() => {
+                        setMetodoPagamento('cartao');
+                        setContaId('');
+                      }}
+                      disabled={loading}
+                      className="cursor-pointer"
+                    />
+                    <span className="text-text-primary">Cartão de Crédito</span>
+                  </label>
+                </div>
+              </div>
 
-          <div className="flex flex-col gap-xs">
-            <label htmlFor="cartao" className="text-sm font-medium text-text-primary">
-              Cartão de Crédito {!contaId && '*'}
-            </label>
-            <select
-              id="cartao"
-              className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
-              value={cartaoId}
-              onChange={(e) => {
-                setCartaoId(e.target.value);
-                if (e.target.value) {
-                  setContaId(''); // Limpar conta se cartão selecionado
-                }
-              }}
-              disabled={loading}
-            >
-              <option value="">Selecione um cartão</option>
-              {/* Cartões serão implementados futuramente */}
-            </select>
-            <p className="text-sm text-text-muted">
-              Funcionalidade de cartões será implementada em breve
-            </p>
-          </div>
+              {metodoPagamento === 'conta' && (
+                <div className="flex flex-col gap-xs">
+                  <label htmlFor="conta" className="text-sm font-medium text-text-primary">
+                    Conta *
+                  </label>
+                  <select
+                    id="conta"
+                    className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                    value={contaId}
+                    onChange={(e) => setContaId(e.target.value)}
+                    disabled={loading || contasAtivas.length === 0}
+                  >
+                    <option value="">Selecione uma conta</option>
+                    {contasAtivas.map((conta) => (
+                      <option key={conta.id} value={conta.id}>
+                        {conta.nome} ({conta.tipo === 'corrente' ? 'Corrente' : conta.tipo === 'poupanca' ? 'Poupança' : 'Investimento'})
+                      </option>
+                    ))}
+                  </select>
+                  {contasAtivas.length === 0 && (
+                    <p className="text-sm text-text-muted">
+                      Nenhuma conta cadastrada. Cadastre uma conta primeiro.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {metodoPagamento === 'cartao' && (
+                <>
+                  <div className="flex flex-col gap-xs">
+                    <label htmlFor="cartao" className="text-sm font-medium text-text-primary">
+                      Cartão de Crédito *
+                    </label>
+                    <select
+                      id="cartao"
+                      className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                      value={cartaoId}
+                      onChange={(e) => setCartaoId(e.target.value)}
+                      disabled={loading || cartoesAtivos.length === 0}
+                    >
+                      <option value="">Selecione um cartão</option>
+                      {cartoesAtivos.map((cartao) => (
+                        <option key={cartao.id} value={cartao.id}>
+                          {cartao.nome} (Limite: R$ {cartao.limite.toFixed(2)})
+                        </option>
+                      ))}
+                    </select>
+                    {cartoesAtivos.length === 0 && (
+                      <p className="text-sm text-text-muted">
+                        Nenhum cartão cadastrado. Cadastre um cartão primeiro.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-xs">
+                    <label className="text-sm font-medium text-text-primary">Forma de Pagamento</label>
+                    <div className="flex gap-md">
+                      <label className="flex items-center gap-sm cursor-pointer flex-1 p-md border border-border rounded-md hover:bg-background transition-colors">
+                        <input
+                          type="radio"
+                          name="parcelado"
+                          checked={!parcelado}
+                          onChange={() => setParcelado(false)}
+                          disabled={loading || !cartaoId}
+                          className="cursor-pointer"
+                        />
+                        <span className="text-text-primary">À vista</span>
+                      </label>
+                      <label className="flex items-center gap-sm cursor-pointer flex-1 p-md border border-border rounded-md hover:bg-background transition-colors">
+                        <input
+                          type="radio"
+                          name="parcelado"
+                          checked={parcelado}
+                          onChange={() => setParcelado(true)}
+                          disabled={loading || !cartaoId}
+                          className="cursor-pointer"
+                        />
+                        <span className="text-text-primary">Parcelado</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {parcelado && cartaoId && (
+                    <div className="flex flex-col gap-xs">
+                      <label htmlFor="numeroParcelas" className="text-sm font-medium text-text-primary">
+                        Número de Parcelas *
+                      </label>
+                      <input
+                        id="numeroParcelas"
+                        type="text"
+                        inputMode="numeric"
+                        className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                        value={numeroParcelas}
+                        onChange={(e) => setNumeroParcelas(handleNumberInputChange(e, false))}
+                        placeholder="1"
+                        required
+                        disabled={loading}
+                      />
+                      <p className="text-sm text-text-muted">
+                        Valor por parcela: R$ {valor && numeroParcelas ? formatNumberInput(parseNumberInput(valor) / parseNumberInput(numeroParcelas)) : '0,00'}
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
+            </>
+          )}
+
+          {tipo === 'receita' && (
+            <div className="flex flex-col gap-xs">
+              <label htmlFor="conta" className="text-sm font-medium text-text-primary">
+                Conta *
+              </label>
+              <select
+                id="conta"
+                className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                value={contaId}
+                onChange={(e) => setContaId(e.target.value)}
+                disabled={loading || contasAtivas.length === 0}
+              >
+                <option value="">Selecione uma conta</option>
+                {contasAtivas.map((conta) => (
+                  <option key={conta.id} value={conta.id}>
+                    {conta.nome} ({conta.tipo === 'corrente' ? 'Corrente' : conta.tipo === 'poupanca' ? 'Poupança' : 'Investimento'})
+                  </option>
+                ))}
+              </select>
+              {contasAtivas.length === 0 && (
+                <p className="text-sm text-text-muted">
+                  Nenhuma conta cadastrada. Cadastre uma conta primeiro.
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="flex flex-col gap-xs">
             <label htmlFor="data" className="text-sm font-medium text-text-primary">

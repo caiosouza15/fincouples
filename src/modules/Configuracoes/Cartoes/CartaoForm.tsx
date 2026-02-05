@@ -1,32 +1,34 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import type { Conta } from '@/types';
+import type { CartaoCredito } from '@/types';
 import { formatNumberInput, parseNumberInput, handleNumberInputChange } from '@/utils/numberMask';
 
-interface ContaFormProps {
-  conta?: Conta | null;
+interface CartaoFormProps {
+  cartao?: CartaoCredito | null;
   onClose: () => void;
-  onSave: (conta: Omit<Conta, 'id'> | Conta) => Promise<void>;
+  onSave: (cartao: Omit<CartaoCredito, 'id'> | CartaoCredito) => Promise<void>;
 }
 
-export function ContaForm({ conta, onClose, onSave }: ContaFormProps) {
+export function CartaoForm({ cartao, onClose, onSave }: CartaoFormProps) {
   const [nome, setNome] = useState('');
-  const [tipo, setTipo] = useState<Conta['tipo']>('corrente');
-  const [saldo, setSaldo] = useState('');
-  const [ativa, setAtiva] = useState(true);
+  const [limite, setLimite] = useState('');
+  const [fechamento, setFechamento] = useState('10');
+  const [vencimento, setVencimento] = useState('15');
+  const [ativo, setAtivo] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isEditMode = !!conta;
+  const isEditMode = !!cartao;
 
   useEffect(() => {
-    if (conta) {
-      setNome(conta.nome);
-      setTipo(conta.tipo);
-      setSaldo(formatNumberInput(conta.saldo));
-      setAtiva(conta.ativa);
+    if (cartao) {
+      setNome(cartao.nome);
+      setLimite(formatNumberInput(cartao.limite));
+      setFechamento(formatNumberInput(cartao.fechamento, false));
+      setVencimento(formatNumberInput(cartao.vencimento, false));
+      setAtivo(cartao.ativo);
     }
-  }, [conta]);
+  }, [cartao]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,33 +36,56 @@ export function ContaForm({ conta, onClose, onSave }: ContaFormProps) {
 
     // Validações
     if (!nome.trim()) {
-      setError('Nome da conta é obrigatório');
+      setError('Nome do cartão é obrigatório');
       return;
     }
 
-    const saldoNum = parseNumberInput(saldo);
-    if (isNaN(saldoNum)) {
-      setError('Saldo deve ser um número válido');
+    const limiteNum = parseNumberInput(limite);
+    if (isNaN(limiteNum) || limiteNum <= 0) {
+      setError('Limite deve ser um número maior que zero');
+      return;
+    }
+
+    const fechamentoNum = parseNumberInput(fechamento);
+    const vencimentoNum = parseNumberInput(vencimento);
+    
+    if (fechamentoNum < 1 || fechamentoNum > 31) {
+      setError('Dia de fechamento deve ser entre 1 e 31');
+      return;
+    }
+
+    if (vencimentoNum < 1 || vencimentoNum > 31) {
+      setError('Dia de vencimento deve ser entre 1 e 31');
       return;
     }
 
     try {
       setLoading(true);
       
-      const contaData: Omit<Conta, 'id'> | Conta = isEditMode && conta
-        ? { ...conta, nome: nome.trim(), tipo, saldo: saldoNum, ativa }
+      const cartaoData: Omit<CartaoCredito, 'id'> | CartaoCredito = isEditMode && cartao
+        ? { 
+            ...cartao, 
+            nome: nome.trim(), 
+            limite: limiteNum, 
+            fechamento: Math.round(fechamentoNum),
+            vencimento: Math.round(vencimentoNum),
+            ativo,
+          }
         : {
             nome: nome.trim(),
-            tipo,
-            saldo: saldoNum,
-            ativa,
-            casalId: 'default', // Por enquanto fixo
+            limite: limiteNum,
+            limiteDisponivel: limiteNum,
+            faturaAtual: 0,
+            fechamento: Math.round(fechamentoNum),
+            vencimento: Math.round(vencimentoNum),
+            ativo,
+            casalId: 'casal-1',
           };
 
-      await onSave(contaData);
+      await onSave(cartaoData);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao salvar conta');
+      setError(err instanceof Error ? err.message : 'Erro ao salvar cartão');
     } finally {
       setLoading(false);
     }
@@ -77,7 +102,7 @@ export function ContaForm({ conta, onClose, onSave }: ContaFormProps) {
       <div className="bg-surface rounded-lg w-full max-w-[500px] max-h-[90vh] overflow-y-auto shadow-lg animate-[slideUp_0.3s_ease] md:rounded-lg md:max-w-[500px]" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-lg border-b border-border">
           <h3 className="text-xl font-semibold text-text-primary m-0">
-            {isEditMode ? 'Editar Conta' : 'Nova Conta'}
+            {isEditMode ? 'Editar Cartão' : 'Novo Cartão'}
           </h3>
           <button
             className="w-8 h-8 flex items-center justify-center bg-transparent border-none rounded-sm cursor-pointer text-text-secondary transition-all duration-200 hover:bg-background hover:text-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
@@ -98,7 +123,7 @@ export function ContaForm({ conta, onClose, onSave }: ContaFormProps) {
 
           <div className="flex flex-col gap-xs">
             <label htmlFor="nome" className="text-sm font-medium text-text-primary">
-              Nome da Conta *
+              Nome do Cartão *
             </label>
             <input
               id="nome"
@@ -106,45 +131,61 @@ export function ContaForm({ conta, onClose, onSave }: ContaFormProps) {
               className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
-              placeholder="Ex: NuConta, Banco do Brasil"
+              placeholder="Ex: Nubank, Inter"
               required
               disabled={loading}
             />
           </div>
 
           <div className="flex flex-col gap-xs">
-            <label htmlFor="tipo" className="text-sm font-medium text-text-primary">
-              Tipo *
-            </label>
-            <select
-              id="tipo"
-              className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
-              value={tipo}
-              onChange={(e) => setTipo(e.target.value as Conta['tipo'])}
-              required
-              disabled={loading}
-            >
-              <option value="corrente">Conta Corrente</option>
-              <option value="poupanca">Poupança</option>
-              <option value="investimento">Investimento</option>
-            </select>
-          </div>
-
-          <div className="flex flex-col gap-xs">
-            <label htmlFor="saldo" className="text-sm font-medium text-text-primary">
-              Saldo Inicial *
+            <label htmlFor="limite" className="text-sm font-medium text-text-primary">
+              Limite *
             </label>
             <input
-              id="saldo"
+              id="limite"
               type="text"
               inputMode="decimal"
               className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
-              value={saldo}
-              onChange={(e) => setSaldo(handleNumberInputChange(e, true))}
+              value={limite}
+              onChange={(e) => setLimite(handleNumberInputChange(e, true))}
               placeholder="0,00"
               required
               disabled={loading}
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-md">
+            <div className="flex flex-col gap-xs">
+              <label htmlFor="fechamento" className="text-sm font-medium text-text-primary">
+                Dia de Fechamento *
+              </label>
+              <input
+                id="fechamento"
+                type="text"
+                inputMode="numeric"
+                className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                value={fechamento}
+                onChange={(e) => setFechamento(handleNumberInputChange(e, false))}
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div className="flex flex-col gap-xs">
+              <label htmlFor="vencimento" className="text-sm font-medium text-text-primary">
+                Dia de Vencimento *
+              </label>
+              <input
+                id="vencimento"
+                type="text"
+                inputMode="numeric"
+                className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                value={vencimento}
+                onChange={(e) => setVencimento(handleNumberInputChange(e, false))}
+                required
+                disabled={loading}
+              />
+            </div>
           </div>
 
           {isEditMode && (
@@ -153,11 +194,11 @@ export function ContaForm({ conta, onClose, onSave }: ContaFormProps) {
                 <input
                   type="checkbox"
                   className="w-[18px] h-[18px] cursor-pointer"
-                  checked={ativa}
-                  onChange={(e) => setAtiva(e.target.checked)}
+                  checked={ativo}
+                  onChange={(e) => setAtivo(e.target.checked)}
                   disabled={loading}
                 />
-                <span>Conta ativa</span>
+                <span>Cartão ativo</span>
               </label>
             </div>
           )}
@@ -176,7 +217,7 @@ export function ContaForm({ conta, onClose, onSave }: ContaFormProps) {
               className="py-md px-lg rounded-md text-base font-medium cursor-pointer transition-all duration-200 border-none bg-positive text-white hover:bg-[#16a34a] disabled:opacity-60 disabled:cursor-not-allowed md:w-auto w-full"
               disabled={loading}
             >
-              {loading ? 'Salvando...' : isEditMode ? 'Salvar' : 'Criar Conta'}
+              {loading ? 'Salvando...' : isEditMode ? 'Salvar' : 'Criar Cartão'}
             </button>
           </div>
         </form>
@@ -200,14 +241,6 @@ export function ContaForm({ conta, onClose, onSave }: ContaFormProps) {
           to {
             transform: translateY(0);
             opacity: 1;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .modal-content {
-            border-radius: 0.75rem 0.75rem 0 0;
-            max-width: 100%;
-            max-height: 90vh;
           }
         }
       `}</style>

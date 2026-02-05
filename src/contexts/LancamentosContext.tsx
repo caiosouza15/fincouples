@@ -12,7 +12,7 @@ interface LancamentosContextType {
   loading: boolean;
   error: string | null;
   fetchLancamentos: () => Promise<void>;
-  addLancamento: (lancamento: Omit<Lancamento, 'id'>) => Promise<void>;
+  addLancamento: (lancamento: Omit<Lancamento, 'id'>) => Promise<Lancamento>;
   editLancamento: (id: string, lancamento: Partial<Lancamento>) => Promise<void>;
   removeLancamento: (id: string) => Promise<void>;
   getLancamentosPorMes: (mes: string) => Lancamento[];
@@ -81,12 +81,13 @@ export function LancamentosProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addLancamento = async (lancamento: Omit<Lancamento, 'id'>) => {
+  const addLancamento = async (lancamento: Omit<Lancamento, 'id'>): Promise<Lancamento> => {
     try {
       setLoading(true);
       setError(null);
       const newLancamento = await createLancamento(lancamento);
       setLancamentos((prev) => [newLancamento, ...prev].sort((a, b) => b.data.getTime() - a.data.getTime()));
+      return newLancamento;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao criar lançamento');
       console.error('Erro ao criar lançamento:', err);

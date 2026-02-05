@@ -4,6 +4,9 @@ import { Menu, Bell, Settings, User } from 'lucide-react';
 import { ContasProvider } from './contexts/ContasContext';
 import { CategoriasProvider } from './contexts/CategoriasContext';
 import { LancamentosProvider } from './contexts/LancamentosContext';
+import { CartoesProvider } from './contexts/CartoesContext';
+import { FaturasProvider } from './contexts/FaturasContext';
+import { PrivacyProvider } from './contexts/PrivacyContext';
 import { SelectedMonthProvider, useSelectedMonth } from './contexts/SelectedMonthContext';
 import { MonthSelector } from './components/MonthSelector';
 import { Dashboard } from './modules/Dashboard';
@@ -13,6 +16,7 @@ import { Lancamentos } from './modules/Lancamentos';
 import { Relatorios } from './modules/Relatorios';
 import { Metas } from './modules/Metas';
 import { Contas } from './modules/Contas';
+import { Cartoes } from './modules/Cartoes';
 import logo from './assets/logo.png';
 
 function AppContent() {
@@ -104,6 +108,7 @@ function AppContent() {
             <Route path="/relatorios" element={<Relatorios />} />
             <Route path="/metas" element={<Metas />} />
             <Route path="/contas" element={<Contas />} />
+            <Route path="/cartoes" element={<Cartoes />} />
             <Route path="/configuracoes" element={<Configuracoes />} />
           </Routes>
         </main>
@@ -115,15 +120,21 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
-      <SelectedMonthProvider>
-        <CategoriasProvider>
-          <ContasProvider>
-            <LancamentosProvider>
-              <AppContent />
-            </LancamentosProvider>
-          </ContasProvider>
-        </CategoriasProvider>
-      </SelectedMonthProvider>
+      <PrivacyProvider>
+        <SelectedMonthProvider>
+          <CategoriasProvider>
+            <ContasProvider>
+              <CartoesProvider>
+                <FaturasProvider>
+                  <LancamentosProvider>
+                    <AppContent />
+                  </LancamentosProvider>
+                </FaturasProvider>
+              </CartoesProvider>
+            </ContasProvider>
+          </CategoriasProvider>
+        </SelectedMonthProvider>
+      </PrivacyProvider>
     </BrowserRouter>
   );
 }
