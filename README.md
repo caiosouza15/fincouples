@@ -15,6 +15,8 @@ O **Calculadora de Gastos** oferece uma visão clara, simples e confiável da vi
 
 ## 📐 Arquitetura
 
+> **📖 Documentação completa:** Consulte [`docs/ARQUITETURA_FRONTEND.md`](docs/ARQUITETURA_FRONTEND.md) para padrões arquiteturais, design patterns, convenções e checklist de novas funcionalidades.
+
 ### Módulos Principais
 
 - **Dashboard**: Visão geral e resumo financeiro imediato
