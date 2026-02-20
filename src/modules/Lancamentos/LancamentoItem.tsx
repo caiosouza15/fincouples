@@ -1,16 +1,19 @@
+import { useState } from 'react';
 import type { Lancamento } from '@/types';
 import { formatCurrency } from '@/utils';
 import { iconMap } from '@/utils/iconMap';
 import { useCategorias } from '@/hooks/useCategorias';
 import { useContas } from '@/hooks/useContas';
 import { useCasal } from '@/hooks/useCasal';
-import { Pencil, Trash2, CheckCircle2, Circle } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { Pencil, Trash2, CheckCircle2, Circle, Copy } from 'lucide-react';
 
 interface LancamentoItemProps {
   lancamento: Lancamento;
   onEdit: (lancamento: Lancamento) => void;
   onDelete: (id: string) => void;
   onTogglePago: (id: string) => void;
+  onDuplicate?: (lancamento: Lancamento) => void;
 }
 
 export function LancamentoItem({
@@ -18,7 +21,9 @@ export function LancamentoItem({
   onEdit,
   onDelete,
   onTogglePago,
+  onDuplicate,
 }: LancamentoItemProps) {
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const { categorias } = useCategorias();
   const { contas } = useContas();
   const { getNomePessoa } = useCasal();
@@ -62,10 +67,9 @@ export function LancamentoItem({
     });
   };
 
-  const handleDelete = () => {
-    if (window.confirm(`Tem certeza que deseja excluir este lançamento?`)) {
-      onDelete(lancamento.id);
-    }
+  const handleConfirmDelete = () => {
+    onDelete(lancamento.id);
+    setShowConfirmDelete(false);
   };
 
   const isReceita = lancamento.tipo === 'receita';
@@ -73,7 +77,9 @@ export function LancamentoItem({
   const valorPrefix = isReceita ? '+' : '-';
 
   return (
+    <>
     <div
+      id={`lancamento-${lancamento.id}`}
       className={`flex md:flex-row flex-col md:items-center md:justify-between p-md bg-surface border border-border rounded-md transition-all duration-200 gap-md ${
         !lancamento.pago ? 'opacity-75' : ''
       } hover:border-positive hover:shadow-sm`}
@@ -93,7 +99,7 @@ export function LancamentoItem({
           <div className="flex items-center gap-sm mb-xs flex-wrap">
             <div className="font-medium text-text-primary">{categoria?.nome || 'Sem categoria'}</div>
             {nomePessoa && lancamento.tipo === 'despesa' && (
-              <span className={`px-xs py-0.5 text-xs font-medium rounded-full ${
+              <span className={`px-2.5 py-1 text-xs font-medium rounded-full shrink-0 ${
                 lancamento.pessoaId === 'usuario1'
                   ? 'bg-blue-100 text-blue-700'
                   : 'bg-purple-100 text-purple-700'
@@ -121,6 +127,16 @@ export function LancamentoItem({
       </div>
 
       <div className="flex gap-xs shrink-0 md:justify-start justify-end md:border-0 border-t border-border md:pt-0 pt-sm">
+        {onDuplicate && (
+          <button
+            className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer transition-all duration-200 p-0 hover:bg-background hover:border-text-muted"
+            onClick={() => onDuplicate(lancamento)}
+            aria-label="Duplicar lançamento"
+            title="Duplicar lançamento"
+          >
+            <Copy size={16} />
+          </button>
+        )}
         <button
           className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer transition-all duration-200 p-0 hover:bg-background hover:border-text-muted"
           onClick={() => onTogglePago(lancamento.id)}
@@ -143,7 +159,7 @@ export function LancamentoItem({
         </button>
         <button
           className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer transition-all duration-200 p-0 hover:bg-negative hover:border-negative group"
-          onClick={handleDelete}
+          onClick={() => setShowConfirmDelete(true)}
           aria-label="Excluir lançamento"
           title="Excluir lançamento"
         >
@@ -151,5 +167,15 @@ export function LancamentoItem({
         </button>
       </div>
     </div>
+    <ConfirmDialog
+      isOpen={showConfirmDelete}
+      title="Excluir lançamento?"
+      message="Tem certeza que deseja excluir este lançamento? Esta ação não pode ser desfeita."
+      confirmText="Excluir"
+      onConfirm={handleConfirmDelete}
+      onCancel={() => setShowConfirmDelete(false)}
+      variant="danger"
+    />
+    </>
   );
 }

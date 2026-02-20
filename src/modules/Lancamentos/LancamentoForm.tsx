@@ -62,8 +62,10 @@ export function LancamentoForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const formRef = useRef<HTMLFormElement>(null);
+  const valorInputRef = useRef<HTMLInputElement>(null);
 
-  const isEditMode = !!lancamento;
+  const isEditMode = !!(lancamento?.id);
 
   const clearFieldError = (field: string) => {
     setFieldErrors((prev) => {
@@ -272,6 +274,23 @@ export function LancamentoForm({
     }
   }, [showContaForm, contasAtivas]);
 
+  useEffect(() => {
+    if (valorInputRef.current) valorInputRef.current.focus();
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (!loading) handleClose();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        if (formRef.current && !loading) formRef.current.requestSubmit();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [loading]);
+
   return (
     <div
       className="fixed top-0 left-0 right-0 bottom-0 bg-black/50 flex items-center justify-center z-[1000] p-md animate-[fadeIn_0.2s_ease]"
@@ -296,7 +315,7 @@ export function LancamentoForm({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-lg flex flex-col gap-md" noValidate>
+        <form ref={formRef} onSubmit={handleSubmit} className="p-lg flex flex-col gap-md" noValidate>
           {error && (
             <div
               className="p-md bg-[#fee2e2] border border-negative rounded-md text-negative text-sm"
@@ -343,6 +362,7 @@ export function LancamentoForm({
               Valor *
             </label>
             <input
+              ref={valorInputRef}
               id="valor"
               type="text"
               inputMode="decimal"
