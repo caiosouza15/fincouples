@@ -23,6 +23,8 @@ export interface Conta {
   saldo: number;
   ativa: boolean;
   icone?: string; // Para exibir logo do banco
+  proprietarioId?: 'usuario1' | 'usuario2'; // Opcional para compatibilidade
+  nomeProprietario?: string; // Opcional, cache do nome
 }
 
 export interface CartaoCredito {

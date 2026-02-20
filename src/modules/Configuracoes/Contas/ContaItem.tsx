@@ -1,19 +1,21 @@
+import { useState } from 'react';
 import type { Conta } from '@/types';
 import { formatCurrencyWithPrivacy } from '@/utils';
 import { iconMap } from '@/utils/iconMap';
-import { usePrivacy } from '@/hooks/usePrivacy';
-import { Pencil, Trash2 } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { Pencil, Trash2, Copy } from 'lucide-react';
 
 interface ContaItemProps {
   conta: Conta;
   hideSaldo?: boolean;
   onEdit: (conta: Conta) => void;
   onDelete: (id: string) => void;
+  onDuplicate?: (conta: Conta) => void;
 }
 
-export function ContaItem({ conta, hideSaldo = false, onEdit, onDelete }: ContaItemProps) {
-  const { valuesHidden } = usePrivacy();
-  const aplicarBlur = valuesHidden || hideSaldo;
+export function ContaItem({ conta, hideSaldo = false, onEdit, onDelete, onDuplicate }: ContaItemProps) {
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const aplicarBlur = hideSaldo;
   
   const tipoLabels: Record<Conta['tipo'], string> = {
     corrente: 'Conta Corrente',
@@ -39,10 +41,9 @@ export function ContaItem({ conta, hideSaldo = false, onEdit, onDelete }: ContaI
     return DefaultIcon ? <DefaultIcon size={24} /> : null;
   };
 
-  const handleDelete = () => {
-    if (window.confirm(`Tem certeza que deseja excluir a conta "${conta.nome}"?`)) {
-      onDelete(conta.id);
-    }
+  const handleConfirmDelete = () => {
+    onDelete(conta.id);
+    setShowConfirmDelete(false);
   };
 
   return (
@@ -52,7 +53,14 @@ export function ContaItem({ conta, hideSaldo = false, onEdit, onDelete }: ContaI
           {getContaIcon()}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-base font-medium text-text-primary mb-xs">{conta.nome}</div>
+          <div className="flex flex-wrap items-center gap-xs mb-xs">
+            <span className="text-base font-medium text-text-primary">{conta.nome}</span>
+            {conta.nomeProprietario && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-background border border-border text-text-secondary">
+                {conta.nomeProprietario}
+              </span>
+            )}
+          </div>
           <div className="text-sm text-text-secondary">{tipoLabels[conta.tipo]}</div>
         </div>
         <div className={`text-lg font-semibold shrink-0 md:text-right ${conta.saldo >= 0 ? 'text-positive' : 'text-negative'} md:mt-0 mt-xs`}>
@@ -60,6 +68,16 @@ export function ContaItem({ conta, hideSaldo = false, onEdit, onDelete }: ContaI
         </div>
       </div>
       <div className="flex gap-xs shrink-0 md:justify-start justify-end md:border-0 border-t border-border md:pt-0 pt-sm">
+        {onDuplicate && (
+          <button
+            className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer transition-all duration-200 p-0 hover:bg-background hover:border-text-muted"
+            onClick={() => onDuplicate(conta)}
+            aria-label="Duplicar conta"
+            title="Duplicar conta"
+          >
+            <Copy size={16} />
+          </button>
+        )}
         <button
           className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer transition-all duration-200 p-0 hover:bg-background hover:border-text-muted"
           onClick={() => onEdit(conta)}
@@ -70,13 +88,22 @@ export function ContaItem({ conta, hideSaldo = false, onEdit, onDelete }: ContaI
         </button>
         <button
           className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer transition-all duration-200 p-0 hover:bg-negative hover:border-negative group"
-          onClick={handleDelete}
+          onClick={() => setShowConfirmDelete(true)}
           aria-label="Excluir conta"
           title="Excluir conta"
         >
           <Trash2 size={16} className="text-text-secondary group-hover:text-white" />
         </button>
       </div>
+      <ConfirmDialog
+        isOpen={showConfirmDelete}
+        title="Excluir conta?"
+        message={`Ao excluir a conta "${conta.nome}", o histórico de saldo será perdido. Deseja continuar?`}
+        confirmText="Excluir"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowConfirmDelete(false)}
+        variant="danger"
+      />
     </div>
   );
 }

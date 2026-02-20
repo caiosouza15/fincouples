@@ -7,7 +7,7 @@ interface ContasContextType {
   loading: boolean;
   error: string | null;
   fetchContas: () => Promise<void>;
-  addConta: (conta: Omit<Conta, 'id'>) => Promise<void>;
+  addConta: (conta: Omit<Conta, 'id'>) => Promise<Conta>;
   editConta: (id: string, conta: Partial<Conta>) => Promise<void>;
   removeConta: (id: string) => Promise<void>;
   toggleContaAtiva: (id: string) => Promise<void>;
@@ -35,12 +35,13 @@ export function ContasProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addConta = async (conta: Omit<Conta, 'id'>) => {
+  const addConta = async (conta: Omit<Conta, 'id'>): Promise<Conta> => {
     try {
       setLoading(true);
       setError(null);
       const newConta = await createConta(conta);
       setContas((prev) => [...prev, newConta]);
+      return newConta;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao criar conta');
       throw err;
