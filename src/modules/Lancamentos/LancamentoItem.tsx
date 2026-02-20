@@ -3,6 +3,7 @@ import { formatCurrency } from '@/utils';
 import { iconMap } from '@/utils/iconMap';
 import { useCategorias } from '@/hooks/useCategorias';
 import { useContas } from '@/hooks/useContas';
+import { useCasal } from '@/hooks/useCasal';
 import { Pencil, Trash2, CheckCircle2, Circle } from 'lucide-react';
 
 interface LancamentoItemProps {
@@ -20,10 +21,15 @@ export function LancamentoItem({
 }: LancamentoItemProps) {
   const { categorias } = useCategorias();
   const { contas } = useContas();
+  const { getNomePessoa } = useCasal();
 
   const categoria = categorias.find((c) => c.id === lancamento.categoriaId);
   const conta = lancamento.contaId
     ? contas.find((c) => c.id === lancamento.contaId)
+    : null;
+  
+  const nomePessoa = lancamento.pessoaId 
+    ? (lancamento.nomePessoa || getNomePessoa(lancamento.pessoaId))
     : null;
 
   const getCategoriaIcon = () => {
@@ -84,8 +90,17 @@ export function LancamentoItem({
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-sm mb-xs">
+          <div className="flex items-center gap-sm mb-xs flex-wrap">
             <div className="font-medium text-text-primary">{categoria?.nome || 'Sem categoria'}</div>
+            {nomePessoa && lancamento.tipo === 'despesa' && (
+              <span className={`px-xs py-0.5 text-xs font-medium rounded-full ${
+                lancamento.pessoaId === 'usuario1'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'bg-purple-100 text-purple-700'
+              }`}>
+                {nomePessoa}
+              </span>
+            )}
             {!lancamento.pago && (
               <span className="text-xs px-sm py-xs bg-negative/10 text-negative rounded-sm">
                 Pendente

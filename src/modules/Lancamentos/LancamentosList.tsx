@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import type { Lancamento } from '@/types';
 import { LancamentoItem } from './LancamentoItem';
+import { useCasal } from '@/hooks/useCasal';
 
 interface LancamentosListProps {
   lancamentos: Lancamento[];
@@ -11,6 +12,7 @@ interface LancamentosListProps {
 
 type FiltroTipo = 'todos' | 'receita' | 'despesa';
 type FiltroStatus = 'todos' | 'pago' | 'pendente';
+type FiltroPessoa = 'todos' | 'usuario1' | 'usuario2';
 
 export function LancamentosList({
   lancamentos,
@@ -18,9 +20,11 @@ export function LancamentosList({
   onDelete,
   onTogglePago,
 }: LancamentosListProps) {
+  const { usuario1Nome, usuario2Nome } = useCasal();
   const [filtroTipo, setFiltroTipo] = useState<FiltroTipo>('todos');
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>('todos');
   const [filtroMes, setFiltroMes] = useState<string>('');
+  const [filtroPessoa, setFiltroPessoa] = useState<FiltroPessoa>('todos');
 
   // Função para agrupar por data
   const agruparPorData = (lancamentos: Lancamento[]) => {
@@ -90,8 +94,20 @@ export function LancamentosList({
       });
     }
 
+    // Filtro por pessoa (apenas para despesas)
+    if (filtroPessoa !== 'todos') {
+      filtrados = filtrados.filter((l) => {
+        // Apenas filtrar despesas por pessoa
+        if (l.tipo === 'despesa') {
+          return l.pessoaId === filtroPessoa;
+        }
+        // Receitas sempre passam pelo filtro (podem ser compartilhadas)
+        return true;
+      });
+    }
+
     return filtrados;
-  }, [lancamentos, filtroTipo, filtroStatus, filtroMes]);
+  }, [lancamentos, filtroTipo, filtroStatus, filtroMes, filtroPessoa]);
 
   // Agrupar por data
   const grupos = useMemo(() => {
@@ -166,6 +182,19 @@ export function LancamentosList({
                 {formatMesLabel(mes)}
               </option>
             ))}
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-xs flex-1">
+          <label className="text-sm font-medium text-text-primary">Pessoa</label>
+          <select
+            className="p-sm border border-border rounded-md text-sm font-inherit text-text-primary bg-surface focus:outline-none focus:border-positive"
+            value={filtroPessoa}
+            onChange={(e) => setFiltroPessoa(e.target.value as FiltroPessoa)}
+          >
+            <option value="todos">Todas as pessoas</option>
+            <option value="usuario1">{usuario1Nome}</option>
+            <option value="usuario2">{usuario2Nome}</option>
           </select>
         </div>
       </div>

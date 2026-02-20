@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import * as React from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { Menu, Bell, Settings, User } from 'lucide-react';
 import { ContasProvider } from './contexts/ContasContext';
@@ -7,7 +8,11 @@ import { LancamentosProvider } from './contexts/LancamentosContext';
 import { CartoesProvider } from './contexts/CartoesContext';
 import { FaturasProvider } from './contexts/FaturasContext';
 import { PrivacyProvider } from './contexts/PrivacyContext';
+import { ToastProvider } from './contexts/ToastContext';
+import { CasalProvider } from './contexts/CasalContext';
 import { SelectedMonthProvider, useSelectedMonth } from './contexts/SelectedMonthContext';
+import { ToastContainer } from './components/Toast/ToastContainer';
+import { migrateAllCasalData } from './utils/migrateCasalData';
 import { MonthSelector } from './components/MonthSelector';
 import { Dashboard } from './modules/Dashboard';
 import { Sidebar } from './components/Sidebar';
@@ -113,27 +118,37 @@ function AppContent() {
           </Routes>
         </main>
       </div>
+      <ToastContainer />
     </div>
   );
 }
 
 function App() {
+  // Executar migração uma vez na inicialização
+  React.useEffect(() => {
+    migrateAllCasalData();
+  }, []);
+
   return (
     <BrowserRouter>
       <PrivacyProvider>
-        <SelectedMonthProvider>
-          <CategoriasProvider>
-            <ContasProvider>
-              <CartoesProvider>
-                <FaturasProvider>
-                  <LancamentosProvider>
-                    <AppContent />
-                  </LancamentosProvider>
-                </FaturasProvider>
-              </CartoesProvider>
-            </ContasProvider>
-          </CategoriasProvider>
-        </SelectedMonthProvider>
+        <ToastProvider>
+          <CasalProvider>
+            <SelectedMonthProvider>
+              <CategoriasProvider>
+                <ContasProvider>
+                  <CartoesProvider>
+                    <FaturasProvider>
+                      <LancamentosProvider>
+                        <AppContent />
+                      </LancamentosProvider>
+                    </FaturasProvider>
+                  </CartoesProvider>
+                </ContasProvider>
+              </CategoriasProvider>
+            </SelectedMonthProvider>
+          </CasalProvider>
+        </ToastProvider>
       </PrivacyProvider>
     </BrowserRouter>
   );

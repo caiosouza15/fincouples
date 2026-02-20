@@ -19,8 +19,8 @@ export function formatNumberInput(value: string | number, allowDecimals: boolean
     // Remover tudo que não é número, vírgula ou ponto
     cleanValue = value.replace(/[^\d,.]/g, '');
     
-    // Converter ponto para vírgula (formato brasileiro)
-    cleanValue = cleanValue.replace(/\./g, ',');
+    // Pontos são separadores de milhar (formato BR); remover para não virar decimal
+    cleanValue = cleanValue.replace(/\./g, '');
     
     // Garantir apenas uma vírgula
     const commaIndex = cleanValue.indexOf(',');

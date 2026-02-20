@@ -12,8 +12,9 @@ import { ContasList } from './Contas/ContasList';
 import { ContaForm } from './Contas/ContaForm';
 import { CategoriasList, CategoriaForm } from './Categorias';
 import { CartoesList, CartaoForm } from './Cartoes';
+import { CasalConfig } from './Casal/CasalConfig';
 
-type TabType = 'contas' | 'categorias' | 'cartoes';
+type TabType = 'contas' | 'categorias' | 'cartoes' | 'casal';
 type FiltroTipoCategoria = 'todas' | 'receita' | 'despesa';
 
 const Configuracoes = () => {
@@ -162,6 +163,16 @@ const Configuracoes = () => {
         >
           Cartões
         </button>
+        <button
+          onClick={() => setActiveTab('casal')}
+          className={`px-lg py-md text-base font-medium transition-colors duration-200 border-b-2 ${
+            activeTab === 'casal'
+              ? 'border-positive text-positive'
+              : 'border-transparent text-text-secondary hover:text-text-primary'
+          }`}
+        >
+          Casal
+        </button>
       </div>
 
       {/* Conteúdo da Aba Contas */}
@@ -297,6 +308,9 @@ const Configuracoes = () => {
           )}
         </Card>
       )}
+
+      {/* Conteúdo da Aba Casal */}
+      {activeTab === 'casal' && <CasalConfig />}
 
       {/* Modais de Formulários */}
       {showFormConta && (

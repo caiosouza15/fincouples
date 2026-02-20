@@ -1,12 +1,13 @@
 // Módulo: Relatórios
 // Análise gráfica e comparativa de dados
 
+import { RelatoriosPorPessoa } from './RelatoriosPorPessoa';
+
 const Relatorios = () => {
   return (
-    <div>
-      <h1>Relatórios</h1>
-      <p>Análise gráfica e comparativa de dados</p>
-      {/* Estrutura a ser implementada conforme documentação */}
+    <div className="max-w-[1280px] mx-auto pb-xl">
+      <h1 className="text-2xl font-bold text-text-primary mb-lg">Relatórios</h1>
+      <RelatoriosPorPessoa />
     </div>
   );
 };
