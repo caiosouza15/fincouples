@@ -4,6 +4,7 @@ import type { Lancamento } from '@/types';
 import { useContas } from '@/hooks/useContas';
 import { useCategorias } from '@/hooks/useCategorias';
 import { useCartoes } from '@/hooks/useCartoes';
+import { useCasal } from '@/hooks/useCasal';
 import { formatNumberInput, parseNumberInput, handleNumberInputChange } from '@/utils/numberMask';
 import { CartaoForm } from '@/modules/Configuracoes/Cartoes/CartaoForm';
 import { ContaForm } from '@/modules/Configuracoes/Contas/ContaForm';
@@ -36,6 +37,7 @@ export function LancamentoForm({
   const { contas, addConta } = useContas();
   const { categorias } = useCategorias();
   const { cartoes, addCartao } = useCartoes();
+  const { usuario1Nome, usuario2Nome, getNomePessoa } = useCasal();
 
   const [showCartaoForm, setShowCartaoForm] = useState(false);
   const [showContaForm, setShowContaForm] = useState(false);
@@ -55,6 +57,7 @@ export function LancamentoForm({
     mesPreSelecionado ? getDataInicialParaMes(mesPreSelecionado) : new Date().toISOString().split('T')[0]
   );
   const [descricao, setDescricao] = useState('');
+  const [pessoaId, setPessoaId] = useState<'usuario1' | 'usuario2'>('usuario1');
   const [pago, setPago] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -98,6 +101,7 @@ export function LancamentoForm({
       setNumeroParcelas(formatNumberInput(lancamento.totalParcelas || 1, false));
       setData(new Date(lancamento.data).toISOString().split('T')[0]);
       setDescricao(lancamento.descricao);
+      setPessoaId(lancamento.pessoaId || 'usuario1');
       setPago(lancamento.pago !== undefined ? lancamento.pago : true);
     } else {
       // Valores padrão para novo lançamento
@@ -105,8 +109,19 @@ export function LancamentoForm({
       setMetodoPagamento('debito');
       setParcelado(false);
       setNumeroParcelas('1');
+      setPessoaId('usuario1');
     }
   }, [lancamento, tipo]);
+
+  // Herdar proprietário do cartão quando cartão é selecionado
+  useEffect(() => {
+    if (metodoPagamento === 'cartao' && cartaoId && !isEditMode) {
+      const cartaoSelecionado = cartoes.find(c => c.id === cartaoId);
+      if (cartaoSelecionado?.proprietarioId) {
+        setPessoaId(cartaoSelecionado.proprietarioId);
+      }
+    }
+  }, [cartaoId, metodoPagamento, cartoes, isEditMode]);
 
   // Resetar categoria quando tipo mudar
   useEffect(() => {
@@ -170,6 +185,8 @@ export function LancamentoForm({
     try {
       setLoading(true);
 
+      const nomePessoa = tipo === 'despesa' ? getNomePessoa(pessoaId) : undefined;
+      
       const lancamentoData: Omit<Lancamento, 'id'> | Lancamento = isEditMode && lancamento
         ? {
             ...lancamento,
@@ -185,6 +202,8 @@ export function LancamentoForm({
             totalParcelas: metodoPagamento === 'cartao' && parcelado ? parseNumberInput(numeroParcelas) : undefined,
             parcelaAtual: lancamento.parcelaAtual,
             lancamentoPaiId: lancamento.lancamentoPaiId,
+            pessoaId: tipo === 'despesa' ? pessoaId : undefined,
+            nomePessoa: tipo === 'despesa' ? nomePessoa : undefined,
           }
         : {
             tipo,
@@ -198,6 +217,8 @@ export function LancamentoForm({
             parcelado: metodoPagamento === 'cartao' && parcelado,
             totalParcelas: metodoPagamento === 'cartao' && parcelado ? parseNumberInput(numeroParcelas) : undefined,
             casalId: 'casal-1',
+            pessoaId: tipo === 'despesa' ? pessoaId : undefined,
+            nomePessoa: tipo === 'despesa' ? nomePessoa : undefined,
           };
 
       await onSave(lancamentoData);
@@ -373,6 +394,44 @@ export function LancamentoForm({
               </p>
             )}
           </div>
+
+          {tipo === 'despesa' && (
+            <div className="flex flex-col gap-xs">
+              <label className="text-sm font-medium text-text-primary">
+                Quem realizou? *
+              </label>
+              <div className="flex gap-md">
+                <label className="flex items-center gap-sm cursor-pointer flex-1 p-md border border-border rounded-md hover:bg-background transition-colors">
+                  <input
+                    type="radio"
+                    name="pessoa"
+                    checked={pessoaId === 'usuario1'}
+                    onChange={() => {
+                      clearFieldError('pessoaId');
+                      setPessoaId('usuario1');
+                    }}
+                    disabled={loading}
+                    className="cursor-pointer"
+                  />
+                  <span className="text-text-primary">{usuario1Nome}</span>
+                </label>
+                <label className="flex items-center gap-sm cursor-pointer flex-1 p-md border border-border rounded-md hover:bg-background transition-colors">
+                  <input
+                    type="radio"
+                    name="pessoa"
+                    checked={pessoaId === 'usuario2'}
+                    onChange={() => {
+                      clearFieldError('pessoaId');
+                      setPessoaId('usuario2');
+                    }}
+                    disabled={loading}
+                    className="cursor-pointer"
+                  />
+                  <span className="text-text-primary">{usuario2Nome}</span>
+                </label>
+              </div>
+            </div>
+          )}
 
           {tipo === 'despesa' && (
             <>

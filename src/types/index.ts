@@ -36,6 +36,9 @@ export interface CartaoCredito {
   vencimento: number; // Dia do mês
   ativo: boolean;
   icone?: string;
+  proprietarioId?: 'usuario1' | 'usuario2'; // Opcional para compatibilidade
+  tipo?: 'principal' | 'adicional'; // Opcional
+  nomeProprietario?: string; // Opcional, cache do nome
 }
 
 export interface Categoria {
@@ -61,6 +64,8 @@ export interface Lancamento {
   totalParcelas?: number; // Total de parcelas (se parcelado)
   parcelaAtual?: number; // Número da parcela atual (1, 2, 3...)
   lancamentoPaiId?: string; // ID do lançamento original (para agrupar parcelas)
+  pessoaId?: 'usuario1' | 'usuario2'; // Opcional para compatibilidade
+  nomePessoa?: string; // Opcional, cache do nome
 }
 
 export interface MetaFinanceira {

@@ -7,7 +7,7 @@ interface CartoesContextType {
   loading: boolean;
   error: string | null;
   fetchCartoes: () => Promise<void>;
-  addCartao: (cartao: Omit<CartaoCredito, 'id'>) => Promise<void>;
+  addCartao: (cartao: Omit<CartaoCredito, 'id'>) => Promise<CartaoCredito>;
   editCartao: (id: string, cartao: Partial<CartaoCredito>) => Promise<void>;
   removeCartao: (id: string) => Promise<void>;
   toggleCartaoAtivo: (id: string) => Promise<void>;
@@ -36,12 +36,13 @@ export function CartoesProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addCartao = async (cartao: Omit<CartaoCredito, 'id'>) => {
+  const addCartao = async (cartao: Omit<CartaoCredito, 'id'>): Promise<CartaoCredito> => {
     try {
       setLoading(true);
       setError(null);
       const newCartao = await createCartao(cartao);
       setCartoes((prev) => [...prev, newCartao]);
+      return newCartao;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao criar cartão');
       throw err;

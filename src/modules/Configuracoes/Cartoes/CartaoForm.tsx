@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import type { CartaoCredito } from '@/types';
 import { formatNumberInput, parseNumberInput, handleNumberInputChange } from '@/utils/numberMask';
+import { useCasal } from '@/hooks/useCasal';
 
 interface CartaoFormProps {
   cartao?: CartaoCredito | null;
@@ -10,15 +11,36 @@ interface CartaoFormProps {
 }
 
 export function CartaoForm({ cartao, onClose, onSave }: CartaoFormProps) {
+  const { usuario1Nome, usuario2Nome, getNomePessoa } = useCasal();
   const [nome, setNome] = useState('');
   const [limite, setLimite] = useState('');
   const [fechamento, setFechamento] = useState('10');
   const [vencimento, setVencimento] = useState('15');
+  const [proprietarioId, setProprietarioId] = useState<'usuario1' | 'usuario2'>('usuario1');
+  const [tipo, setTipo] = useState<'principal' | 'adicional'>('principal');
   const [ativo, setAtivo] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const nomeInputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const isEditMode = !!cartao;
+
+  const clearFieldError = (field: string) => {
+    setFieldErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const getInputClassName = (hasError: boolean) =>
+    `p-md border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed ${
+      hasError
+        ? 'border-negative focus:border-negative focus:shadow-[0_0_0_3px_rgba(220,38,38,0.1)]'
+        : 'border-border focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)]'
+    }`;
 
   useEffect(() => {
     if (cartao) {
@@ -26,41 +48,95 @@ export function CartaoForm({ cartao, onClose, onSave }: CartaoFormProps) {
       setLimite(formatNumberInput(cartao.limite));
       setFechamento(formatNumberInput(cartao.fechamento, false));
       setVencimento(formatNumberInput(cartao.vencimento, false));
+      setProprietarioId(cartao.proprietarioId || 'usuario1');
+      setTipo(cartao.tipo || 'principal');
       setAtivo(cartao.ativo);
+    } else {
+      // Valores padrão para novo cartão
+      setProprietarioId('usuario1');
+      setTipo('principal');
     }
   }, [cartao]);
+
+  // Auto-focus no primeiro campo quando modal abre
+  useEffect(() => {
+    if (nomeInputRef.current) {
+      nomeInputRef.current.focus();
+    }
+  }, []);
+
+  const handleClose = () => {
+    if (!loading) {
+      onClose();
+    }
+  };
+
+  // Atalhos de teclado
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (!loading) {
+          handleClose();
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        if (formRef.current && !loading) {
+          formRef.current.requestSubmit();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [loading, onClose]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setFieldErrors({});
 
-    // Validações
+    const errors: Record<string, string> = {};
+
+    // Validações por campo
     if (!nome.trim()) {
-      setError('Nome do cartão é obrigatório');
-      return;
+      errors.nome = 'Este campo é obrigatório';
     }
 
     const limiteNum = parseNumberInput(limite);
     if (isNaN(limiteNum) || limiteNum <= 0) {
-      setError('Limite deve ser um número maior que zero');
-      return;
+      errors.limite = limite.trim() ? 'Limite deve ser maior que zero' : 'Este campo é obrigatório';
     }
 
     const fechamentoNum = parseNumberInput(fechamento);
     const vencimentoNum = parseNumberInput(vencimento);
     
-    if (fechamentoNum < 1 || fechamentoNum > 31) {
-      setError('Dia de fechamento deve ser entre 1 e 31');
-      return;
+    if (isNaN(fechamentoNum) || fechamentoNum < 1 || fechamentoNum > 31) {
+      errors.fechamento = fechamento.trim() 
+        ? 'Dia de fechamento deve ser entre 1 e 31' 
+        : 'Este campo é obrigatório';
     }
 
-    if (vencimentoNum < 1 || vencimentoNum > 31) {
-      setError('Dia de vencimento deve ser entre 1 e 31');
+    if (isNaN(vencimentoNum) || vencimentoNum < 1 || vencimentoNum > 31) {
+      errors.vencimento = vencimento.trim()
+        ? 'Dia de vencimento deve ser entre 1 e 31'
+        : 'Este campo é obrigatório';
+    }
+
+    // Validação cruzada: fechamento não pode ser depois do vencimento
+    if (!errors.fechamento && !errors.vencimento && fechamentoNum > vencimentoNum) {
+      errors.fechamento = 'Dia de fechamento não pode ser depois do vencimento';
+      errors.vencimento = 'Dia de vencimento deve ser igual ou depois do fechamento';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
     try {
       setLoading(true);
+      
+      const nomeProprietario = getNomePessoa(proprietarioId);
       
       const cartaoData: Omit<CartaoCredito, 'id'> | CartaoCredito = isEditMode && cartao
         ? { 
@@ -70,6 +146,9 @@ export function CartaoForm({ cartao, onClose, onSave }: CartaoFormProps) {
             fechamento: Math.round(fechamentoNum),
             vencimento: Math.round(vencimentoNum),
             ativo,
+            proprietarioId,
+            tipo,
+            nomeProprietario,
           }
         : {
             nome: nome.trim(),
@@ -80,6 +159,9 @@ export function CartaoForm({ cartao, onClose, onSave }: CartaoFormProps) {
             vencimento: Math.round(vencimentoNum),
             ativo,
             casalId: 'casal-1',
+            proprietarioId,
+            tipo,
+            nomeProprietario,
           };
 
       await onSave(cartaoData);
@@ -88,12 +170,6 @@ export function CartaoForm({ cartao, onClose, onSave }: CartaoFormProps) {
       setError(err instanceof Error ? err.message : 'Erro ao salvar cartão');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleClose = () => {
-    if (!loading) {
-      onClose();
     }
   };
 
@@ -114,7 +190,7 @@ export function CartaoForm({ cartao, onClose, onSave }: CartaoFormProps) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-lg flex flex-col gap-md">
+        <form ref={formRef} onSubmit={handleSubmit} className="p-lg flex flex-col gap-md">
           {error && (
             <div className="p-md bg-[#fee2e2] border border-negative rounded-md text-negative text-sm" role="alert">
               {error}
@@ -126,15 +202,24 @@ export function CartaoForm({ cartao, onClose, onSave }: CartaoFormProps) {
               Nome do Cartão *
             </label>
             <input
+              ref={nomeInputRef}
               id="nome"
               type="text"
-              className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+              className={getInputClassName(!!fieldErrors.nome)}
               value={nome}
-              onChange={(e) => setNome(e.target.value)}
+              onChange={(e) => {
+                clearFieldError('nome');
+                setNome(e.target.value);
+              }}
               placeholder="Ex: Nubank, Inter"
-              required
               disabled={loading}
+              autoFocus
             />
+            {fieldErrors.nome && (
+              <p className="text-sm text-negative" role="alert">
+                {fieldErrors.nome}
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col gap-xs">
@@ -145,13 +230,92 @@ export function CartaoForm({ cartao, onClose, onSave }: CartaoFormProps) {
               id="limite"
               type="text"
               inputMode="decimal"
-              className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+              className={getInputClassName(!!fieldErrors.limite)}
               value={limite}
-              onChange={(e) => setLimite(handleNumberInputChange(e, true))}
+              onChange={(e) => {
+                clearFieldError('limite');
+                setLimite(handleNumberInputChange(e, true));
+              }}
               placeholder="0,00"
-              required
               disabled={loading}
             />
+            {fieldErrors.limite && (
+              <p className="text-sm text-negative" role="alert">
+                {fieldErrors.limite}
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-xs">
+            <label className="text-sm font-medium text-text-primary">
+              Proprietário *
+            </label>
+            <div className="flex gap-md">
+              <label className="flex items-center gap-sm cursor-pointer text-sm text-text-primary">
+                <input
+                  type="radio"
+                  name="proprietario"
+                  checked={proprietarioId === 'usuario1'}
+                  onChange={() => {
+                    clearFieldError('proprietarioId');
+                    setProprietarioId('usuario1');
+                  }}
+                  disabled={loading}
+                  className="w-4 h-4 cursor-pointer"
+                />
+                <span>{usuario1Nome}</span>
+              </label>
+              <label className="flex items-center gap-sm cursor-pointer text-sm text-text-primary">
+                <input
+                  type="radio"
+                  name="proprietario"
+                  checked={proprietarioId === 'usuario2'}
+                  onChange={() => {
+                    clearFieldError('proprietarioId');
+                    setProprietarioId('usuario2');
+                  }}
+                  disabled={loading}
+                  className="w-4 h-4 cursor-pointer"
+                />
+                <span>{usuario2Nome}</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-xs">
+            <label className="text-sm font-medium text-text-primary">
+              Tipo de Cartão *
+            </label>
+            <div className="flex gap-md">
+              <label className="flex items-center gap-sm cursor-pointer text-sm text-text-primary">
+                <input
+                  type="radio"
+                  name="tipo"
+                  checked={tipo === 'principal'}
+                  onChange={() => {
+                    clearFieldError('tipo');
+                    setTipo('principal');
+                  }}
+                  disabled={loading}
+                  className="w-4 h-4 cursor-pointer"
+                />
+                <span>Principal</span>
+              </label>
+              <label className="flex items-center gap-sm cursor-pointer text-sm text-text-primary">
+                <input
+                  type="radio"
+                  name="tipo"
+                  checked={tipo === 'adicional'}
+                  onChange={() => {
+                    clearFieldError('tipo');
+                    setTipo('adicional');
+                  }}
+                  disabled={loading}
+                  className="w-4 h-4 cursor-pointer"
+                />
+                <span>Adicional</span>
+              </label>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-md">
@@ -163,12 +327,20 @@ export function CartaoForm({ cartao, onClose, onSave }: CartaoFormProps) {
                 id="fechamento"
                 type="text"
                 inputMode="numeric"
-                className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                className={getInputClassName(!!fieldErrors.fechamento)}
                 value={fechamento}
-                onChange={(e) => setFechamento(handleNumberInputChange(e, false))}
-                required
+                onChange={(e) => {
+                  clearFieldError('fechamento');
+                  clearFieldError('vencimento'); // Limpar erro de vencimento também ao alterar fechamento
+                  setFechamento(handleNumberInputChange(e, false));
+                }}
                 disabled={loading}
               />
+              {fieldErrors.fechamento && (
+                <p className="text-sm text-negative" role="alert">
+                  {fieldErrors.fechamento}
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col gap-xs">
@@ -179,12 +351,20 @@ export function CartaoForm({ cartao, onClose, onSave }: CartaoFormProps) {
                 id="vencimento"
                 type="text"
                 inputMode="numeric"
-                className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                className={getInputClassName(!!fieldErrors.vencimento)}
                 value={vencimento}
-                onChange={(e) => setVencimento(handleNumberInputChange(e, false))}
-                required
+                onChange={(e) => {
+                  clearFieldError('vencimento');
+                  clearFieldError('fechamento'); // Limpar erro de fechamento também ao alterar vencimento
+                  setVencimento(handleNumberInputChange(e, false));
+                }}
                 disabled={loading}
               />
+              {fieldErrors.vencimento && (
+                <p className="text-sm text-negative" role="alert">
+                  {fieldErrors.vencimento}
+                </p>
+              )}
             </div>
           </div>
 
