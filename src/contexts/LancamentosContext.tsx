@@ -86,7 +86,11 @@ export function LancamentosProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       setError(null);
       const newLancamento = await createLancamento(lancamento);
-      setLancamentos((prev) => [newLancamento, ...prev].sort((a, b) => b.data.getTime() - a.data.getTime()));
+      setLancamentos((prev) => [newLancamento, ...prev].sort((a, b) => {
+        const aT = a.data instanceof Date ? a.data.getTime() : new Date(a.data).getTime();
+        const bT = b.data instanceof Date ? b.data.getTime() : new Date(b.data).getTime();
+        return bT - aT;
+      }));
       return newLancamento;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao criar lançamento');
@@ -244,20 +248,23 @@ export function LancamentosProvider({ children }: { children: ReactNode }) {
     return maioresGastos;
   };
 
-  // Obter últimos gastos (lançamentos de despesa mais recentes)
+  // Obter últimos gastos (5 despesas mais recentes do mês, excluindo datas futuras)
   const getUltimosGastosContext = (mes?: string, limit: number = 5): Lancamento[] => {
     const targetMonth = mes || getCurrentMonth();
-    
-    // Filtrar despesas do mês selecionado
-    let despesas = lancamentos.filter((l) => l.tipo === 'despesa');
-    
-    if (mes) {
-      despesas = despesas.filter((l) => formatMonth(l.data) === targetMonth);
-    }
-    
-    // Ordenar por data (mais recente primeiro) e limitar
-    return despesas
-      .sort((a, b) => b.data.getTime() - a.data.getTime())
+    const hojeStr = new Date().toISOString().split('T')[0];
+    return lancamentos
+      .filter((l) => {
+        if (l.tipo !== 'despesa') return false;
+        const dataL = l.data instanceof Date ? l.data : new Date(l.data);
+        if (formatMonth(dataL) !== targetMonth) return false;
+        const dataStr = dataL.toISOString().split('T')[0];
+        return dataStr <= hojeStr;
+      })
+      .sort((a, b) => {
+        const aTime = a.data instanceof Date ? a.data.getTime() : new Date(a.data).getTime();
+        const bTime = b.data instanceof Date ? b.data.getTime() : new Date(b.data).getTime();
+        return bTime - aTime;
+      })
       .slice(0, limit);
   };
 

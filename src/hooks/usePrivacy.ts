@@ -1,1 +1,1 @@
-export { usePrivacy } from '@/contexts/PrivacyContext';
+export { usePrivacy, useSectionPrivacy } from '@/contexts/PrivacyContext';

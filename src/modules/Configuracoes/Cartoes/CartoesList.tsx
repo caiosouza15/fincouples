@@ -3,6 +3,7 @@ import { CartaoItem } from './CartaoItem';
 
 interface CartoesListProps {
   cartoes: CartaoCredito[];
+  hideValues?: boolean;
   onEdit: (cartao: CartaoCredito) => void;
   onDelete: (id: string) => void;
   onToggleAtivo: (id: string) => void;
@@ -10,6 +11,7 @@ interface CartoesListProps {
 
 export function CartoesList({
   cartoes,
+  hideValues = false,
   onEdit,
   onDelete,
   onToggleAtivo,
@@ -30,6 +32,7 @@ export function CartoesList({
             <CartaoItem
               key={cartao.id}
               cartao={cartao}
+              hideValues={hideValues}
               onEdit={onEdit}
               onDelete={onDelete}
               onToggleAtivo={onToggleAtivo}
@@ -45,6 +48,7 @@ export function CartoesList({
             <CartaoItem
               key={cartao.id}
               cartao={cartao}
+              hideValues={hideValues}
               onEdit={onEdit}
               onDelete={onDelete}
               onToggleAtivo={onToggleAtivo}

@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Minus, Plus, GraduationCap } from 'lucide-react';
+import { Minus, Plus, GraduationCap } from 'lucide-react';
 import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
+import { PrivacyToggleButton } from '@/components/PrivacyToggleButton';
 import { useContas } from '@/hooks/useContas';
 import { useLancamentos } from '@/hooks/useLancamentos';
 import { useCategorias } from '@/hooks/useCategorias';
 import { useFaturas } from '@/hooks/useFaturas';
 import { useCartoes } from '@/hooks/useCartoes';
-import { usePrivacy } from '@/hooks/usePrivacy';
+import { useSectionPrivacy } from '@/hooks/usePrivacy';
 import { useSelectedMonth } from '@/contexts/SelectedMonthContext';
 import type { Conta, Lancamento, CartaoCredito } from '@/types';
 import { ContasList } from '@/modules/Configuracoes/Contas/ContasList';
@@ -20,7 +21,7 @@ import { iconMap } from '@/utils/iconMap';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { contas, getSaldoGeral, addConta, editConta, removeConta, toggleContaAtiva } = useContas();
+  const { contas, getSaldoGeral, addConta, editConta, removeConta } = useContas();
   const {
     lancamentos: allLancamentos,
     getReceitaMensal,
@@ -34,9 +35,14 @@ const Dashboard = () => {
   const { categorias } = useCategorias();
   const { faturas, getFaturaAtual, fetchFaturas } = useFaturas();
   const { cartoes, removeCartao, toggleCartaoAtivo } = useCartoes();
-  const { valuesHidden, toggleValuesVisibility } = usePrivacy();
-
-  const [hidePoupancaInvestimento, setHidePoupancaInvestimento] = useState(false);
+  
+  // Estados de privacidade por seção
+  const saldoGeralPrivacy = useSectionPrivacy('saldo-geral');
+  const ultimosGastosPrivacy = useSectionPrivacy('ultimos-gastos');
+  const maioresGastosPrivacy = useSectionPrivacy('maiores-gastos');
+  const ultimasFaturasPrivacy = useSectionPrivacy('ultimas-faturas');
+  const minhasContasPrivacy = useSectionPrivacy('minhas-contas');
+  const cartoesCreditoPrivacy = useSectionPrivacy('cartoes-credito');
   const [showForm, setShowForm] = useState(false);
   const [contaEditando, setContaEditando] = useState<Conta | null>(null);
   const [showLancamentoForm, setShowLancamentoForm] = useState(false);
@@ -193,17 +199,10 @@ const Dashboard = () => {
           <div className="flex flex-col gap-sm">
             <div className="flex justify-between items-center">
               <span className="text-sm text-text-secondary uppercase font-medium">Saldo geral</span>
-              <button 
-                onClick={toggleValuesVisibility}
-                className="bg-transparent border-none cursor-pointer p-xs opacity-70 transition-opacity duration-200 text-text-secondary hover:opacity-100 hover:text-text-primary" 
-                aria-label={valuesHidden ? "Mostrar valores" : "Ocultar valores"}
-                title={valuesHidden ? "Mostrar valores" : "Ocultar valores"}
-              >
-                {valuesHidden ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
+              <PrivacyToggleButton sectionKey="saldo-geral" />
             </div>
             <div className="text-3xl md:text-[2rem] lg:text-[3rem] font-bold text-text-primary leading-none">
-              {formatCurrencyWithPrivacy(saldoGeral, valuesHidden)}
+              {formatCurrencyWithPrivacy(saldoGeral, saldoGeralPrivacy.hidden)}
             </div>
             <a href="#" className="text-text-secondary text-sm underline">Ver relatórios</a>
           </div>
@@ -225,7 +224,7 @@ const Dashboard = () => {
             <div className="text-sm text-text-secondary uppercase mb-sm">Receita mensal</div>
             {receitaMensal > 0 ? (
               <div className="text-2xl font-bold text-positive">
-                + {formatCurrencyWithPrivacy(receitaMensal, valuesHidden)}
+                + {formatCurrencyWithPrivacy(receitaMensal, saldoGeralPrivacy.hidden)}
               </div>
             ) : (
               <div className="text-lg text-text-muted">
@@ -246,7 +245,7 @@ const Dashboard = () => {
             <div className="text-sm text-text-secondary uppercase mb-sm">Despesa mensal</div>
             {despesaMensal > 0 ? (
               <div className="text-2xl font-bold text-negative">
-                - {formatCurrencyWithPrivacy(despesaMensal, valuesHidden)}
+                - {formatCurrencyWithPrivacy(despesaMensal, saldoGeralPrivacy.hidden)}
               </div>
             ) : (
               <div className="text-lg text-text-muted">
@@ -260,7 +259,7 @@ const Dashboard = () => {
       {/* Últimos Gastos, Maiores Gastos e Últimas Faturas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-md mb-md">
         {/* Card 1: Últimos Gastos */}
-        <Card title="Últimos gastos">
+        <Card title="Últimos gastos" actions={<PrivacyToggleButton sectionKey="ultimos-gastos" />}>
           <div className="flex flex-col gap-md">
             {ultimosGastos.length === 0 ? (
               <EmptyState 
@@ -273,7 +272,8 @@ const Dashboard = () => {
                 const IconComponent = categoria?.icone
                   ? iconMap[categoria.icone]
                   : null;
-                const dataFormatada = gasto.data.toLocaleDateString('pt-BR', {
+                const dataObj = gasto.data instanceof Date ? gasto.data : new Date(gasto.data);
+                const dataFormatada = dataObj.toLocaleDateString('pt-BR', {
                   day: '2-digit',
                   month: '2-digit',
                 });
@@ -293,7 +293,7 @@ const Dashboard = () => {
                       <div className="flex items-center justify-between gap-2">
                         <div className="text-xs text-text-secondary">{dataFormatada}</div>
                       <div className="text-sm font-semibold text-negative">
-                        {formatCurrencyWithPrivacy(gasto.valor, valuesHidden)}
+                        {formatCurrencyWithPrivacy(gasto.valor, ultimosGastosPrivacy.hidden)}
                       </div>
                       </div>
                     </div>
@@ -305,7 +305,7 @@ const Dashboard = () => {
         </Card>
 
         {/* Card 2: Maiores Gastos */}
-        <Card title="Maiores gastos">
+        <Card title="Maiores gastos" actions={<PrivacyToggleButton sectionKey="maiores-gastos" />}>
           <div className="flex flex-col gap-md">
             {maioresGastos.length === 0 ? (
               <EmptyState 
@@ -331,7 +331,7 @@ const Dashboard = () => {
                         {gasto.categoria.nome}
                       </div>
                       <div className="text-sm text-text-secondary font-semibold">
-                        {formatCurrencyWithPrivacy(gasto.valor, valuesHidden)}
+                        {formatCurrencyWithPrivacy(gasto.valor, maioresGastosPrivacy.hidden)}
                       </div>
                     </div>
                   </div>
@@ -342,7 +342,7 @@ const Dashboard = () => {
         </Card>
 
         {/* Card 3: Últimas Faturas */}
-        <Card title="Últimas faturas">
+        <Card title="Últimas faturas" actions={<PrivacyToggleButton sectionKey="ultimas-faturas" />}>
           {cartoes.length === 0 ? (
             <EmptyState 
               hideText={true}
@@ -388,11 +388,11 @@ const Dashboard = () => {
                     </div>
                     <div className="text-right">
                       <div className={`text-sm font-semibold ${getStatusColor()}`}>
-                        {formatCurrencyWithPrivacy(fatura.valorTotal, valuesHidden)}
+                        {formatCurrencyWithPrivacy(fatura.valorTotal, ultimasFaturasPrivacy.hidden)}
                       </div>
                       {fatura.status === 'pago_parcial' && (
                         <div className="text-xs text-text-secondary">
-                          Pago: {formatCurrencyWithPrivacy(fatura.valorPago, valuesHidden)}
+                          Pago: {formatCurrencyWithPrivacy(fatura.valorPago, ultimasFaturasPrivacy.hidden)}
                         </div>
                       )}
                     </div>
@@ -407,16 +407,7 @@ const Dashboard = () => {
       {/* Minhas Contas */}
       <Card 
         title="Minhas contas"
-        actions={
-          <label className="flex items-center gap-sm text-sm text-text-secondary cursor-pointer">
-            <input 
-              type="checkbox" 
-              checked={hidePoupancaInvestimento}
-              onChange={(e) => setHidePoupancaInvestimento(e.target.checked)}
-            />
-            <span className="text-xs">Esconder saldo das contas poupanças / investimentos</span>
-          </label>
-        }
+        actions={<PrivacyToggleButton sectionKey="minhas-contas" />}
       >
         {contas.length === 0 ? (
           <EmptyState 
@@ -433,10 +424,10 @@ const Dashboard = () => {
         ) : (
           <ContasList
             contas={contas}
-            hidePoupancaInvestimento={hidePoupancaInvestimento}
+            hidePoupancaInvestimento={false}
+            hideSaldo={minhasContasPrivacy.hidden}
             onEdit={handleEditConta}
             onDelete={handleDeleteConta}
-            onToggleAtiva={toggleContaAtiva}
           />
         )}
       </Card>
@@ -453,13 +444,14 @@ const Dashboard = () => {
         <LancamentoForm
           lancamento={lancamentoEditando}
           tipoPreSelecionado={tipoPreSelecionado}
+          mesPreSelecionado={selectedMonth}
           onClose={handleCloseLancamentoForm}
           onSave={handleSaveLancamento}
         />
       )}
 
       {/* Cartões de Crédito */}
-      <Card title="Cartões de crédito">
+      <Card title="Cartões de crédito" actions={<PrivacyToggleButton sectionKey="cartoes-credito" />}>
         {cartoes.length === 0 ? (
           <EmptyState 
             hideText={true}
@@ -475,6 +467,7 @@ const Dashboard = () => {
         ) : (
           <CartoesList
             cartoes={cartoes}
+            hideValues={cartoesCreditoPrivacy.hidden}
             onEdit={handleEditCartao}
             onDelete={handleDeleteCartao}
             onToggleAtivo={toggleCartaoAtivo}

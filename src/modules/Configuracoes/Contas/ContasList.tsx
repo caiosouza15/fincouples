@@ -4,26 +4,21 @@ import { ContaItem } from './ContaItem';
 interface ContasListProps {
   contas: Conta[];
   hidePoupancaInvestimento: boolean;
+  hideSaldo?: boolean;
   onEdit: (conta: Conta) => void;
   onDelete: (id: string) => void;
-  onToggleAtiva: (id: string) => void;
 }
 
 export function ContasList({
   contas,
   hidePoupancaInvestimento,
+  hideSaldo = false,
   onEdit,
   onDelete,
-  onToggleAtiva,
 }: ContasListProps) {
-  // Filtrar contas baseado na opção de ocultar
-  const contasFiltradas = hidePoupancaInvestimento
-    ? contas.filter((c) => c.tipo === 'corrente' || !c.ativa)
-    : contas;
-
-  // Separar contas ativas e inativas
-  const contasAtivas = contasFiltradas.filter((c) => c.ativa);
-  const contasInativas = contasFiltradas.filter((c) => !c.ativa);
+  // Separar contas ativas e inativas (mostrar todas; o blur do saldo é aplicado no ContaItem)
+  const contasAtivas = contas.filter((c) => c.ativa);
+  const contasInativas = contas.filter((c) => !c.ativa);
 
   if (contas.length === 0) {
     return null;
@@ -37,9 +32,9 @@ export function ContasList({
             <ContaItem
               key={conta.id}
               conta={conta}
+              hideSaldo={hidePoupancaInvestimento || hideSaldo}
               onEdit={onEdit}
               onDelete={onDelete}
-              onToggleAtiva={onToggleAtiva}
             />
           ))}
         </div>
@@ -52,9 +47,9 @@ export function ContasList({
             <ContaItem
               key={conta.id}
               conta={conta}
+              hideSaldo={hidePoupancaInvestimento || hideSaldo}
               onEdit={onEdit}
               onDelete={onDelete}
-              onToggleAtiva={onToggleAtiva}
             />
           ))}
         </div>

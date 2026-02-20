@@ -22,7 +22,7 @@ const navItems: NavItem[] = [
   { path: '/relatorios', label: 'Relatorios', iconName: 'relatorios' },
   { path: '/metas', label: 'Metas', iconName: 'metas' },
   { path: '/contas', label: 'Minhas Contas', iconName: 'bank' },
-  { path: '/cartoes', label: 'Cartões de Crédito', iconName: 'wallet' },
+  { path: '/cartoes', label: 'Cartões de Crédito', iconName: 'creditcard' },
   { path: '/configuracoes', label: 'Configuracoes', iconName: 'configuracoes' },
 ];
 

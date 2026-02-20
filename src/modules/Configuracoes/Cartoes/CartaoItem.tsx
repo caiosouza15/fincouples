@@ -5,13 +5,15 @@ import { CreditCard, Power, Pencil, Trash2 } from 'lucide-react';
 
 interface CartaoItemProps {
   cartao: CartaoCredito;
+  hideValues?: boolean;
   onEdit: (cartao: CartaoCredito) => void;
   onDelete: (id: string) => void;
   onToggleAtivo: (id: string) => void;
 }
 
-export function CartaoItem({ cartao, onEdit, onDelete, onToggleAtivo }: CartaoItemProps) {
+export function CartaoItem({ cartao, hideValues, onEdit, onDelete, onToggleAtivo }: CartaoItemProps) {
   const { valuesHidden } = usePrivacy();
+  const aplicarBlur = hideValues !== undefined ? hideValues : valuesHidden;
   
   const handleDelete = () => {
     if (window.confirm(`Tem certeza que deseja excluir o cartão "${cartao.nome}"?`)) {
@@ -32,14 +34,14 @@ export function CartaoItem({ cartao, onEdit, onDelete, onToggleAtivo }: CartaoIt
         <div className="flex-1 min-w-0">
           <div className="text-base font-medium text-text-primary mb-xs">{cartao.nome}</div>
           <div className="text-sm text-text-secondary">
-            Limite: {formatCurrencyWithPrivacy(cartao.limite, valuesHidden)} • Disponível: {formatCurrencyWithPrivacy(cartao.limiteDisponivel, valuesHidden)}
+            Limite: {formatCurrencyWithPrivacy(cartao.limite, aplicarBlur)} • Disponível: {formatCurrencyWithPrivacy(cartao.limiteDisponivel, aplicarBlur)}
           </div>
           <div className="text-xs text-text-secondary mt-xs">
             Fechamento: dia {cartao.fechamento} • Vencimento: dia {cartao.vencimento}
           </div>
           {cartao.faturaAtual > 0 && (
             <div className="text-sm text-negative mt-xs">
-              Fatura atual: {formatCurrencyWithPrivacy(cartao.faturaAtual, valuesHidden)}
+              Fatura atual: {formatCurrencyWithPrivacy(cartao.faturaAtual, aplicarBlur)}
             </div>
           )}
           {percentualUsado > 0 && (
