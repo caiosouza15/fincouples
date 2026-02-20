@@ -3,20 +3,19 @@ import { ContaItem } from './ContaItem';
 
 interface ContasListProps {
   contas: Conta[];
-  hidePoupancaInvestimento: boolean;
   hideSaldo?: boolean;
   onEdit: (conta: Conta) => void;
   onDelete: (id: string) => void;
+  onDuplicate?: (conta: Conta) => void;
 }
 
 export function ContasList({
   contas,
-  hidePoupancaInvestimento,
   hideSaldo = false,
   onEdit,
   onDelete,
+  onDuplicate,
 }: ContasListProps) {
-  // Separar contas ativas e inativas (mostrar todas; o blur do saldo é aplicado no ContaItem)
   const contasAtivas = contas.filter((c) => c.ativa);
   const contasInativas = contas.filter((c) => !c.ativa);
 
@@ -29,13 +28,15 @@ export function ContasList({
       {contasAtivas.length > 0 && (
         <div className="flex flex-col gap-sm">
           {contasAtivas.map((conta) => (
-            <ContaItem
-              key={conta.id}
-              conta={conta}
-              hideSaldo={hidePoupancaInvestimento || hideSaldo}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
+            <div key={conta.id} id={`conta-${conta.id}`}>
+              <ContaItem
+                conta={conta}
+                hideSaldo={hideSaldo}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onDuplicate={onDuplicate}
+              />
+            </div>
           ))}
         </div>
       )}
@@ -44,13 +45,15 @@ export function ContasList({
         <div className="flex flex-col gap-sm">
           <div className="text-sm font-semibold text-text-secondary uppercase mb-xs py-xs">Contas Inativas</div>
           {contasInativas.map((conta) => (
-            <ContaItem
-              key={conta.id}
-              conta={conta}
-              hideSaldo={hidePoupancaInvestimento || hideSaldo}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
+            <div key={conta.id} id={`conta-${conta.id}`}>
+              <ContaItem
+                conta={conta}
+                hideSaldo={hideSaldo}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onDuplicate={onDuplicate}
+              />
+            </div>
           ))}
         </div>
       )}

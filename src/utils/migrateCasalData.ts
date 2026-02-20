@@ -1,6 +1,7 @@
-import type { CartaoCredito, Lancamento } from '@/types';
+import type { CartaoCredito, Conta, Lancamento } from '@/types';
 
 const CARTÕES_STORAGE_KEY = 'fincouples_cartoes';
+const CONTAS_STORAGE_KEY = 'fincouples_contas';
 const LANCAMENTOS_STORAGE_KEY = 'fincouples_lancamentos';
 const MIGRATION_FLAG_KEY = 'fincouples_casal_migration_v1';
 
@@ -86,6 +87,47 @@ export function migrateCartoesToCasal(): { migrated: number; total: number } {
   return { migrated, total: cartoes.length };
 }
 
+function loadContasFromStorage(): Conta[] {
+  try {
+    const data = localStorage.getItem(CONTAS_STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveContasToStorage(contas: Conta[]): void {
+  try {
+    localStorage.setItem(CONTAS_STORAGE_KEY, JSON.stringify(contas));
+  } catch (error) {
+    console.error('Erro ao salvar contas:', error);
+  }
+}
+
+export function migrateContasToCasal(): { migrated: number; total: number } {
+  const contas = loadContasFromStorage();
+  let migrated = 0;
+
+  const contasAtualizados = contas.map((conta) => {
+    if (conta.proprietarioId == null) {
+      migrated++;
+      return {
+        ...conta,
+        proprietarioId: 'usuario1' as const,
+        nomeProprietario: 'Usuario 1',
+      };
+    }
+    return conta;
+  });
+
+  if (migrated > 0) {
+    saveContasToStorage(contasAtualizados);
+    console.log(`✅ [Migração] ${migrated} contas migradas para sistema de casal`);
+  }
+
+  return { migrated, total: contas.length };
+}
+
 export function migrateLancamentosToCasal(): { migrated: number; total: number } {
   const lancamentos = loadLancamentosFromStorage();
   let migrated = 0;
@@ -111,27 +153,32 @@ export function migrateLancamentosToCasal(): { migrated: number; total: number }
   return { migrated, total: lancamentos.length };
 }
 
-export function migrateAllCasalData(): { cartoes: { migrated: number; total: number }; lancamentos: { migrated: number; total: number } } {
-  // Verificar se já foi migrado
+export function migrateAllCasalData(): {
+  cartoes: { migrated: number; total: number };
+  contas: { migrated: number; total: number };
+  lancamentos: { migrated: number; total: number };
+} {
   const alreadyMigrated = localStorage.getItem(MIGRATION_FLAG_KEY);
   if (alreadyMigrated === 'true') {
     console.log('ℹ️ [Migração] Dados já foram migrados anteriormente');
     return {
       cartoes: { migrated: 0, total: 0 },
+      contas: { migrated: 0, total: 0 },
       lancamentos: { migrated: 0, total: 0 },
     };
   }
 
   const cartoesResult = migrateCartoesToCasal();
+  const contasResult = migrateContasToCasal();
   const lancamentosResult = migrateLancamentosToCasal();
 
-  // Marcar como migrado
   localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
 
-  console.log(`✅ [Migração] Migração completa: ${cartoesResult.migrated} cartões, ${lancamentosResult.migrated} lançamentos`);
+  console.log(`✅ [Migração] Migração completa: ${cartoesResult.migrated} cartões, ${contasResult.migrated} contas, ${lancamentosResult.migrated} lançamentos`);
 
   return {
     cartoes: cartoesResult,
+    contas: contasResult,
     lancamentos: lancamentosResult,
   };
 }

@@ -119,7 +119,7 @@ export function CartaoCard({
                 </p>
                 <div className="flex items-center gap-xs flex-wrap">
                   {nomeProprietario && (
-                    <span className={`px-xs py-0.5 text-xs font-medium rounded-full shrink-0 ${
+                    <span className={`px-2.5 py-1 text-xs font-medium rounded-full shrink-0 ${
                       cartao.proprietarioId === 'usuario1'
                         ? 'bg-blue-100 text-blue-700'
                         : 'bg-purple-100 text-purple-700'
@@ -128,7 +128,7 @@ export function CartaoCard({
                     </span>
                   )}
                   {cartao.tipo && (
-                    <span className="px-xs py-0.5 text-xs font-medium rounded-full bg-surface text-text-secondary border border-border shrink-0">
+                    <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-surface text-text-secondary border border-border shrink-0">
                       {cartao.tipo === 'principal' ? 'Principal' : 'Adicional'}
                     </span>
                   )}

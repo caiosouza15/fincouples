@@ -424,7 +424,6 @@ const Dashboard = () => {
         ) : (
           <ContasList
             contas={contas}
-            hidePoupancaInvestimento={false}
             hideSaldo={minhasContasPrivacy.hidden}
             onEdit={handleEditConta}
             onDelete={handleDeleteConta}

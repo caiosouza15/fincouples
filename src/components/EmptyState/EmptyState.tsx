@@ -6,20 +6,23 @@ interface EmptyStateProps {
   message?: string;
   actionButton?: ReactNode;
   hideText?: boolean;
+  icon?: ReactNode;
 }
 
 export const EmptyState = ({ 
   title = "Nenhum item adicionado!", 
   message = "Que tal começar adicionando algo?",
   actionButton,
-  hideText = false
+  hideText = false,
+  icon
 }: EmptyStateProps) => {
+  const IconSlot = icon ?? <CreditCard size={32} className="text-text-secondary" />;
   return (
     <div className="flex flex-col items-center justify-center py-xl px-md text-center">
       {!hideText && (
         <>
           <div className="w-16 h-16 flex items-center justify-center bg-background rounded-full mb-md">
-            <CreditCard size={32} className="text-text-secondary" />
+            {IconSlot}
           </div>
           <h3 className="text-lg font-semibold text-text-primary mb-sm">
             {title}
@@ -32,7 +35,7 @@ export const EmptyState = ({
       {hideText && actionButton && (
         <>
           <div className="w-16 h-16 flex items-center justify-center bg-background rounded-full mb-md">
-            <CreditCard size={32} className="text-text-secondary" />
+            {IconSlot}
           </div>
           <p className="text-text-secondary mb-md max-w-md">
             Nenhum dado encontrado. Clique no botão abaixo para adicionar.

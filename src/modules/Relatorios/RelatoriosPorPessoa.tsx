@@ -3,6 +3,7 @@ import { Card } from '@/components/Card';
 import { useLancamentos } from '@/hooks/useLancamentos';
 import { useCategorias } from '@/hooks/useCategorias';
 import { useCartoes } from '@/hooks/useCartoes';
+import { useContas } from '@/hooks/useContas';
 import { useCasal } from '@/hooks/useCasal';
 import { useSelectedMonth } from '@/contexts/SelectedMonthContext';
 import { formatCurrency } from '@/utils';
@@ -16,6 +17,8 @@ interface MetricasPorPessoa {
   saldo: number;
   gastosPorCategoria: Record<string, number>;
   cartoes: number;
+  contas: number;
+  saldoContas: number;
   mediaMensal: number;
 }
 
@@ -23,6 +26,7 @@ export function RelatoriosPorPessoa() {
   const { lancamentos } = useLancamentos();
   const { categorias } = useCategorias();
   const { cartoes } = useCartoes();
+  const { contas } = useContas();
   const { usuario1Nome, usuario2Nome, getNomePessoa } = useCasal();
   const { selectedMonth } = useSelectedMonth();
 
@@ -45,6 +49,8 @@ export function RelatoriosPorPessoa() {
       saldo: 0,
       gastosPorCategoria: {},
       cartoes: 0,
+      contas: 0,
+      saldoContas: 0,
       mediaMensal: 0,
     };
 
@@ -56,6 +62,8 @@ export function RelatoriosPorPessoa() {
       saldo: 0,
       gastosPorCategoria: {},
       cartoes: 0,
+      contas: 0,
+      saldoContas: 0,
       mediaMensal: 0,
     };
 
@@ -82,12 +90,20 @@ export function RelatoriosPorPessoa() {
     metricasUsuario1.cartoes = cartoes.filter((c) => c.proprietarioId === 'usuario1').length;
     metricasUsuario2.cartoes = cartoes.filter((c) => c.proprietarioId === 'usuario2').length;
 
+    // Contas por pessoa (contagem e saldo das contas ativas)
+    const contasUsuario1 = contas.filter((c) => c.ativa && c.proprietarioId === 'usuario1');
+    const contasUsuario2 = contas.filter((c) => c.ativa && c.proprietarioId === 'usuario2');
+    metricasUsuario1.contas = contasUsuario1.length;
+    metricasUsuario2.contas = contasUsuario2.length;
+    metricasUsuario1.saldoContas = contasUsuario1.reduce((s, c) => s + c.saldo, 0);
+    metricasUsuario2.saldoContas = contasUsuario2.reduce((s, c) => s + c.saldo, 0);
+
     // Calcular média mensal (simplificado: usar apenas o mês atual)
     metricasUsuario1.mediaMensal = metricasUsuario1.totalGastos;
     metricasUsuario2.mediaMensal = metricasUsuario2.totalGastos;
 
     return [metricasUsuario1, metricasUsuario2];
-  }, [lancamentosDoMes, categorias, cartoes, usuario1Nome, usuario2Nome]);
+  }, [lancamentosDoMes, categorias, cartoes, contas, usuario1Nome, usuario2Nome]);
 
   const totalGastos = metricas[0].totalGastos + metricas[1].totalGastos;
   const percentualUsuario1 = totalGastos > 0 ? (metricas[0].totalGastos / totalGastos) * 100 : 0;
@@ -143,6 +159,16 @@ export function RelatoriosPorPessoa() {
                   <div className="flex justify-between">
                     <span className="text-sm text-text-secondary">Cartões:</span>
                     <span className="text-sm font-medium text-text-primary">{metrica.cartoes}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-text-secondary">Contas:</span>
+                    <span className="text-sm font-medium text-text-primary">{metrica.contas}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-text-secondary">Saldo em contas:</span>
+                    <span className={`text-sm font-medium ${metrica.saldoContas >= 0 ? 'text-positive' : 'text-negative'}`}>
+                      {formatCurrency(metrica.saldoContas)}
+                    </span>
                   </div>
                 </div>
               </div>
