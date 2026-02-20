@@ -66,3 +66,37 @@ Implementação completa das melhorias na jornada de cartões de crédito: ident
 - [ ] Configurar nomes em Configurações → Casal
 - [ ] Cadastrar despesa com "Quem realizou" e conferir em Relatórios por pessoa
 - [ ] Verificar toasts ao salvar/excluir e confirmação ao excluir
+
+---
+
+## Próximas funcionalidades (planejamento)
+
+Ideias para as próximas sprints/features:
+
+1. **Metas e orçamento**
+   - Definir metas por categoria ou por pessoa; acompanhamento no Dashboard.
+   - Alertas quando gastos se aproximam do limite da meta.
+
+2. **Exportação e backup**
+   - Exportar lançamentos/cartões para CSV ou Excel.
+   - Backup/restauração de dados (JSON ou arquivo).
+
+3. **Gráficos e relatórios**
+   - Gráficos de evolução mensal (receitas x despesas).
+   - Pizza/barras por categoria; comparativo entre meses.
+
+4. **Contas bancárias**
+   - Vincular lançamentos à conta (já existe Contas); reforçar uso em relatórios e saldo consolidado.
+
+5. **Parcelamento e recorrência**
+   - Recorrência de despesas/receitas (mensal, etc.).
+   - Visão de parcelas restantes e totais parcelados.
+
+6. **Acessibilidade e PWA**
+   - Revisão de labels, foco e contraste.
+   - Service worker e instalável como PWA.
+
+7. **Temas**
+   - Tema escuro/claro persistido em configurações.
+
+Escolha uma ou duas para priorizar e detalhamos o escopo e tarefas.
