@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { usePrivacy } from '@/hooks/usePrivacy';
 import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
 import { useContas } from '@/hooks/useContas';
@@ -7,9 +8,9 @@ import { ContasList } from '@/modules/Configuracoes/Contas/ContasList';
 import { ContaForm } from '@/modules/Configuracoes/Contas/ContaForm';
 
 const Contas = () => {
-  const { contas, addConta, editConta, removeConta, toggleContaAtiva } = useContas();
+  const { contas, addConta, editConta, removeConta } = useContas();
   
-  const [hidePoupancaInvestimento, setHidePoupancaInvestimento] = useState(false);
+  const { hidePoupancaInvestimento, setHidePoupancaInvestimento } = usePrivacy();
   const [showForm, setShowForm] = useState(false);
   const [contaEditando, setContaEditando] = useState<Conta | null>(null);
 
@@ -55,7 +56,7 @@ const Contas = () => {
               checked={hidePoupancaInvestimento}
               onChange={(e) => setHidePoupancaInvestimento(e.target.checked)}
             />
-            <span className="text-xs">Esconder saldo das contas poupanças / investimentos</span>
+            <span className="text-xs">Esconder saldos das contas</span>
           </label>
         }
       >
@@ -78,7 +79,6 @@ const Contas = () => {
               hidePoupancaInvestimento={hidePoupancaInvestimento}
               onEdit={handleEditConta}
               onDelete={handleDeleteConta}
-              onToggleAtiva={toggleContaAtiva}
             />
             <div className="mt-md">
               <button

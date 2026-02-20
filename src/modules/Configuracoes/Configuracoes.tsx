@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { usePrivacy } from '@/hooks/usePrivacy';
 import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
 import { useContas } from '@/hooks/useContas';
@@ -17,12 +18,12 @@ type FiltroTipoCategoria = 'todas' | 'receita' | 'despesa';
 
 const Configuracoes = () => {
   const [activeTab, setActiveTab] = useState<TabType>('contas');
-  const { contas, addConta, editConta, removeConta, toggleContaAtiva } = useContas();
+  const { contas, addConta, editConta, removeConta } = useContas();
   const { categorias, addCategoria, editCategoria, removeCategoria, isPadrao } = useCategorias();
   const { cartoes, addCartao, editCartao, removeCartao, toggleCartaoAtivo } = useCartoes();
   
   // Estados para Contas
-  const [hidePoupancaInvestimento, setHidePoupancaInvestimento] = useState(false);
+  const { hidePoupancaInvestimento, setHidePoupancaInvestimento } = usePrivacy();
   const [showFormConta, setShowFormConta] = useState(false);
   const [contaEditando, setContaEditando] = useState<Conta | null>(null);
   
@@ -174,7 +175,7 @@ const Configuracoes = () => {
                 checked={hidePoupancaInvestimento}
                 onChange={(e) => setHidePoupancaInvestimento(e.target.checked)}
               />
-              <span className="text-xs">Esconder saldo das contas poupanças / investimentos</span>
+              <span className="text-xs">Esconder saldos das contas</span>
             </label>
           }
         >
@@ -197,7 +198,6 @@ const Configuracoes = () => {
                 hidePoupancaInvestimento={hidePoupancaInvestimento}
                 onEdit={handleEditConta}
                 onDelete={handleDeleteConta}
-                onToggleAtiva={toggleContaAtiva}
               />
               <div className="mt-md">
                 <button

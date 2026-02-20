@@ -1,14 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import type { Lancamento } from '@/types';
 import { useContas } from '@/hooks/useContas';
 import { useCategorias } from '@/hooks/useCategorias';
 import { useCartoes } from '@/hooks/useCartoes';
 import { formatNumberInput, parseNumberInput, handleNumberInputChange } from '@/utils/numberMask';
+import { CartaoForm } from '@/modules/Configuracoes/Cartoes/CartaoForm';
+import { ContaForm } from '@/modules/Configuracoes/Contas/ContaForm';
+
+function getDataInicialParaMes(mes: string): string {
+  const [year, month] = mes.split('-').map(Number);
+  const hoje = new Date();
+  const mesAtual = hoje.getFullYear() * 12 + hoje.getMonth();
+  const mesAlvo = year * 12 + (month - 1);
+  if (mesAtual === mesAlvo) return hoje.toISOString().split('T')[0];
+  const ultimoDia = new Date(year, month, 0);
+  return ultimoDia.toISOString().split('T')[0];
+}
 
 interface LancamentoFormProps {
   lancamento?: Lancamento | null;
   tipoPreSelecionado?: 'receita' | 'despesa';
+  mesPreSelecionado?: string;
   onClose: () => void;
   onSave: (lancamento: Omit<Lancamento, 'id'> | Lancamento) => Promise<void>;
 }
@@ -16,30 +29,53 @@ interface LancamentoFormProps {
 export function LancamentoForm({
   lancamento,
   tipoPreSelecionado,
+  mesPreSelecionado,
   onClose,
   onSave,
 }: LancamentoFormProps) {
-  const { contas } = useContas();
+  const { contas, addConta } = useContas();
   const { categorias } = useCategorias();
-  const { cartoes } = useCartoes();
+  const { cartoes, addCartao } = useCartoes();
 
+  const [showCartaoForm, setShowCartaoForm] = useState(false);
+  const [showContaForm, setShowContaForm] = useState(false);
+  const cartoesCountBeforeRef = useRef(0);
+  const contasCountBeforeRef = useRef(0);
   const [tipo, setTipo] = useState<'receita' | 'despesa'>(
     tipoPreSelecionado || lancamento?.tipo || 'despesa'
   );
   const [valor, setValor] = useState('');
   const [categoriaId, setCategoriaId] = useState('');
-  const [metodoPagamento, setMetodoPagamento] = useState<'conta' | 'cartao'>('conta');
+  const [metodoPagamento, setMetodoPagamento] = useState<'debito' | 'cartao'>('debito');
   const [contaId, setContaId] = useState('');
   const [cartaoId, setCartaoId] = useState('');
   const [parcelado, setParcelado] = useState(false);
   const [numeroParcelas, setNumeroParcelas] = useState('1');
-  const [data, setData] = useState(new Date().toISOString().split('T')[0]);
+  const [data, setData] = useState(
+    mesPreSelecionado ? getDataInicialParaMes(mesPreSelecionado) : new Date().toISOString().split('T')[0]
+  );
   const [descricao, setDescricao] = useState('');
   const [pago, setPago] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const isEditMode = !!lancamento;
+
+  const clearFieldError = (field: string) => {
+    setFieldErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const getInputClassName = (hasError: boolean) =>
+    `p-md border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed ${
+      hasError
+        ? 'border-negative focus:border-negative focus:shadow-[0_0_0_3px_rgba(220,38,38,0.1)]'
+        : 'border-border focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)]'
+    }`;
 
   // Filtrar categorias por tipo
   const categoriasFiltradas = categorias.filter((c) => c.tipo === tipo);
@@ -57,7 +93,7 @@ export function LancamentoForm({
       setCategoriaId(lancamento.categoriaId);
       setContaId(lancamento.contaId || '');
       setCartaoId(lancamento.cartaoId || '');
-      setMetodoPagamento(lancamento.cartaoId ? 'cartao' : 'conta');
+      setMetodoPagamento(lancamento.cartaoId ? 'cartao' : 'debito');
       setParcelado(lancamento.parcelado || false);
       setNumeroParcelas(formatNumberInput(lancamento.totalParcelas || 1, false));
       setData(new Date(lancamento.data).toISOString().split('T')[0]);
@@ -66,7 +102,7 @@ export function LancamentoForm({
     } else {
       // Valores padrão para novo lançamento
       setPago(tipo === 'receita');
-      setMetodoPagamento('conta');
+      setMetodoPagamento('debito');
       setParcelado(false);
       setNumeroParcelas('1');
     }
@@ -82,53 +118,54 @@ export function LancamentoForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setFieldErrors({});
+
+    const errors: Record<string, string> = {};
 
     // Validações
     const valorNum = parseNumberInput(valor);
     if (isNaN(valorNum) || valorNum <= 0) {
-      setError('Valor deve ser maior que zero');
-      return;
+      errors.valor = valor.trim() ? 'Valor deve ser maior que zero' : 'Este campo é obrigatório';
     }
 
     if (!categoriaId) {
-      setError('Categoria é obrigatória');
-      return;
+      errors.categoriaId = 'Este campo é obrigatório';
     }
 
     if (tipo === 'despesa') {
-      if (metodoPagamento === 'conta' && !contaId) {
-        setError('Conta deve ser informada');
-        return;
+      if (metodoPagamento === 'debito' && !contaId) {
+        errors.contaId = 'Este campo é obrigatório';
       }
       if (metodoPagamento === 'cartao' && !cartaoId) {
-        setError('Cartão deve ser informado');
-        return;
+        errors.cartaoId = 'Este campo é obrigatório';
       }
       if (metodoPagamento === 'cartao' && parcelado) {
         const parcelasNum = parseNumberInput(numeroParcelas);
         if (isNaN(parcelasNum) || parcelasNum < 1 || parcelasNum > 24) {
-          setError('Número de parcelas deve ser entre 1 e 24');
-          return;
+          errors.numeroParcelas = 'Número de parcelas deve ser entre 1 e 24';
         }
       }
     } else {
-      // Receita sempre usa conta
       if (!contaId) {
-        setError('Conta deve ser informada');
-        return;
+        errors.contaId = 'Este campo é obrigatório';
       }
     }
 
     if (!data) {
-      setError('Data é obrigatória');
+      errors.data = 'Este campo é obrigatório';
+    } else {
+      const dataObj = new Date(data);
+      if (isNaN(dataObj.getTime())) {
+        errors.data = 'Data inválida';
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
     const dataObj = new Date(data);
-    if (isNaN(dataObj.getTime())) {
-      setError('Data inválida');
-      return;
-    }
 
     try {
       setLoading(true);
@@ -139,11 +176,11 @@ export function LancamentoForm({
             tipo,
             valor: valorNum,
             categoriaId,
-            contaId: metodoPagamento === 'conta' ? (contaId || undefined) : undefined,
+            contaId: metodoPagamento === 'debito' ? (contaId || undefined) : undefined,
             cartaoId: metodoPagamento === 'cartao' ? (cartaoId || undefined) : undefined,
             data: dataObj,
             descricao: descricao.trim(),
-            pago,
+            pago: tipo === 'receita' ? true : pago,
             parcelado: metodoPagamento === 'cartao' && parcelado,
             totalParcelas: metodoPagamento === 'cartao' && parcelado ? parseNumberInput(numeroParcelas) : undefined,
             parcelaAtual: lancamento.parcelaAtual,
@@ -153,11 +190,11 @@ export function LancamentoForm({
             tipo,
             valor: valorNum,
             categoriaId,
-            contaId: metodoPagamento === 'conta' ? (contaId || undefined) : undefined,
+            contaId: metodoPagamento === 'debito' ? (contaId || undefined) : undefined,
             cartaoId: metodoPagamento === 'cartao' ? (cartaoId || undefined) : undefined,
             data: dataObj,
             descricao: descricao.trim(),
-            pago,
+            pago: tipo === 'receita' ? true : pago,
             parcelado: metodoPagamento === 'cartao' && parcelado,
             totalParcelas: metodoPagamento === 'cartao' && parcelado ? parseNumberInput(numeroParcelas) : undefined,
             casalId: 'casal-1',
@@ -178,16 +215,53 @@ export function LancamentoForm({
     }
   };
 
+  const handleOpenCartaoForm = () => {
+    cartoesCountBeforeRef.current = cartoesAtivos.length;
+    setShowCartaoForm(true);
+  };
+  const handleOpenContaForm = () => {
+    contasCountBeforeRef.current = contasAtivas.length;
+    setShowContaForm(true);
+  };
+
+  const handleCloseCartaoForm = () => setShowCartaoForm(false);
+  const handleCloseContaForm = () => setShowContaForm(false);
+
+  const handleSaveCartao = async (cartaoData: Parameters<typeof addCartao>[0]) => {
+    await addCartao(cartaoData);
+    handleCloseCartaoForm();
+  };
+
+  const handleSaveConta = async (contaData: Parameters<typeof addConta>[0]) => {
+    await addConta(contaData);
+    handleCloseContaForm();
+  };
+
+  useEffect(() => {
+    if (!showCartaoForm && cartoesAtivos.length > cartoesCountBeforeRef.current && metodoPagamento === 'cartao') {
+      const lastCartao = cartoesAtivos[cartoesAtivos.length - 1];
+      setCartaoId(lastCartao.id);
+    }
+  }, [showCartaoForm, cartoesAtivos, metodoPagamento]);
+
+  useEffect(() => {
+    if (!showContaForm && contasAtivas.length > contasCountBeforeRef.current) {
+      const lastConta = contasAtivas[contasAtivas.length - 1];
+      setContaId(lastConta.id);
+    }
+  }, [showContaForm, contasAtivas]);
+
   return (
     <div
       className="fixed top-0 left-0 right-0 bottom-0 bg-black/50 flex items-center justify-center z-[1000] p-md animate-[fadeIn_0.2s_ease]"
       onClick={handleClose}
     >
       <div
-        className="bg-surface rounded-lg w-full max-w-[500px] max-h-[90vh] overflow-y-auto shadow-lg animate-[slideUp_0.3s_ease] md:rounded-lg md:max-w-[500px]"
+        className="rounded-lg overflow-hidden w-full max-w-[500px] max-h-[90vh] shadow-lg bg-surface animate-[slideUp_0.3s_ease] md:max-w-[500px]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-lg border-b border-border">
+        <div className="overflow-y-auto max-h-[90vh]">
+          <div className="flex items-center justify-between p-lg border-b border-border">
           <h3 className="text-xl font-semibold text-text-primary m-0">
             {isEditMode ? 'Editar Lançamento' : tipo === 'despesa' ? 'Nova Despesa' : 'Nova Receita'}
           </h3>
@@ -201,7 +275,7 @@ export function LancamentoForm({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-lg flex flex-col gap-md">
+        <form onSubmit={handleSubmit} className="p-lg flex flex-col gap-md" noValidate>
           {error && (
             <div
               className="p-md bg-[#fee2e2] border border-negative rounded-md text-negative text-sm"
@@ -251,13 +325,20 @@ export function LancamentoForm({
               id="valor"
               type="text"
               inputMode="decimal"
-              className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+              className={getInputClassName(!!fieldErrors.valor)}
               value={valor}
-              onChange={(e) => setValor(handleNumberInputChange(e, true))}
+              onChange={(e) => {
+                clearFieldError('valor');
+                setValor(handleNumberInputChange(e, true));
+              }}
               placeholder="0,00"
-              required
               disabled={loading}
             />
+            {fieldErrors.valor && (
+              <p className="text-sm text-negative" role="alert">
+                {fieldErrors.valor}
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col gap-xs">
@@ -266,10 +347,12 @@ export function LancamentoForm({
             </label>
             <select
               id="categoria"
-              className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+              className={getInputClassName(!!fieldErrors.categoriaId)}
               value={categoriaId}
-              onChange={(e) => setCategoriaId(e.target.value)}
-              required
+              onChange={(e) => {
+                clearFieldError('categoriaId');
+                setCategoriaId(e.target.value);
+              }}
               disabled={loading || categoriasFiltradas.length === 0}
             >
               <option value="">Selecione uma categoria</option>
@@ -279,6 +362,11 @@ export function LancamentoForm({
                 </option>
               ))}
             </select>
+            {fieldErrors.categoriaId && (
+              <p className="text-sm text-negative" role="alert">
+                {fieldErrors.categoriaId}
+              </p>
+            )}
             {categoriasFiltradas.length === 0 && (
               <p className="text-sm text-text-muted">
                 Nenhuma categoria de {tipo} cadastrada. Cadastre uma categoria primeiro.
@@ -295,17 +383,17 @@ export function LancamentoForm({
                     <input
                       type="radio"
                       name="metodoPagamento"
-                      value="conta"
-                      checked={metodoPagamento === 'conta'}
+                      value="debito"
+                      checked={metodoPagamento === 'debito'}
                       onChange={() => {
-                        setMetodoPagamento('conta');
+                        setMetodoPagamento('debito');
                         setCartaoId('');
                         setParcelado(false);
                       }}
                       disabled={loading}
                       className="cursor-pointer"
                     />
-                    <span className="text-text-primary">Conta</span>
+                    <span className="text-text-primary">Débito</span>
                   </label>
                   <label className="flex items-center gap-sm cursor-pointer flex-1 p-md border border-border rounded-md hover:bg-background transition-colors">
                     <input
@@ -325,16 +413,19 @@ export function LancamentoForm({
                 </div>
               </div>
 
-              {metodoPagamento === 'conta' && (
+              {metodoPagamento === 'debito' && (
                 <div className="flex flex-col gap-xs">
                   <label htmlFor="conta" className="text-sm font-medium text-text-primary">
                     Conta *
                   </label>
                   <select
                     id="conta"
-                    className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                    className={getInputClassName(!!fieldErrors.contaId)}
                     value={contaId}
-                    onChange={(e) => setContaId(e.target.value)}
+                    onChange={(e) => {
+                      clearFieldError('contaId');
+                      setContaId(e.target.value);
+                    }}
                     disabled={loading || contasAtivas.length === 0}
                   >
                     <option value="">Selecione uma conta</option>
@@ -344,9 +435,22 @@ export function LancamentoForm({
                       </option>
                     ))}
                   </select>
+                  {fieldErrors.contaId && (
+                    <p className="text-sm text-negative" role="alert">
+                      {fieldErrors.contaId}
+                    </p>
+                  )}
                   {contasAtivas.length === 0 && (
                     <p className="text-sm text-text-muted">
-                      Nenhuma conta cadastrada. Cadastre uma conta primeiro.
+                      Nenhuma conta cadastrada.{' '}
+                      <button
+                        type="button"
+                        className="text-positive underline hover:text-[#16a34a] transition-colors duration-200 cursor-pointer bg-transparent border-none p-0 font-inherit text-inherit"
+                        onClick={handleOpenContaForm}
+                        disabled={loading}
+                      >
+                        Adicionar conta
+                      </button>
                     </p>
                   )}
                 </div>
@@ -360,9 +464,12 @@ export function LancamentoForm({
                     </label>
                     <select
                       id="cartao"
-                      className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                      className={getInputClassName(!!fieldErrors.cartaoId)}
                       value={cartaoId}
-                      onChange={(e) => setCartaoId(e.target.value)}
+                      onChange={(e) => {
+                        clearFieldError('cartaoId');
+                        setCartaoId(e.target.value);
+                      }}
                       disabled={loading || cartoesAtivos.length === 0}
                     >
                       <option value="">Selecione um cartão</option>
@@ -372,9 +479,22 @@ export function LancamentoForm({
                         </option>
                       ))}
                     </select>
+                    {fieldErrors.cartaoId && (
+                      <p className="text-sm text-negative" role="alert">
+                        {fieldErrors.cartaoId}
+                      </p>
+                    )}
                     {cartoesAtivos.length === 0 && (
                       <p className="text-sm text-text-muted">
-                        Nenhum cartão cadastrado. Cadastre um cartão primeiro.
+                        Nenhum cartão cadastrado.{' '}
+                        <button
+                          type="button"
+                          className="text-positive underline hover:text-[#16a34a] transition-colors duration-200 cursor-pointer bg-transparent border-none p-0 font-inherit text-inherit"
+                          onClick={handleOpenCartaoForm}
+                          disabled={loading}
+                        >
+                          Adicionar cartão
+                        </button>
                       </p>
                     )}
                   </div>
@@ -416,13 +536,20 @@ export function LancamentoForm({
                         id="numeroParcelas"
                         type="text"
                         inputMode="numeric"
-                        className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                        className={getInputClassName(!!fieldErrors.numeroParcelas)}
                         value={numeroParcelas}
-                        onChange={(e) => setNumeroParcelas(handleNumberInputChange(e, false))}
+                        onChange={(e) => {
+                          clearFieldError('numeroParcelas');
+                          setNumeroParcelas(handleNumberInputChange(e, false));
+                        }}
                         placeholder="1"
-                        required
                         disabled={loading}
                       />
+                      {fieldErrors.numeroParcelas && (
+                        <p className="text-sm text-negative" role="alert">
+                          {fieldErrors.numeroParcelas}
+                        </p>
+                      )}
                       <p className="text-sm text-text-muted">
                         Valor por parcela: R$ {valor && numeroParcelas ? formatNumberInput(parseNumberInput(valor) / parseNumberInput(numeroParcelas)) : '0,00'}
                       </p>
@@ -435,14 +562,17 @@ export function LancamentoForm({
 
           {tipo === 'receita' && (
             <div className="flex flex-col gap-xs">
-              <label htmlFor="conta" className="text-sm font-medium text-text-primary">
+              <label htmlFor="conta-receita" className="text-sm font-medium text-text-primary">
                 Conta *
               </label>
               <select
-                id="conta"
-                className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                id="conta-receita"
+                className={getInputClassName(!!fieldErrors.contaId)}
                 value={contaId}
-                onChange={(e) => setContaId(e.target.value)}
+                onChange={(e) => {
+                  clearFieldError('contaId');
+                  setContaId(e.target.value);
+                }}
                 disabled={loading || contasAtivas.length === 0}
               >
                 <option value="">Selecione uma conta</option>
@@ -452,9 +582,22 @@ export function LancamentoForm({
                   </option>
                 ))}
               </select>
+              {fieldErrors.contaId && (
+                <p className="text-sm text-negative" role="alert">
+                  {fieldErrors.contaId}
+                </p>
+              )}
               {contasAtivas.length === 0 && (
                 <p className="text-sm text-text-muted">
-                  Nenhuma conta cadastrada. Cadastre uma conta primeiro.
+                  Nenhuma conta cadastrada.{' '}
+                  <button
+                    type="button"
+                    className="text-positive underline hover:text-[#16a34a] transition-colors duration-200 cursor-pointer bg-transparent border-none p-0 font-inherit text-inherit"
+                    onClick={handleOpenContaForm}
+                    disabled={loading}
+                  >
+                    Adicionar conta
+                  </button>
                 </p>
               )}
             </div>
@@ -467,13 +610,20 @@ export function LancamentoForm({
             <input
               id="data"
               type="date"
-              className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
+              className={getInputClassName(!!fieldErrors.data)}
               value={data}
-              onChange={(e) => setData(e.target.value)}
-              required
+              onChange={(e) => {
+                clearFieldError('data');
+                setData(e.target.value);
+              }}
               disabled={loading}
-              max={new Date().toISOString().split('T')[0]} // Não permitir datas futuras
+              max={new Date().toISOString().split('T')[0]}
             />
+            {fieldErrors.data && (
+              <p className="text-sm text-negative" role="alert">
+                {fieldErrors.data}
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col gap-xs">
@@ -491,18 +641,20 @@ export function LancamentoForm({
             />
           </div>
 
-          <div className="flex flex-col gap-xs">
-            <label className="flex items-center gap-sm cursor-pointer text-sm text-text-primary">
-              <input
-                type="checkbox"
-                className="w-[18px] h-[18px] cursor-pointer"
-                checked={pago}
-                onChange={(e) => setPago(e.target.checked)}
-                disabled={loading}
-              />
-              <span>Marcar como pago</span>
-            </label>
-          </div>
+          {tipo === 'despesa' && (
+            <div className="flex flex-col gap-xs">
+              <label className="flex items-center gap-sm cursor-pointer text-sm text-text-primary">
+                <input
+                  type="checkbox"
+                  className="w-[18px] h-[18px] cursor-pointer"
+                  checked={pago}
+                  onChange={(e) => setPago(e.target.checked)}
+                  disabled={loading}
+                />
+                <span>Marcar como pago</span>
+              </label>
+            </div>
+          )}
 
           <div className="flex flex-col-reverse md:flex-row gap-md justify-end mt-md pt-md border-t border-border">
             <button
@@ -522,7 +674,26 @@ export function LancamentoForm({
             </button>
           </div>
         </form>
+        </div>
       </div>
+
+      {showCartaoForm && (
+        <div className="fixed inset-0 z-[1100]">
+          <CartaoForm
+            onClose={handleCloseCartaoForm}
+            onSave={handleSaveCartao}
+          />
+        </div>
+      )}
+
+      {showContaForm && (
+        <div className="fixed inset-0 z-[1100]">
+          <ContaForm
+            onClose={handleCloseContaForm}
+            onSave={handleSaveConta}
+          />
+        </div>
+      )}
 
       <style>{`
         @keyframes fadeIn {

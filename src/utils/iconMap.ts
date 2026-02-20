@@ -2,6 +2,7 @@ import type { LucideIcon } from 'lucide-react';
 import {
   LayoutDashboard,
   Wallet,
+  CreditCard,
   TrendingUp,
   Target,
   Settings,
@@ -74,4 +75,6 @@ export const iconMap: Record<string, LucideIcon> = {
   'despesa-padrao': FileText,
   // Alternativas
   bank: Landmark,
+  wallet: Wallet,
+  creditcard: CreditCard,
 };

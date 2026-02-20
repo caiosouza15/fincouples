@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useLancamentos } from '@/hooks/useLancamentos';
+import { useSelectedMonth } from '@/contexts/SelectedMonthContext';
 import type { Lancamento } from '@/types';
 import { LancamentosList } from './LancamentosList';
 import { LancamentoForm } from './LancamentoForm';
 
 const Lancamentos = () => {
+  const { selectedMonth } = useSelectedMonth();
   const { lancamentos, addLancamento, editLancamento, removeLancamento } = useLancamentos();
   const [showForm, setShowForm] = useState(false);
   const [lancamentoEditando, setLancamentoEditando] = useState<Lancamento | null>(null);
@@ -134,6 +136,7 @@ const Lancamentos = () => {
         <LancamentoForm
           lancamento={lancamentoEditando}
           tipoPreSelecionado={tipoPreSelecionado}
+          mesPreSelecionado={selectedMonth}
           onClose={handleCloseForm}
           onSave={handleSaveLancamento}
         />
