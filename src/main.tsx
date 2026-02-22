@@ -6,12 +6,12 @@ import { seedAllIfEmpty } from './utils/seedUtils'
 
 // Inicializar dados mock antes de renderizar
 async function initApp() {
-  // Popular dados mock se necessário
+  // Popular dados mock (substitui automaticamente se detectar formato antigo ou force_seed no sessionStorage)
   await seedAllIfEmpty();
-  
-  // Pequeno delay para garantir que o localStorage foi atualizado
-  await new Promise(resolve => setTimeout(resolve, 100));
-  
+
+  // Pequeno delay para o localStorage estar disponível antes dos contexts lerem
+  await new Promise((resolve) => setTimeout(resolve, 150));
+
   // Renderizar aplicação
   createRoot(document.getElementById('root')!).render(
     <StrictMode>

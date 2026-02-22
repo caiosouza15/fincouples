@@ -22,7 +22,7 @@ import { Relatorios } from './modules/Relatorios';
 import { Metas } from './modules/Metas';
 import { Contas } from './modules/Contas';
 import { Cartoes } from './modules/Cartoes';
-import logo from './assets/logo.png';
+import logo from './assets/FinCouples_logo_144px.png';
 
 function AppContent() {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
