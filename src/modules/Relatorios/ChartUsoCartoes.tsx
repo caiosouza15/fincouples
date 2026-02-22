@@ -1,6 +1,7 @@
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { formatCurrency } from '@/utils';
+import { useTheme } from '@/contexts/ThemeContext';
 import type { CartaoCredito } from '@/types';
 
 const COR_USADO = '#ef4444';
@@ -11,6 +12,7 @@ interface ChartUsoCartoesProps {
 }
 
 export function ChartUsoCartoes({ cartoes }: ChartUsoCartoesProps) {
+  const { resolvedTheme } = useTheme();
   const ativos = cartoes.filter((c) => c.ativo);
   if (ativos.length === 0) {
     return (
@@ -25,7 +27,8 @@ export function ChartUsoCartoes({ cartoes }: ChartUsoCartoesProps) {
   const disponivel = ativos.map((c) => c.limiteDisponivel);
 
   const options: ApexOptions = {
-    chart: { type: 'bar', toolbar: { show: false }, stacked: true },
+    theme: { mode: resolvedTheme === 'dark' ? 'dark' : 'light' },
+    chart: { type: 'bar', toolbar: { show: false }, stacked: true, foreColor: resolvedTheme === 'dark' ? '#94a3b8' : '#64748b' },
     plotOptions: {
       bar: {
         horizontal: false,
@@ -47,7 +50,7 @@ export function ChartUsoCartoes({ cartoes }: ChartUsoCartoesProps) {
     },
     legend: { position: 'top', horizontalAlign: 'right' },
     dataLabels: { enabled: false },
-    grid: { borderColor: '#e5e7eb' },
+    grid: { borderColor: resolvedTheme === 'dark' ? '#334155' : '#e5e7eb' },
   };
 
   const series = [

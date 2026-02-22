@@ -30,14 +30,14 @@ export function ConfirmDialog({
           icon: AlertCircle,
           iconColor: 'text-negative',
           iconBg: 'bg-negative/10',
-          confirmButtonClass: 'bg-negative text-white hover:bg-[#dc2626]',
+          confirmButtonClass: 'bg-negative text-white hover:bg-negative/90',
         };
       case 'warning':
         return {
           icon: AlertTriangle,
           iconColor: 'text-warning',
           iconBg: 'bg-warning/10',
-          confirmButtonClass: 'bg-warning text-white hover:bg-[#f59e0b]',
+          confirmButtonClass: 'bg-warning text-white hover:bg-warning/90',
         };
       case 'info':
       default:
@@ -45,7 +45,7 @@ export function ConfirmDialog({
           icon: Info,
           iconColor: 'text-text-secondary',
           iconBg: 'bg-background',
-          confirmButtonClass: 'bg-positive text-white hover:bg-[#16a34a]',
+          confirmButtonClass: 'bg-positive text-white hover:bg-positive/90',
         };
     }
   };
@@ -95,28 +95,6 @@ export function ConfirmDialog({
           </div>
         </div>
       </div>
-
-      <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes slideUp {
-          from {
-            transform: translateY(20px);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0);
-            opacity: 1;
-          }
-        }
-      `}</style>
     </div>
   );
 }

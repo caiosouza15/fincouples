@@ -113,7 +113,7 @@ export function FaturaItem({ fatura, cartao, lancamentos, categorias, onMarcarCo
         {fatura.status !== 'pago_total' && (
           <div className="flex gap-xs shrink-0 md:justify-start justify-end md:border-0 border-t border-border md:pt-0 pt-sm">
             <button
-              className="py-xs px-md rounded-md text-sm font-medium cursor-pointer transition-all duration-200 border-none bg-positive text-white hover:bg-[#16a34a] disabled:opacity-60 disabled:cursor-not-allowed"
+              className="py-xs px-md rounded-md text-sm font-medium cursor-pointer transition-all duration-200 border-none bg-positive text-white hover:bg-positive/90 disabled:opacity-60 disabled:cursor-not-allowed"
               onClick={() => onMarcarComoPaga(fatura.id, fatura.valorTotal)}
             >
               Pagar Total
@@ -146,7 +146,7 @@ export function FaturaItem({ fatura, cartao, lancamentos, categorias, onMarcarCo
                 placeholder="0,00"
               />
               <button
-                className="py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-all duration-200 border-none bg-positive text-white hover:bg-[#16a34a]"
+                className="py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-all duration-200 border-none bg-positive text-white hover:bg-positive/90"
                 onClick={handlePagarParcial}
               >
                 Confirmar

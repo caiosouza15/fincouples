@@ -71,7 +71,7 @@ export const Sidebar = ({ expanded, onMouseEnter, onMouseLeave, onClose }: Sideb
                 className={({ isActive }) =>
                   `group relative flex items-center gap-md p-md rounded-md text-text-secondary no-underline transition-all duration-200 whitespace-nowrap cursor-pointer select-none sidebar-item border-none bg-transparent w-full text-left ${
                     isActive 
-                      ? 'bg-positive/10 text-positive font-medium sidebar-item-active' 
+                      ? 'bg-teal/10 text-teal font-medium sidebar-item-active' 
                       : 'hover:bg-background hover:text-text-primary'
                   }`
                 }
@@ -80,7 +80,7 @@ export const Sidebar = ({ expanded, onMouseEnter, onMouseLeave, onClose }: Sideb
                 {({ isActive }) => (
                   <>
                     <span className={`shrink-0 w-6 h-6 flex items-center justify-center transition-transform duration-200 ${!isActive && 'group-hover:scale-110'}`}>
-                      {IconComponent && <IconComponent size={20} className={isActive ? 'text-positive' : 'text-text-secondary'} />}
+                      {IconComponent && <IconComponent size={20} className={isActive ? 'text-teal' : 'text-text-secondary'} />}
                     </span>
                     <span className={`text-base font-medium transition-all duration-300 sidebar-label ${expanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2.5 md:group-hover:opacity-100 md:group-hover:translate-x-0'}`}>
                       {item.label}

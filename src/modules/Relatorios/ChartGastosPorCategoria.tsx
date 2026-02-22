@@ -1,19 +1,21 @@
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { formatCurrency } from '@/utils';
+import { useTheme } from '@/contexts/ThemeContext';
 import type { Categoria } from '@/types';
 
+// Cores de marca (tokens): teal #0FB9B1, pink #F78FB3
 const PALETA = [
+  '#0FB9B1',
+  '#F78FB3',
   '#3b82f6',
   '#8b5cf6',
-  '#ec4899',
   '#f59e0b',
   '#10b981',
   '#06b6d4',
   '#6366f1',
   '#84cc16',
   '#f97316',
-  '#14b8a6',
 ];
 
 interface ItemGasto {
@@ -28,6 +30,8 @@ interface ChartGastosPorCategoriaProps {
 }
 
 export function ChartGastosPorCategoria({ itens }: ChartGastosPorCategoriaProps) {
+  const { resolvedTheme } = useTheme();
+
   if (itens.length === 0) {
     return (
       <div className="flex items-center justify-center py-xl text-text-secondary">
@@ -37,7 +41,8 @@ export function ChartGastosPorCategoria({ itens }: ChartGastosPorCategoriaProps)
   }
 
   const options: ApexOptions = {
-    chart: { type: 'bar', toolbar: { show: false } },
+    theme: { mode: resolvedTheme === 'dark' ? 'dark' : 'light' },
+    chart: { type: 'bar', toolbar: { show: false }, foreColor: resolvedTheme === 'dark' ? '#94a3b8' : '#64748b' },
     plotOptions: {
       bar: {
         horizontal: false,
@@ -67,7 +72,7 @@ export function ChartGastosPorCategoria({ itens }: ChartGastosPorCategoriaProps)
     },
     legend: { show: false },
     dataLabels: { enabled: false },
-    grid: { borderColor: '#e5e7eb' },
+    grid: { borderColor: resolvedTheme === 'dark' ? '#334155' : '#e5e7eb' },
   };
 
   const series = [{ name: 'Gastos', data: itens.map((i) => i.valor) }];

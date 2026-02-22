@@ -1,6 +1,7 @@
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { formatCurrency } from '@/utils';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface MetricasPessoa {
   nome: string;
@@ -17,10 +18,12 @@ const COR_USUARIO1 = '#3b82f6';
 const COR_USUARIO2 = '#8b5cf6';
 
 export function ChartPorPessoa({ metricas }: ChartPorPessoaProps) {
+  const { resolvedTheme } = useTheme();
   const [m1, m2] = metricas;
 
   const options: ApexOptions = {
-    chart: { type: 'bar', toolbar: { show: false }, stacked: false },
+    theme: { mode: resolvedTheme === 'dark' ? 'dark' : 'light' },
+    chart: { type: 'bar', toolbar: { show: false }, stacked: false, foreColor: resolvedTheme === 'dark' ? '#94a3b8' : '#64748b' },
     plotOptions: {
       bar: {
         horizontal: false,
@@ -42,7 +45,7 @@ export function ChartPorPessoa({ metricas }: ChartPorPessoaProps) {
     },
     legend: { position: 'top', horizontalAlign: 'right' },
     dataLabels: { enabled: false },
-    grid: { borderColor: '#e5e7eb' },
+    grid: { borderColor: resolvedTheme === 'dark' ? '#334155' : '#e5e7eb' },
   };
 
   const series = [

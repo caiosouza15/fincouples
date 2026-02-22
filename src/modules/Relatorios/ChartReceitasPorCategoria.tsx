@@ -1,19 +1,21 @@
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { formatCurrency } from '@/utils';
+import { useTheme } from '@/contexts/ThemeContext';
 import type { Categoria } from '@/types';
 
+// Cores de marca (tokens): teal #0FB9B1, pink #F78FB3
 const PALETA = [
-  '#3b82f6', // azul
-  '#8b5cf6', // violeta
-  '#ec4899', // rosa
-  '#f59e0b', // âmbar
-  '#10b981', // esmeralda
-  '#06b6d4', // ciano
-  '#6366f1', // índigo
-  '#84cc16', // lima
-  '#f97316', // laranja
-  '#14b8a6', // teal
+  '#0FB9B1', // teal
+  '#F78FB3', // pink
+  '#3b82f6',
+  '#8b5cf6',
+  '#f59e0b',
+  '#10b981',
+  '#06b6d4',
+  '#6366f1',
+  '#84cc16',
+  '#f97316',
 ];
 
 interface ItemReceita {
@@ -27,6 +29,8 @@ interface ChartReceitasPorCategoriaProps {
 }
 
 export function ChartReceitasPorCategoria({ itens }: ChartReceitasPorCategoriaProps) {
+  const { resolvedTheme } = useTheme();
+
   if (itens.length === 0) {
     return (
       <div className="flex items-center justify-center py-xl text-text-secondary">
@@ -36,7 +40,8 @@ export function ChartReceitasPorCategoria({ itens }: ChartReceitasPorCategoriaPr
   }
 
   const options: ApexOptions = {
-    chart: { type: 'donut', toolbar: { show: false }, width: '100%' },
+    theme: { mode: resolvedTheme === 'dark' ? 'dark' : 'light' },
+    chart: { type: 'donut', toolbar: { show: false }, width: '100%', foreColor: resolvedTheme === 'dark' ? '#94a3b8' : '#64748b' },
     colors: PALETA,
     labels: itens.map((i) => i.categoria.nome),
     legend: { position: 'right', fontSize: '14px' },

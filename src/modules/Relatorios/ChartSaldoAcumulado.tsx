@@ -1,6 +1,7 @@
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { formatCurrency } from '@/utils';
+import { useTheme } from '@/contexts/ThemeContext';
 import { getUltimos12Meses, formatMonthLabel } from '@/utils/relatoriosUtils';
 
 interface ChartSaldoAcumuladoProps {
@@ -9,6 +10,7 @@ interface ChartSaldoAcumuladoProps {
 }
 
 export function ChartSaldoAcumulado({ selectedMonth, getResultadoMensal }: ChartSaldoAcumuladoProps) {
+  const { resolvedTheme } = useTheme();
   const meses = getUltimos12Meses(selectedMonth);
   const labels = meses.map(formatMonthLabel);
   let acumulado = 0;
@@ -18,7 +20,8 @@ export function ChartSaldoAcumulado({ selectedMonth, getResultadoMensal }: Chart
   });
 
   const options: ApexOptions = {
-    chart: { type: 'line', toolbar: { show: false }, zoom: { enabled: false } },
+    theme: { mode: resolvedTheme === 'dark' ? 'dark' : 'light' },
+    chart: { type: 'line', toolbar: { show: false }, zoom: { enabled: false }, foreColor: resolvedTheme === 'dark' ? '#94a3b8' : '#64748b' },
     stroke: { curve: 'smooth', width: 2 },
     colors: ['#3b82f6'],
     xaxis: { categories: labels },
@@ -34,7 +37,7 @@ export function ChartSaldoAcumulado({ selectedMonth, getResultadoMensal }: Chart
     },
     legend: { show: false },
     dataLabels: { enabled: false },
-    grid: { borderColor: '#e5e7eb' },
+    grid: { borderColor: resolvedTheme === 'dark' ? '#334155' : '#e5e7eb' },
   };
 
   const series = [{ name: 'Saldo acumulado', data: saldos }];

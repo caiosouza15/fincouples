@@ -1,6 +1,7 @@
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { formatCurrency } from '@/utils';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useEconomiaPorCategoria } from './useEconomiaPorCategoria';
 import type { Categoria } from '@/types';
 
@@ -20,6 +21,7 @@ export function ChartEconomiaGroupedBar({
   categorias,
   getMaioresGastos,
 }: ChartEconomiaGroupedBarProps) {
+  const { resolvedTheme } = useTheme();
   const { items, hasData } = useEconomiaPorCategoria(selectedMonth, categorias, getMaioresGastos);
 
   if (!hasData) {
@@ -35,7 +37,8 @@ export function ChartEconomiaGroupedBar({
   const valoresAtual = items.map((i) => i.valorAtual);
 
   const options: ApexOptions = {
-    chart: { type: 'bar', toolbar: { show: false } },
+    theme: { mode: resolvedTheme === 'dark' ? 'dark' : 'light' },
+    chart: { type: 'bar', toolbar: { show: false }, foreColor: resolvedTheme === 'dark' ? '#94a3b8' : '#64748b' },
     plotOptions: {
       bar: {
         horizontal: false,
@@ -60,7 +63,7 @@ export function ChartEconomiaGroupedBar({
     },
     legend: { position: 'top', horizontalAlign: 'right' },
     dataLabels: { enabled: false },
-    grid: { borderColor: '#e5e7eb' },
+    grid: { borderColor: resolvedTheme === 'dark' ? '#334155' : '#e5e7eb' },
   };
 
   const series = [

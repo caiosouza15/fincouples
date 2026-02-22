@@ -1,6 +1,7 @@
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { formatCurrency } from '@/utils';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface FormaPagamento {
   conta: number;
@@ -15,6 +16,7 @@ interface ChartFormaPagamentoProps {
 const CORES = ['#3b82f6', '#8b5cf6', '#94a3b8'];
 
 export function ChartFormaPagamento({ dados }: ChartFormaPagamentoProps) {
+  const { resolvedTheme } = useTheme();
   const total = dados.conta + dados.cartao + dados.outros;
   if (total === 0) {
     return (
@@ -28,7 +30,8 @@ export function ChartFormaPagamento({ dados }: ChartFormaPagamentoProps) {
   const values = [dados.conta, dados.cartao, dados.outros];
 
   const options: ApexOptions = {
-    chart: { type: 'area', toolbar: { show: false }, zoom: { enabled: false } },
+    theme: { mode: resolvedTheme === 'dark' ? 'dark' : 'light' },
+    chart: { type: 'area', toolbar: { show: false }, zoom: { enabled: false }, foreColor: resolvedTheme === 'dark' ? '#94a3b8' : '#64748b' },
     stroke: { curve: 'smooth', width: 2 },
     fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0.2 } },
     colors: [CORES[0]],
@@ -45,7 +48,7 @@ export function ChartFormaPagamento({ dados }: ChartFormaPagamentoProps) {
     },
     legend: { show: false },
     dataLabels: { enabled: false },
-    grid: { borderColor: '#e5e7eb' },
+    grid: { borderColor: resolvedTheme === 'dark' ? '#334155' : '#e5e7eb' },
   };
 
   const series = [{ name: 'Valor', data: values }];
