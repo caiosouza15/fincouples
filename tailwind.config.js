@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -9,14 +10,16 @@ export default {
       colors: {
         positive: '#22c55e',
         negative: '#ef4444',
+        warning: '#f59e0b',
         teal: '#0FB9B1',
         pink: '#F78FB3',
-        background: '#f8fafc',
-        surface: '#ffffff',
-        border: '#e2e8f0',
-        'text-primary': '#1e293b',
-        'text-secondary': '#64748b',
-        'text-muted': '#94a3b8',
+        brandHeader: '#1e293b',
+        background: 'var(--color-background)',
+        surface: 'var(--color-surface)',
+        border: 'var(--color-border)',
+        'text-primary': 'var(--color-text-primary)',
+        'text-secondary': 'var(--color-text-secondary)',
+        'text-muted': 'var(--color-text-muted)',
       },
       spacing: {
         xs: '0.25rem',

@@ -1,6 +1,7 @@
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { formatCurrency } from '@/utils';
+import { useTheme } from '@/contexts/ThemeContext';
 import type { Lancamento } from '@/types';
 import type { Categoria } from '@/types';
 
@@ -17,6 +18,7 @@ interface ListaMaioresGastosProps {
 }
 
 export function ListaMaioresGastos({ lancamentos, categorias }: ListaMaioresGastosProps) {
+  const { resolvedTheme } = useTheme();
   const lista = lancamentos.slice(0, LIMITE);
 
   if (lista.length === 0) {
@@ -31,7 +33,8 @@ export function ListaMaioresGastos({ lancamentos, categorias }: ListaMaioresGast
   const values = lista.map((l) => l.valor);
 
   const options: ApexOptions = {
-    chart: { type: 'line', toolbar: { show: false }, zoom: { enabled: false } },
+    theme: { mode: resolvedTheme === 'dark' ? 'dark' : 'light' },
+    chart: { type: 'line', toolbar: { show: false }, zoom: { enabled: false }, foreColor: resolvedTheme === 'dark' ? '#94a3b8' : '#64748b' },
     stroke: { curve: 'smooth', width: 2 },
     colors: ['#ef4444', '#3b82f6'],
     xaxis: {
@@ -54,7 +57,7 @@ export function ListaMaioresGastos({ lancamentos, categorias }: ListaMaioresGast
     },
     legend: { show: false },
     dataLabels: { enabled: false },
-    grid: { borderColor: '#e5e7eb' },
+    grid: { borderColor: resolvedTheme === 'dark' ? '#334155' : '#e5e7eb' },
     plotOptions: {
       bar: {
         columnWidth: '60%',

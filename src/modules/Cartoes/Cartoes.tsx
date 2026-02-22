@@ -173,7 +173,7 @@ const Cartoes = () => {
 
   return (
     <div className="max-w-[1280px] mx-auto pb-xl">
-      <h1 className="text-2xl font-bold text-text-primary mb-lg">Cartões de Crédito</h1>
+      <h1 className="text-2xl md:text-3xl font-bold text-text-primary mb-lg">Cartões de Crédito</h1>
 
       {/* Resumo */}
       {cartoes.length > 0 && (
@@ -196,7 +196,7 @@ const Cartoes = () => {
         actions={
           <div className="flex items-center gap-sm">
             <button
-              className="px-md py-sm bg-positive text-white rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-[#16a34a] flex items-center justify-center gap-xs shrink-0"
+              className="px-md py-sm bg-positive text-white rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-positive/90 flex items-center justify-center gap-xs shrink-0"
               onClick={handleAddCartao}
               aria-label="Adicionar cartão"
               title="Adicionar cartão"

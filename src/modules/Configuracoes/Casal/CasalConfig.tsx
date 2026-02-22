@@ -119,13 +119,13 @@ export function CasalConfig() {
         </div>
 
         {errors.geral && (
-          <div className="p-md bg-[#fee2e2] border border-negative rounded-md text-negative text-sm" role="alert">
+          <div className="p-md bg-negative/10 border border-negative rounded-md text-negative text-sm" role="alert">
             {errors.geral}
           </div>
         )}
 
         {saved && (
-          <div className="p-md bg-[#dcfce7] border border-positive rounded-md text-positive text-sm" role="alert">
+          <div className="p-md bg-positive/10 border border-positive rounded-md text-positive text-sm" role="alert">
             Configuração salva com sucesso!
           </div>
         )}
@@ -133,7 +133,7 @@ export function CasalConfig() {
         <div className="flex gap-md">
           <button
             onClick={handleSave}
-            className="bg-positive text-white py-sm px-lg rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-[#22c55e] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-positive text-white py-sm px-lg rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-positive/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Salvar
           </button>

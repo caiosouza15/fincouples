@@ -1,6 +1,7 @@
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { formatCurrency } from '@/utils';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const COR_RECEITA = '#22c55e';
 const COR_DESPESA = '#ef4444';
@@ -12,8 +13,10 @@ interface ChartReceitasDespesasProps {
 }
 
 export function ChartReceitasDespesas({ receita, despesa }: ChartReceitasDespesasProps) {
+  const { resolvedTheme } = useTheme();
   const options: ApexOptions = {
-    chart: { type: 'bar', toolbar: { show: false } },
+    theme: { mode: resolvedTheme === 'dark' ? 'dark' : 'light' },
+    chart: { type: 'bar', toolbar: { show: false }, foreColor: resolvedTheme === 'dark' ? '#94a3b8' : '#64748b' },
     plotOptions: {
       bar: {
         horizontal: false,
@@ -35,7 +38,7 @@ export function ChartReceitasDespesas({ receita, despesa }: ChartReceitasDespesa
     },
     legend: { show: false },
     dataLabels: { enabled: false },
-    grid: { borderColor: '#e5e7eb' },
+    grid: { borderColor: resolvedTheme === 'dark' ? '#334155' : '#e5e7eb' },
   };
 
   const series = [{ name: 'Valor', data: [receita, despesa] }];

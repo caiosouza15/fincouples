@@ -139,7 +139,7 @@ const Contas = () => {
 
   return (
     <div className="max-w-[1280px] mx-auto pb-xl">
-      <h1 className="text-2xl font-bold text-text-primary mb-lg">Minhas Contas</h1>
+      <h1 className="text-2xl md:text-3xl font-bold text-text-primary mb-lg">Minhas Contas</h1>
 
       {alertasSaldo.length > 0 && (
         <div className="mb-lg">
@@ -157,7 +157,7 @@ const Contas = () => {
         actions={
           <div className="flex items-center gap-sm">
             <button
-              className="px-md py-sm bg-positive text-white rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-[#16a34a] flex items-center justify-center gap-xs shrink-0"
+              className="px-md py-sm bg-positive text-white rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-positive/90 flex items-center justify-center gap-xs shrink-0"
               onClick={handleAddConta}
               aria-label="Adicionar conta"
               title="Adicionar conta"
@@ -200,7 +200,7 @@ const Contas = () => {
             message="Adicione contas para acompanhar seus saldos."
             actionButton={
               <button
-                className="bg-positive text-white py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-[#16a34a]"
+                className="bg-positive text-white py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-positive/90"
                 onClick={handleAddConta}
               >
                 Adicionar conta
@@ -284,7 +284,7 @@ const Contas = () => {
                 message={temFiltroAtivo ? 'Tente ajustar os filtros de busca.' : 'Adicione contas para acompanhar seus saldos.'}
                 actionButton={
                   <button
-                    className="bg-positive text-white py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-[#16a34a]"
+                    className="bg-positive text-white py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-positive/90"
                     onClick={handleAddConta}
                   >
                     Adicionar conta

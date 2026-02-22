@@ -1,6 +1,7 @@
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { formatCurrency } from '@/utils';
+import { useTheme } from '@/contexts/ThemeContext';
 import { getUltimos12Meses, formatMonthLabel } from '@/utils/relatoriosUtils';
 
 const COR_RECEITA = '#22c55e';
@@ -17,13 +18,15 @@ export function ChartEvolucaoMensal({
   getReceitaMensal,
   getDespesaMensal,
 }: ChartEvolucaoMensalProps) {
+  const { resolvedTheme } = useTheme();
   const meses = getUltimos12Meses(selectedMonth);
   const labels = meses.map(formatMonthLabel);
   const receitas = meses.map((m) => getReceitaMensal(m));
   const despesas = meses.map((m) => getDespesaMensal(m));
 
   const options: ApexOptions = {
-    chart: { type: 'area', toolbar: { show: false }, zoom: { enabled: false } },
+    theme: { mode: resolvedTheme === 'dark' ? 'dark' : 'light' },
+    chart: { type: 'area', toolbar: { show: false }, zoom: { enabled: false }, foreColor: resolvedTheme === 'dark' ? '#94a3b8' : '#64748b' },
     stroke: { curve: 'smooth', width: 2 },
     fill: { type: 'gradient', opacity: 0.3 },
     colors: [COR_RECEITA, COR_DESPESA],
@@ -43,7 +46,7 @@ export function ChartEvolucaoMensal({
       horizontalAlign: 'right',
     },
     dataLabels: { enabled: false },
-    grid: { borderColor: '#e5e7eb' },
+    grid: { borderColor: resolvedTheme === 'dark' ? '#334155' : '#e5e7eb' },
   };
 
   const series = [

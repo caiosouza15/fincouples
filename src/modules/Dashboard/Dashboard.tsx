@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Minus, Plus, GraduationCap } from 'lucide-react';
 import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
@@ -10,6 +10,7 @@ import { useCategorias } from '@/hooks/useCategorias';
 import { useFaturas } from '@/hooks/useFaturas';
 import { useCartoes } from '@/hooks/useCartoes';
 import { useSectionPrivacy } from '@/hooks/usePrivacy';
+import { useToast } from '@/hooks/useToast';
 import { useSelectedMonth } from '@/contexts/SelectedMonthContext';
 import type { Conta, Lancamento, CartaoCredito } from '@/types';
 import { ContasList } from '@/modules/Configuracoes/Contas/ContasList';
@@ -21,6 +22,7 @@ import { iconMap } from '@/utils/iconMap';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const { contas, getSaldoGeral, addConta, editConta, removeConta } = useContas();
   const {
     lancamentos: allLancamentos,
@@ -173,14 +175,17 @@ const Dashboard = () => {
     try {
       if ('id' in lancamentoData) {
         await editLancamento(lancamentoData.id, lancamentoData);
+        showToast('Lançamento atualizado com sucesso', 'success');
       } else {
         await addLancamento(lancamentoData);
+        showToast('Lançamento salvo com sucesso', 'success');
       }
       setShowLancamentoForm(false);
       setLancamentoEditando(null);
       setTipoPreSelecionado(undefined);
     } catch (error) {
       console.error('Erro ao salvar lançamento:', error);
+      showToast('Erro ao salvar lançamento', 'error');
     }
   };
 
@@ -194,8 +199,8 @@ const Dashboard = () => {
     <div className="max-w-[1280px] mx-auto pb-xl">
       {/* Saudação e Saldo Geral */}
       <section className="mb-lg">
-        <h2 className="text-xl font-semibold text-text-primary mb-md">{saudacao}</h2>
-        <Card className="bg-gradient-to-br from-surface to-[#f0f9ff]">
+        <h1 className="text-2xl md:text-3xl font-bold text-text-primary mb-md">{saudacao}</h1>
+        <Card className="bg-gradient-to-br from-surface to-background dark:from-surface dark:to-surface">
           <div className="flex flex-col gap-sm">
             <div className="flex justify-between items-center">
               <span className="text-sm text-text-secondary uppercase font-medium">Saldo geral</span>
@@ -204,7 +209,7 @@ const Dashboard = () => {
             <div className="text-3xl md:text-[2rem] lg:text-[3rem] font-bold text-text-primary leading-none">
               {formatCurrencyWithPrivacy(saldoGeral, saldoGeralPrivacy.hidden)}
             </div>
-            <a href="#" className="text-text-secondary text-sm underline">Ver relatórios</a>
+            <Link to="/relatorios" className="text-text-secondary text-sm underline hover:text-teal transition-colors">Ver relatórios</Link>
           </div>
         </Card>
       </section>
@@ -475,7 +480,7 @@ const Dashboard = () => {
       </Card>
 
       {/* Metas do Mês */}
-      <Card title="Metas de Novembro">
+      <Card title={`Metas de ${new Date(selectedMonth + '-01').toLocaleDateString('pt-BR', { month: 'long' }).replace(/^./, (c) => c.toUpperCase())}`}>
         <EmptyState 
           hideText={true}
           actionButton={
@@ -489,7 +494,7 @@ const Dashboard = () => {
       {/* Equilíbrio Financeiro */}
       <Card 
         title="Equilíbrio financeiro"
-        actions={<a href="#" className="text-text-secondary text-sm underline">Saiba mais</a>}
+        actions={<Link to="/metas" className="text-text-secondary text-sm underline hover:text-teal transition-colors">Saiba mais</Link>}
       >
         <div>
           <div className="p-md bg-background rounded-md">

@@ -1,6 +1,7 @@
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { formatCurrency } from '@/utils';
+import { useTheme } from '@/contexts/ThemeContext';
 import { getUltimos12Meses, formatMonthLabel } from '@/utils/relatoriosUtils';
 import { useLancamentos } from '@/hooks/useLancamentos';
 import { useCasal } from '@/hooks/useCasal';
@@ -10,6 +11,7 @@ const COR_USUARIO1 = '#3b82f6';
 const COR_USUARIO2 = '#8b5cf6';
 
 export function ChartEvolucaoPorPessoa() {
+  const { resolvedTheme } = useTheme();
   const { getLancamentosPorMes } = useLancamentos();
   const { usuario1Nome, usuario2Nome } = useCasal();
   const { selectedMonth } = useSelectedMonth();
@@ -30,7 +32,8 @@ export function ChartEvolucaoPorPessoa() {
   });
 
   const options: ApexOptions = {
-    chart: { type: 'line', toolbar: { show: false }, zoom: { enabled: false } },
+    theme: { mode: resolvedTheme === 'dark' ? 'dark' : 'light' },
+    chart: { type: 'line', toolbar: { show: false }, zoom: { enabled: false }, foreColor: resolvedTheme === 'dark' ? '#94a3b8' : '#64748b' },
     stroke: { curve: 'smooth', width: 2 },
     colors: [COR_USUARIO1, COR_USUARIO2],
     xaxis: { categories: labels },
@@ -46,7 +49,7 @@ export function ChartEvolucaoPorPessoa() {
     },
     legend: { position: 'top', horizontalAlign: 'right' },
     dataLabels: { enabled: false },
-    grid: { borderColor: '#e5e7eb' },
+    grid: { borderColor: resolvedTheme === 'dark' ? '#334155' : '#e5e7eb' },
   };
 
   const series = [

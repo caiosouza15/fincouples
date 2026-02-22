@@ -59,7 +59,7 @@ export function ContaCard({
 
   return (
     <>
-      <div className={`relative group animate-[fadeIn_0.3s_ease] rounded-lg p-lg border-2 transition-all duration-300 hover:shadow-lg ${
+      <div className={`relative group animate-[fadeInUp_0.3s_ease] rounded-lg p-lg border-2 transition-all duration-300 hover:shadow-md transition-shadow duration-200 ${
         conta.ativa
           ? 'bg-surface border-border hover:border-positive/30'
           : 'bg-surface border-border opacity-60'
@@ -138,13 +138,6 @@ export function ContaCard({
           </div>
         </div>
       </div>
-
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
 
       <ConfirmDialog
         isOpen={showConfirmDelete}

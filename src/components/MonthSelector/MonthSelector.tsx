@@ -44,20 +44,20 @@ export const MonthSelector = ({ selectedMonth, onMonthChange, className = '' }: 
     return selectedMonth === currentMonth;
   };
 
-  // Verificar se está no header (pela className que contém "text-white")
+  // Verificar se está no header (pela className que contém "text-white" ou "dark:text-white")
   const isInHeader = className.includes('text-white');
   
-  // Classes condicionais baseadas no contexto
+  // No header: texto e ícones herdam a cor do wrapper (claro: text-primary, escuro: branco)
   const buttonClass = isInHeader
-    ? "bg-transparent border-none cursor-pointer p-xs text-text-primary hover:text-text-secondary transition-colors duration-200 flex items-center justify-center"
+    ? "bg-transparent border-none cursor-pointer p-xs text-inherit hover:opacity-80 transition-colors duration-200 flex items-center justify-center"
     : "bg-transparent border-none cursor-pointer p-xs text-text-secondary hover:text-text-primary transition-colors duration-200 flex items-center justify-center";
   
   const textClass = isInHeader
-    ? "text-sm font-medium text-text-primary min-w-[140px] text-center"
+    ? "text-sm font-medium text-inherit min-w-[140px] text-center"
     : "text-sm font-medium text-text-primary min-w-[140px] text-center";
   
   const disabledButtonClass = isInHeader
-    ? "bg-transparent border-none cursor-not-allowed p-xs text-text-muted hover:text-text-muted transition-colors duration-200 flex items-center justify-center opacity-50"
+    ? "bg-transparent border-none cursor-not-allowed p-xs text-inherit opacity-50 transition-colors duration-200 flex items-center justify-center"
     : "bg-transparent border-none cursor-pointer p-xs text-text-secondary hover:text-text-primary transition-colors duration-200 flex items-center justify-center opacity-50 cursor-not-allowed";
 
   return (

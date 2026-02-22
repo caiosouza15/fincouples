@@ -47,9 +47,9 @@ export function CartaoCard({
 
   return (
     <>
-    <div className="relative group animate-[fadeIn_0.3s_ease]">
+    <div className="relative group animate-[fadeInUp_0.3s_ease]">
       <div
-        className={`relative overflow-hidden rounded-lg p-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] ${
+        className={`relative overflow-hidden rounded-lg p-lg transition-all duration-300 hover:shadow-md transition-shadow duration-200 ${
           cartao.ativo
             ? 'bg-gradient-to-br from-positive/20 via-positive/10 to-surface border-2 border-positive/30'
             : 'bg-gradient-to-br from-surface via-background to-surface border-2 border-border opacity-60'
@@ -204,18 +204,6 @@ export function CartaoCard({
         </div>
       </div>
     </div>
-    <style>{`
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-    `}</style>
     <ConfirmDialog
         isOpen={showConfirmDelete}
         title="Excluir cartão"

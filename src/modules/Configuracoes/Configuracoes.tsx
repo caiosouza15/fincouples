@@ -129,7 +129,7 @@ const Configuracoes = () => {
 
   return (
     <div className="max-w-[1280px] mx-auto pb-xl">
-      <h1 className="text-2xl font-bold text-text-primary mb-lg">Configurações</h1>
+      <h1 className="text-2xl md:text-3xl font-bold text-text-primary mb-lg">Configurações</h1>
 
       {/* Sistema de Abas */}
       <div className="flex border-b border-border mb-md">

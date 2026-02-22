@@ -84,7 +84,7 @@ export function CategoriaForm({ categoria, onClose, onSave, isPadrao }: Categori
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 bottom-0 bg-black/50 flex items-center justify-center z-[1000] p-md animate-[fadeIn_0.2s_ease]"
+      className="fixed top-0 left-0 right-0 bottom-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[1000] p-md animate-[fadeIn_0.2s_ease]"
       onClick={handleClose}
     >
       <div
@@ -108,7 +108,7 @@ export function CategoriaForm({ categoria, onClose, onSave, isPadrao }: Categori
         <form onSubmit={handleSubmit} className="p-lg flex flex-col gap-md">
           {error && (
             <div
-              className="p-md bg-[#fee2e2] border border-negative rounded-md text-negative text-sm"
+              className="p-md bg-negative/10 border border-negative rounded-md text-negative text-sm"
               role="alert"
             >
               {error}
@@ -206,7 +206,7 @@ export function CategoriaForm({ categoria, onClose, onSave, isPadrao }: Categori
             </button>
             <button
               type="submit"
-              className="py-md px-lg rounded-md text-base font-medium cursor-pointer transition-all duration-200 border-none bg-positive text-white hover:bg-[#16a34a] disabled:opacity-60 disabled:cursor-not-allowed md:w-auto w-full"
+              className="py-md px-lg rounded-md text-base font-medium cursor-pointer transition-all duration-200 border-none bg-positive text-white hover:bg-positive/90 disabled:opacity-60 disabled:cursor-not-allowed md:w-auto w-full"
               disabled={loading}
             >
               {loading ? 'Salvando...' : isEditMode ? 'Salvar' : 'Criar Categoria'}
@@ -214,17 +214,6 @@ export function CategoriaForm({ categoria, onClose, onSave, isPadrao }: Categori
           </div>
         </form>
       </div>
-
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes slideUp {
-          from { transform: translateY(20px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-      `}</style>
     </div>
   );
 }

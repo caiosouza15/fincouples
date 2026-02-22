@@ -3,19 +3,21 @@ import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { formatCurrency } from '@/utils';
 import { getMesAnterior } from '@/utils/relatoriosUtils';
+import { useTheme } from '@/contexts/ThemeContext';
 import type { Categoria } from '@/types';
 
+// Cores de marca (tokens): teal #0FB9B1, pink #F78FB3
 const PALETA = [
+  '#0FB9B1',
+  '#F78FB3',
   '#3b82f6',
   '#8b5cf6',
-  '#ec4899',
   '#f59e0b',
   '#10b981',
   '#06b6d4',
   '#6366f1',
   '#84cc16',
   '#f97316',
-  '#14b8a6',
   '#ef4444',
   '#a855f7',
   '#64748b',
@@ -36,6 +38,7 @@ export function ChartEconomiaPorCategoriaSlope({
   categorias,
   getMaioresGastos,
 }: ChartEconomiaPorCategoriaSlopeProps) {
+  const { resolvedTheme } = useTheme();
   const { series, hasData } = useMemo(() => {
     const mesAnterior = getMesAnterior(selectedMonth);
     const gastosAnterior = getMaioresGastos(categorias, 30, mesAnterior);
@@ -85,7 +88,8 @@ export function ChartEconomiaPorCategoriaSlope({
   }
 
   const options: ApexOptions = {
-    chart: { type: 'line', toolbar: { show: false }, zoom: { enabled: false } },
+    theme: { mode: resolvedTheme === 'dark' ? 'dark' : 'light' },
+    chart: { type: 'line', toolbar: { show: false }, zoom: { enabled: false }, foreColor: resolvedTheme === 'dark' ? '#94a3b8' : '#64748b' },
     plotOptions: {
       line: {
         isSlopeChart: true,
@@ -118,7 +122,7 @@ export function ChartEconomiaPorCategoriaSlope({
       style: { fontSize: '12px' },
     },
     legend: { show: true, position: 'top', horizontalAlign: 'left' },
-    grid: { borderColor: '#e5e7eb' },
+    grid: { borderColor: resolvedTheme === 'dark' ? '#334155' : '#e5e7eb' },
   };
 
   return (

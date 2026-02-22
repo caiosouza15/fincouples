@@ -174,7 +174,7 @@ export function CartaoForm({ cartao, onClose, onSave }: CartaoFormProps) {
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 bottom-0 bg-black/50 flex items-center justify-center z-[1000] p-md animate-[fadeIn_0.2s_ease]" onClick={handleClose}>
+    <div className="fixed top-0 left-0 right-0 bottom-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[1000] p-md animate-[fadeIn_0.2s_ease]" onClick={handleClose}>
       <div className="bg-surface rounded-lg w-full max-w-[500px] max-h-[90vh] overflow-y-auto shadow-lg animate-[slideUp_0.3s_ease] md:rounded-lg md:max-w-[500px]" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-lg border-b border-border">
           <h3 className="text-xl font-semibold text-text-primary m-0">
@@ -192,7 +192,7 @@ export function CartaoForm({ cartao, onClose, onSave }: CartaoFormProps) {
 
         <form ref={formRef} onSubmit={handleSubmit} className="p-lg flex flex-col gap-md">
           {error && (
-            <div className="p-md bg-[#fee2e2] border border-negative rounded-md text-negative text-sm" role="alert">
+            <div className="p-md bg-negative/10 border border-negative rounded-md text-negative text-sm" role="alert">
               {error}
             </div>
           )}
@@ -394,7 +394,7 @@ export function CartaoForm({ cartao, onClose, onSave }: CartaoFormProps) {
             </button>
             <button
               type="submit"
-              className="py-md px-lg rounded-md text-base font-medium cursor-pointer transition-all duration-200 border-none bg-positive text-white hover:bg-[#16a34a] disabled:opacity-60 disabled:cursor-not-allowed md:w-auto w-full"
+              className="py-md px-lg rounded-md text-base font-medium cursor-pointer transition-all duration-200 border-none bg-positive text-white hover:bg-positive/90 disabled:opacity-60 disabled:cursor-not-allowed md:w-auto w-full"
               disabled={loading}
             >
               {loading ? 'Salvando...' : isEditMode ? 'Salvar' : 'Criar Cartão'}
@@ -402,28 +402,6 @@ export function CartaoForm({ cartao, onClose, onSave }: CartaoFormProps) {
           </div>
         </form>
       </div>
-
-      <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes slideUp {
-          from {
-            transform: translateY(20px);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0);
-            opacity: 1;
-          }
-        }
-      `}</style>
     </div>
   );
 }

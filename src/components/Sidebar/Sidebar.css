@@ -16,6 +16,14 @@
   background: rgb(148, 163, 184);
 }
 
+.dark .sidebar-nav::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.dark .sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
 /* Indicador ativo */
 .sidebar-item-active::before {
   content: '';
@@ -25,7 +33,7 @@
   transform: translateY(-50%);
   width: 3px;
   height: 24px;
-  background-color: #22c55e;
+  background-color: #0FB9B1;
   border-radius: 0 2px 2px 0;
   z-index: 1;
 }
@@ -62,6 +70,14 @@
     z-index: 1001;
   }
 
+  .dark .sidebar.sidebar-collapsed .sidebar-item:not(.sidebar-item-active):hover .sidebar-label {
+    background-color: #334155;
+  }
+
+  .dark .sidebar.sidebar-collapsed .sidebar-item:not(.sidebar-item-active):hover .sidebar-label::before {
+    border-right-color: #334155;
+  }
+
   /* Quando expandida, garantir que o label mantenha cor correta e não seja tooltip */
   .sidebar.sidebar-expanded .sidebar-item .sidebar-label {
     position: relative !important;
@@ -86,7 +102,7 @@
     transform: translateY(-50%);
     width: 3px;
     height: 24px;
-    background-color: #22c55e;
+    background-color: #0FB9B1;
     border-radius: 0 2px 2px 0;
     z-index: 1;
   }

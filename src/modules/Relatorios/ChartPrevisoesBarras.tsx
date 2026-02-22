@@ -1,12 +1,14 @@
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { formatCurrency } from '@/utils';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useVencimentosPrevisoes } from './useVencimentosPrevisoes';
 
 const COR_DESPESAS = '#ef4444';
 const COR_FATURAS = '#3b82f6';
 
 export function ChartPrevisoesBarras() {
+  const { resolvedTheme } = useTheme();
   const { despesasPorDia, faturasDoMes, ultimoDiaDoMes, hasData } = useVencimentosPrevisoes();
 
   if (!hasData) {
@@ -27,7 +29,8 @@ export function ChartPrevisoesBarras() {
   }
 
   const options: ApexOptions = {
-    chart: { type: 'bar', toolbar: { show: false } },
+    theme: { mode: resolvedTheme === 'dark' ? 'dark' : 'light' },
+    chart: { type: 'bar', toolbar: { show: false }, foreColor: resolvedTheme === 'dark' ? '#94a3b8' : '#64748b' },
     plotOptions: {
       bar: {
         horizontal: false,
@@ -53,7 +56,7 @@ export function ChartPrevisoesBarras() {
     },
     legend: { position: 'top', horizontalAlign: 'right' },
     dataLabels: { enabled: false },
-    grid: { borderColor: '#e5e7eb' },
+    grid: { borderColor: resolvedTheme === 'dark' ? '#334155' : '#e5e7eb' },
   };
 
   const series = [

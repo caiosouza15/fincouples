@@ -141,7 +141,7 @@ const Lancamentos = () => {
 
   return (
     <div className="max-w-[1280px] mx-auto pb-xl">
-      <h1 className="text-2xl font-bold text-text-primary mb-lg">Lançamentos</h1>
+      <h1 className="text-2xl md:text-3xl font-bold text-text-primary mb-lg">Lançamentos</h1>
 
       {lancamentos.length > 0 && (
         <div className="mb-lg">
@@ -154,7 +154,7 @@ const Lancamentos = () => {
         actions={
           <div className="flex items-center gap-sm">
             <button
-              className="flex items-center justify-center gap-xs px-md py-sm rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 bg-negative text-white hover:bg-[#dc2626] shrink-0"
+              className="flex items-center justify-center gap-xs px-md py-sm rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 bg-negative text-white hover:bg-negative/90 shrink-0"
               onClick={() => handleAddLancamento('despesa')}
               aria-label="Nova despesa"
             >
@@ -162,7 +162,7 @@ const Lancamentos = () => {
               <span className="hidden md:inline">Nova Despesa</span>
             </button>
             <button
-              className="flex items-center justify-center gap-xs px-md py-sm rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 bg-positive text-white hover:bg-[#16a34a] shrink-0"
+              className="flex items-center justify-center gap-xs px-md py-sm rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 bg-positive text-white hover:bg-positive/90 shrink-0"
               onClick={() => handleAddLancamento('receita')}
               aria-label="Nova receita"
             >
@@ -180,13 +180,13 @@ const Lancamentos = () => {
             actionButton={
               <div className="flex flex-wrap gap-sm justify-center">
                 <button
-                  className="bg-negative text-white py-sm px-md rounded-md text-sm font-medium cursor-pointer hover:bg-[#dc2626]"
+                  className="bg-negative text-white py-sm px-md rounded-md text-sm font-medium cursor-pointer hover:bg-negative/90"
                   onClick={() => handleAddLancamento('despesa')}
                 >
                   Nova despesa
                 </button>
                 <button
-                  className="bg-positive text-white py-sm px-md rounded-md text-sm font-medium cursor-pointer hover:bg-[#16a34a]"
+                  className="bg-positive text-white py-sm px-md rounded-md text-sm font-medium cursor-pointer hover:bg-positive/90"
                   onClick={() => handleAddLancamento('receita')}
                 >
                   Nova receita
@@ -218,7 +218,7 @@ const Lancamentos = () => {
 
       {/* Botão flutuante para mobile */}
       <button
-        className="fixed bottom-6 right-6 w-14 h-14 bg-positive text-white rounded-full border-none cursor-pointer shadow-lg flex items-center justify-center transition-all duration-200 hover:bg-[#16a34a] hover:scale-110 md:hidden z-50"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-positive text-white rounded-full border-none cursor-pointer shadow-lg flex items-center justify-center transition-all duration-200 hover:bg-positive/90 hover:scale-110 md:hidden z-50"
         onClick={() => handleAddLancamento()}
         aria-label="Novo lançamento"
       >

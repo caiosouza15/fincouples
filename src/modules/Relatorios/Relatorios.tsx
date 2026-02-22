@@ -44,10 +44,10 @@ const Relatorios = () => {
   const formaPagamento = getDespesasPorFormaPagamento(selectedMonth);
 
   return (
-    <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8 lg:pb-xl min-w-0 overflow-x-hidden">
-      <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-text-primary mb-4 sm:mb-lg">Relatórios</h1>
+    <div className="w-full max-w-[1280px] mx-auto px-md md:px-lg pb-xl min-w-0 overflow-x-hidden">
+      <h1 className="text-2xl md:text-3xl font-bold text-text-primary mb-lg">Relatórios</h1>
 
-      <div className="flex flex-col gap-4 sm:gap-6 lg:gap-lg">
+      <div className="flex flex-col gap-md">
         <Card
           title="Visão geral do mês"
           description="Resumo do mês: receitas, despesas, saldo, comparativo com o mês anterior e taxa de economia."

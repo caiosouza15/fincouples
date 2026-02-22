@@ -570,11 +570,14 @@ App monta
 
 ### 8.1 Design Tokens (tailwind.config.js)
 
+**Identidade visual:** A logo (coração azul + rosa) é o elemento de marca. O header usa fundo escuro (`brandHeader`) para destacar a logo; `teal` e `pink` são usados no conteúdo (gráficos, sidebar ativo, acentos), alinhados à logo.
+
 **Cores:**
+- `brandHeader` (#1e293b) — barra superior (header); moldura escura para a logo; uso único no topo
+- `teal` (#0FB9B1) — marca (gráficos, item ativo da sidebar, acentos)
+- `pink` (#F78FB3) — marca (gráficos, acentos)
 - `positive` (#22c55e) — valores positivos, sucesso
 - `negative` (#ef4444) — valores negativos, erro
-- `teal` (#0FB9B1) — identidade, header
-- `pink` (#F78FB3) — acentos
 - `background`, `surface`, `border`, `text-primary`, `text-secondary`, `text-muted`
 
 **Espaçamento:** `xs`, `sm`, `md`, `lg`, `xl`, `2xl`
