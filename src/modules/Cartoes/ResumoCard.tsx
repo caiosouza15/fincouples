@@ -9,7 +9,7 @@ interface ResumoCardProps {
   selectedMonth: string;
 }
 
-export function ResumoCard({ cartoes, faturas, selectedMonth }: ResumoCardProps) {
+export function ResumoCard({ cartoes, faturas }: ResumoCardProps) {
   // Calcular métricas
   const cartoesAtivos = cartoes.filter(c => c.ativo);
   

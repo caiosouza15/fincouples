@@ -20,6 +20,9 @@ interface LancamentosContextType {
   getDespesaMensal: (mes?: string) => number;
   getResultadoMensal: (mes?: string) => number;
   getMaioresGastos: (categorias: Categoria[], limit?: number, mes?: string) => Array<{ categoriaId: string; categoria: Categoria; valor: number }>;
+  getReceitasPorCategoria: (categorias: Categoria[], limit?: number, mes?: string) => Array<{ categoriaId: string; categoria: Categoria; valor: number }>;
+  getMaioresDespesasPorValor: (mes?: string, limit?: number) => Lancamento[];
+  getDespesasPorFormaPagamento: (mes?: string) => { conta: number; cartao: number; outros: number };
   getSaldoDisponivelMes: (saldoAtualContas: number, mes?: string) => number;
   getUltimosGastos: (mes?: string, limit?: number) => Lancamento[];
 }
@@ -248,6 +251,60 @@ export function LancamentosProvider({ children }: { children: ReactNode }) {
     return maioresGastos;
   };
 
+  // Obter receitas por categoria (espelho de getMaioresGastos para receita)
+  const getReceitasPorCategoriaContext = (
+    categorias: Categoria[],
+    limit: number = 5,
+    mes?: string
+  ): Array<{ categoriaId: string; categoria: Categoria; valor: number }> => {
+    let receitas = lancamentos.filter((l) => l.tipo === 'receita');
+    if (mes) {
+      receitas = receitas.filter((l) => formatMonth(l.data) === mes);
+    }
+    const porCategoria = new Map<string, number>();
+    receitas.forEach((r) => {
+      const atual = porCategoria.get(r.categoriaId) || 0;
+      porCategoria.set(r.categoriaId, atual + r.valor);
+    });
+    return Array.from(porCategoria.entries())
+      .map(([categoriaId, valor]) => {
+        const categoria = categorias.find((c) => c.id === categoriaId);
+        return {
+          categoriaId,
+          categoria: categoria || { id: categoriaId, nome: 'Desconhecida', tipo: 'receita' as const },
+          valor,
+        };
+      })
+      .sort((a, b) => b.valor - a.valor)
+      .slice(0, limit);
+  };
+
+  // Obter maiores despesas do mês por valor (lançamentos ordenados por valor desc)
+  const getMaioresDespesasPorValorContext = (mes?: string, limit: number = 5): Lancamento[] => {
+    const targetMonth = mes || getCurrentMonth();
+    return lancamentos
+      .filter((l) => l.tipo === 'despesa' && formatMonth(l.data) === targetMonth)
+      .sort((a, b) => b.valor - a.valor)
+      .slice(0, limit);
+  };
+
+  // Obter despesas do mês agrupadas por forma de pagamento (conta vs cartão)
+  const getDespesasPorFormaPagamentoContext = (mes?: string): { conta: number; cartao: number; outros: number } => {
+    const targetMonth = mes || getCurrentMonth();
+    const despesas = lancamentos.filter(
+      (l) => l.tipo === 'despesa' && formatMonth(l.data) === targetMonth
+    );
+    let conta = 0;
+    let cartao = 0;
+    let outros = 0;
+    despesas.forEach((l) => {
+      if (l.cartaoId) cartao += l.valor;
+      else if (l.contaId) conta += l.valor;
+      else outros += l.valor;
+    });
+    return { conta, cartao, outros };
+  };
+
   // Obter últimos gastos (5 despesas mais recentes do mês, excluindo datas futuras)
   const getUltimosGastosContext = (mes?: string, limit: number = 5): Lancamento[] => {
     const targetMonth = mes || getCurrentMonth();
@@ -291,6 +348,9 @@ export function LancamentosProvider({ children }: { children: ReactNode }) {
     getDespesaMensal: getDespesaMensalContext,
     getResultadoMensal: getResultadoMensalContext,
     getMaioresGastos: getMaioresGastosContext,
+    getReceitasPorCategoria: getReceitasPorCategoriaContext,
+    getMaioresDespesasPorValor: getMaioresDespesasPorValorContext,
+    getDespesasPorFormaPagamento: getDespesasPorFormaPagamentoContext,
     getSaldoDisponivelMes: getSaldoDisponivelMesContext,
     getUltimosGastos: getUltimosGastosContext,
   };

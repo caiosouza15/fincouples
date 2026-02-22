@@ -4,6 +4,7 @@ import { ContaItem } from './ContaItem';
 interface ContasListProps {
   contas: Conta[];
   hideSaldo?: boolean;
+  hidePoupancaInvestimento?: boolean;
   onEdit: (conta: Conta) => void;
   onDelete: (id: string) => void;
   onDuplicate?: (conta: Conta) => void;
@@ -12,14 +13,18 @@ interface ContasListProps {
 export function ContasList({
   contas,
   hideSaldo = false,
+  hidePoupancaInvestimento = false,
   onEdit,
   onDelete,
   onDuplicate,
 }: ContasListProps) {
-  const contasAtivas = contas.filter((c) => c.ativa);
-  const contasInativas = contas.filter((c) => !c.ativa);
+  const contasFiltradas = hidePoupancaInvestimento
+    ? contas.filter((c) => c.tipo === 'corrente')
+    : contas;
+  const contasAtivas = contasFiltradas.filter((c) => c.ativa);
+  const contasInativas = contasFiltradas.filter((c) => !c.ativa);
 
-  if (contas.length === 0) {
+  if (contasFiltradas.length === 0) {
     return null;
   }
 

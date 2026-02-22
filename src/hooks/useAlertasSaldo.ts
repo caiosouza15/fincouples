@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { useContas } from '@/hooks/useContas';
-import type { Conta } from '@/types';
 
 /** Valor mínimo (R$) abaixo do qual consideramos "saldo baixo" */
 const SALDO_BAIXO_MINIMO = 100;
@@ -24,9 +23,6 @@ export function useAlertasSaldo(): UseAlertasSaldoReturn {
 
   const alertas = useMemo(() => {
     const ativas = contas.filter(c => c.ativa);
-    const saldoMedio = ativas.length > 0
-      ? ativas.reduce((s, c) => s + c.saldo, 0) / ativas.length
-      : 0;
 
     const lista: AlertaSaldo[] = [];
 

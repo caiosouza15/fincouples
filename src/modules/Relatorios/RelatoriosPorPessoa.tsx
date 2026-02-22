@@ -1,13 +1,12 @@
 import { useMemo } from 'react';
-import { Card } from '@/components/Card';
 import { useLancamentos } from '@/hooks/useLancamentos';
+import { ChartPorPessoa } from './ChartPorPessoa';
 import { useCategorias } from '@/hooks/useCategorias';
 import { useCartoes } from '@/hooks/useCartoes';
 import { useContas } from '@/hooks/useContas';
 import { useCasal } from '@/hooks/useCasal';
 import { useSelectedMonth } from '@/contexts/SelectedMonthContext';
 import { formatCurrency } from '@/utils';
-import type { Lancamento } from '@/types';
 
 interface MetricasPorPessoa {
   pessoaId: 'usuario1' | 'usuario2';
@@ -27,7 +26,7 @@ export function RelatoriosPorPessoa() {
   const { categorias } = useCategorias();
   const { cartoes } = useCartoes();
   const { contas } = useContas();
-  const { usuario1Nome, usuario2Nome, getNomePessoa } = useCasal();
+  const { usuario1Nome, usuario2Nome } = useCasal();
   const { selectedMonth } = useSelectedMonth();
 
   // Filtrar lançamentos do mês selecionado
@@ -117,56 +116,55 @@ export function RelatoriosPorPessoa() {
     return Array.from(todasCategorias);
   }, [metricas]);
 
+  const metricasChart = metricas.map((m) => ({
+    nome: m.nome,
+    totalGastos: m.totalGastos,
+    totalReceitas: m.totalReceitas,
+    saldo: m.saldo,
+  })) as [{ nome: string; totalGastos: number; totalReceitas: number; saldo: number }, { nome: string; totalGastos: number; totalReceitas: number; saldo: number }];
+
   return (
-    <div className="flex flex-col gap-lg">
-      <Card title="Relatórios por Pessoa">
-        <div className="flex flex-col gap-lg">
-          {/* Resumo Geral */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+    <div className="flex flex-col gap-4 sm:gap-lg min-w-0">
+      <ChartPorPessoa metricas={metricasChart} />
+      <div className="flex flex-col gap-4 sm:gap-lg">
+        {/* Resumo Geral */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-md">
             {metricas.map((metrica) => (
               <div
                 key={metrica.pessoaId}
-                className={`p-md rounded-md border-2 ${
+                className={`p-3 sm:p-md rounded-md border-2 min-w-0 ${
                   metrica.pessoaId === 'usuario1'
                     ? 'bg-blue-50 border-blue-200'
                     : 'bg-purple-50 border-purple-200'
                 }`}
               >
-                <h3 className="text-lg font-semibold text-text-primary mb-md">{metrica.nome}</h3>
-                <div className="flex flex-col gap-sm">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-text-secondary">Total de Gastos:</span>
-                    <span className="text-base font-semibold text-negative">
-                      {formatCurrency(metrica.totalGastos)}
-                    </span>
+                <h3 className="text-base sm:text-lg font-semibold text-text-primary mb-3 sm:mb-md truncate">{metrica.nome}</h3>
+                <div className="flex flex-col gap-2 sm:gap-sm">
+                  <div className="flex justify-between gap-2 text-xs sm:text-sm">
+                    <span className="text-text-secondary shrink-0">Total de Gastos:</span>
+                    <span className="font-semibold text-negative truncate">{formatCurrency(metrica.totalGastos)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-text-secondary">Total de Receitas:</span>
-                    <span className="text-base font-semibold text-positive">
-                      {formatCurrency(metrica.totalReceitas)}
-                    </span>
+                  <div className="flex justify-between gap-2 text-xs sm:text-sm">
+                    <span className="text-text-secondary shrink-0">Total de Receitas:</span>
+                    <span className="font-semibold text-positive truncate">{formatCurrency(metrica.totalReceitas)}</span>
                   </div>
-                  <div className="flex justify-between pt-sm border-t border-border">
-                    <span className="text-sm font-medium text-text-primary">Saldo:</span>
-                    <span
-                      className={`text-base font-bold ${
-                        metrica.saldo >= 0 ? 'text-positive' : 'text-negative'
-                      }`}
-                    >
+                  <div className="flex justify-between gap-2 pt-2 sm:pt-sm border-t border-border text-xs sm:text-sm">
+                    <span className="font-medium text-text-primary shrink-0">Saldo:</span>
+                    <span className={`font-bold truncate ${metrica.saldo >= 0 ? 'text-positive' : 'text-negative'}`}>
                       {formatCurrency(metrica.saldo)}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-text-secondary">Cartões:</span>
-                    <span className="text-sm font-medium text-text-primary">{metrica.cartoes}</span>
+                  <div className="flex justify-between gap-2 text-xs sm:text-sm">
+                    <span className="text-text-secondary shrink-0">Cartões:</span>
+                    <span className="font-medium text-text-primary">{metrica.cartoes}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-text-secondary">Contas:</span>
-                    <span className="text-sm font-medium text-text-primary">{metrica.contas}</span>
+                  <div className="flex justify-between gap-2 text-xs sm:text-sm">
+                    <span className="text-text-secondary shrink-0">Contas:</span>
+                    <span className="font-medium text-text-primary">{metrica.contas}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-text-secondary">Saldo em contas:</span>
-                    <span className={`text-sm font-medium ${metrica.saldoContas >= 0 ? 'text-positive' : 'text-negative'}`}>
+                  <div className="flex justify-between gap-2 text-xs sm:text-sm">
+                    <span className="text-text-secondary shrink-0">Saldo em contas:</span>
+                    <span className={`font-medium truncate ${metrica.saldoContas >= 0 ? 'text-positive' : 'text-negative'}`}>
                       {formatCurrency(metrica.saldoContas)}
                     </span>
                   </div>
@@ -174,128 +172,7 @@ export function RelatoriosPorPessoa() {
               </div>
             ))}
           </div>
-
-          {/* Distribuição de Gastos */}
-          {totalGastos > 0 && (
-            <div className="p-md bg-background rounded-md border border-border">
-              <h3 className="text-base font-semibold text-text-primary mb-md">Distribuição de Gastos</h3>
-              <div className="flex flex-col gap-sm">
-                <div className="flex items-center gap-md">
-                  <div className="flex-1">
-                    <div className="flex justify-between mb-xs">
-                      <span className="text-sm text-text-primary">{metricas[0].nome}</span>
-                      <span className="text-sm font-semibold text-text-primary">
-                        {formatCurrency(metricas[0].totalGastos)} ({percentualUsuario1.toFixed(1)}%)
-                      </span>
-                    </div>
-                    <div className="w-full h-4 bg-surface rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-blue-500 transition-all duration-300"
-                        style={{ width: `${percentualUsuario1}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-md">
-                  <div className="flex-1">
-                    <div className="flex justify-between mb-xs">
-                      <span className="text-sm text-text-primary">{metricas[1].nome}</span>
-                      <span className="text-sm font-semibold text-text-primary">
-                        {formatCurrency(metricas[1].totalGastos)} ({percentualUsuario2.toFixed(1)}%)
-                      </span>
-                    </div>
-                    <div className="w-full h-4 bg-surface rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-purple-500 transition-all duration-300"
-                        style={{ width: `${percentualUsuario2}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Gastos por Categoria */}
-          {categoriasComGastos.length > 0 && (
-            <div className="p-md bg-background rounded-md border border-border">
-              <h3 className="text-base font-semibold text-text-primary mb-md">Gastos por Categoria</h3>
-              <div className="flex flex-col gap-md">
-                {categoriasComGastos.map((categoriaNome) => {
-                  const gastoUsuario1 = metricas[0].gastosPorCategoria[categoriaNome] || 0;
-                  const gastoUsuario2 = metricas[1].gastosPorCategoria[categoriaNome] || 0;
-                  const totalCategoria = gastoUsuario1 + gastoUsuario2;
-
-                  return (
-                    <div key={categoriaNome} className="flex flex-col gap-xs">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-text-primary">{categoriaNome}</span>
-                        <span className="text-sm font-semibold text-text-primary">
-                          {formatCurrency(totalCategoria)}
-                        </span>
-                      </div>
-                      <div className="flex gap-xs">
-                        <div className="flex-1">
-                          <div className="flex justify-between mb-xs">
-                            <span className="text-xs text-text-secondary">{metricas[0].nome}</span>
-                            <span className="text-xs text-text-secondary">
-                              {formatCurrency(gastoUsuario1)} ({totalCategoria > 0 ? ((gastoUsuario1 / totalCategoria) * 100).toFixed(0) : 0}%)
-                            </span>
-                          </div>
-                          <div className="w-full h-2 bg-surface rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-blue-400 transition-all duration-300"
-                              style={{ width: `${totalCategoria > 0 ? (gastoUsuario1 / totalCategoria) * 100 : 0}%` }}
-                            />
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex justify-between mb-xs">
-                            <span className="text-xs text-text-secondary">{metricas[1].nome}</span>
-                            <span className="text-xs text-text-secondary">
-                              {formatCurrency(gastoUsuario2)} ({totalCategoria > 0 ? ((gastoUsuario2 / totalCategoria) * 100).toFixed(0) : 0}%)
-                            </span>
-                          </div>
-                          <div className="w-full h-2 bg-surface rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-purple-400 transition-all duration-300"
-                              style={{ width: `${totalCategoria > 0 ? (gastoUsuario2 / totalCategoria) * 100 : 0}%` }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Comparativo */}
-          {totalGastos > 0 && (
-            <div className="p-md bg-background rounded-md border border-border">
-              <h3 className="text-base font-semibold text-text-primary mb-md">Comparativo</h3>
-              <div className="flex flex-col gap-sm">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-text-secondary">Diferença absoluta:</span>
-                  <span className="text-sm font-semibold text-text-primary">
-                    {formatCurrency(Math.abs(metricas[0].totalGastos - metricas[1].totalGastos))}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-text-secondary">Diferença percentual:</span>
-                  <span className="text-sm font-semibold text-text-primary">
-                    {totalGastos > 0
-                      ? Math.abs(percentualUsuario1 - percentualUsuario2).toFixed(1)
-                      : 0}
-                    %
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
-      </Card>
     </div>
   );
 }
