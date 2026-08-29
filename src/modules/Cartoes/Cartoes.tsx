@@ -1,8 +1,4 @@
 import { useState, useMemo } from 'react';
-import { Card } from '@/components/Card';
-import { EmptyState } from '@/components/EmptyState';
-import { AlertasCard } from '@/components/AlertasCard';
-import { CartaoCard } from '@/components/CartaoCard';
 import { useCartoes } from '@/hooks/useCartoes';
 import { useFaturas } from '@/hooks/useFaturas';
 import { useLancamentos } from '@/hooks/useLancamentos';
@@ -17,8 +13,11 @@ import { CartoesList } from '@/modules/Configuracoes/Cartoes/CartoesList';
 import { CartaoForm } from '@/modules/Configuracoes/Cartoes/CartaoForm';
 import { FaturasList } from './FaturasList';
 import { ResumoCard } from './ResumoCard';
-import { LayoutGrid, List, Plus, Search, ArrowUpDown, ChevronDown } from 'lucide-react';
+import { LayoutGrid, List, Plus, Search, ArrowUpDown, ChevronDown, CreditCard } from 'lucide-react';
+import { AlertasCard } from '@/components/AlertasCard';
+import { CartaoCard } from '@/components/CartaoCard';
 import { PrivacyToggleButton } from '@/components/PrivacyToggleButton';
+import styles from './Cartoes.module.css';
 
 const Cartoes = () => {
   const { cartoes, addCartao, editCartao, removeCartao, toggleCartaoAtivo } = useCartoes();
@@ -30,7 +29,7 @@ const Cartoes = () => {
   const { hidden: hideCartoesValues } = useSectionPrivacy('cartoes-credito');
   const { showToast } = useToast();
   const { usuario1Nome, usuario2Nome } = useCasal();
-  
+
   const [showForm, setShowForm] = useState(false);
   const [cartaoEditando, setCartaoEditando] = useState<CartaoCredito | null>(null);
   const [visualizacao, setVisualizacao] = useState<'lista' | 'cards'>('cards');
@@ -71,12 +70,10 @@ const Cartoes = () => {
         showToast('Cartão adicionado com sucesso', 'success');
         setShowForm(false);
         setCartaoEditando(null);
-        // Scroll para o novo cartão após um delay maior para garantir renderização
         setTimeout(() => {
           const element = document.getElementById(`cartao-${novoCartao.id}`);
           if (element) {
             element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            // Adicionar classe de destaque temporário
             element.classList.add('animate-pulse');
             setTimeout(() => {
               element.classList.remove('animate-pulse');
@@ -112,38 +109,30 @@ const Cartoes = () => {
   };
 
   const handleVerFatura = (faturaId: string) => {
-    // Scroll para a fatura específica (implementação futura)
     const element = document.getElementById(`fatura-${faturaId}`);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
 
-  // Filtrar, buscar e ordenar cartões
   const cartoesFiltrados = useMemo(() => {
     let filtrados = cartoes;
 
-    // Filtro por status
     if (filtroStatus === 'ativos') {
       filtrados = filtrados.filter(c => c.ativo);
     } else if (filtroStatus === 'inativos') {
       filtrados = filtrados.filter(c => !c.ativo);
     }
 
-    // Filtro por proprietário
     if (filtroProprietario !== 'todos') {
       filtrados = filtrados.filter(c => c.proprietarioId === filtroProprietario);
     }
 
-    // Busca por nome
     if (busca.trim()) {
       const buscaLower = busca.toLowerCase().trim();
-      filtrados = filtrados.filter(c => 
-        c.nome.toLowerCase().includes(buscaLower)
-      );
+      filtrados = filtrados.filter(c => c.nome.toLowerCase().includes(buscaLower));
     }
 
-    // Ordenação
     filtrados = [...filtrados].sort((a, b) => {
       switch (ordenacao) {
         case 'nome':
@@ -165,221 +154,180 @@ const Cartoes = () => {
     return filtrados;
   }, [cartoes, busca, filtroStatus, filtroProprietario, ordenacao]);
 
-  // Filtrar faturas do mês selecionado
   const faturasExibidas = faturas.filter(f => {
     const [ano, mes] = selectedMonth.split('-');
     return f.mesReferencia === `${ano}-${mes}`;
   });
 
+  const temFiltroAtivo = !!busca || filtroStatus !== 'todos' || filtroProprietario !== 'todos';
+
   return (
-    <div className="max-w-[1280px] mx-auto pb-xl">
-      <h1 className="text-2xl md:text-3xl font-bold text-text-primary mb-lg">Cartões de Crédito</h1>
+    <div className={styles.page}>
+      {cartoes.length > 0 && <ResumoCard cartoes={cartoes} faturas={faturas} selectedMonth={selectedMonth} />}
 
-      {/* Resumo */}
-      {cartoes.length > 0 && (
-        <ResumoCard
-          cartoes={cartoes}
-          faturas={faturas}
-          selectedMonth={selectedMonth}
-        />
-      )}
+      {alertas.length > 0 && <AlertasCard alertas={alertas} onVerFatura={handleVerFatura} />}
 
-      {/* Alertas */}
-      {alertas.length > 0 && (
-        <div className="mt-lg">
-          <AlertasCard alertas={alertas} onVerFatura={handleVerFatura} />
-        </div>
-      )}
-
-      <Card
-        title="Meus cartões"
-        actions={
-          <div className="flex items-center gap-sm">
-            <button
-              className="px-md py-sm bg-positive text-white rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-positive/90 flex items-center justify-center gap-xs shrink-0"
-              onClick={handleAddCartao}
-              aria-label="Adicionar cartão"
-              title="Adicionar cartão"
-            >
-              <Plus size={18} strokeWidth={2} className="shrink-0" />
-              <span className="hidden md:inline">Adicionar</span>
-            </button>
-            {cartoes.length > 0 && (
-              <>
-                <PrivacyToggleButton sectionKey="cartoes-credito" />
-                <button
-                  className={`min-w-[36px] min-h-[36px] p-sm rounded-md transition-colors duration-200 flex items-center justify-center shrink-0 ${
-                    visualizacao === 'cards'
-                      ? 'bg-positive text-white'
-                      : 'bg-surface text-text-secondary hover:bg-background'
-                  }`}
-                  onClick={() => setVisualizacao('cards')}
-                  aria-label="Visualização em cards"
-                  title="Visualização em cards"
-                >
-                  <LayoutGrid size={18} strokeWidth={2} className="shrink-0" />
-                </button>
-                <button
-                  className={`min-w-[36px] min-h-[36px] p-sm rounded-md transition-colors duration-200 flex items-center justify-center shrink-0 ${
-                    visualizacao === 'lista'
-                      ? 'bg-positive text-white'
-                      : 'bg-surface text-text-secondary hover:bg-background'
-                  }`}
-                  onClick={() => setVisualizacao('lista')}
-                  aria-label="Visualização em lista"
-                  title="Visualização em lista"
-                >
-                  <List size={18} strokeWidth={2} className="shrink-0" />
-                </button>
-              </>
-            )}
+      {cartoes.length === 0 ? (
+        <div className={styles.emptyState}>
+          <div className={styles.emptyStateIcon}><CreditCard size={26} /></div>
+          <div>
+            <div className={styles.emptyStateTitle}>Nenhum cartão cadastrado</div>
+            <div className={styles.emptyStateMessage}>Adicione seu primeiro cartão de crédito.</div>
           </div>
-        }
-      >
-        {cartoes.length > 0 && (
-          <div className="mb-md flex flex-col md:flex-row gap-sm">
-            <div className="relative flex-1 min-w-0">
-              <Search size={18} strokeWidth={2} className="absolute left-md top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none shrink-0" />
+          <button className={styles.emptyStateAction} onClick={handleAddCartao}>Adicionar cartão</button>
+        </div>
+      ) : (
+        <>
+          <div className={styles.toolbar}>
+            <div className={styles.searchWrap}>
+              <span className={styles.searchIcon}><Search size={16} /></span>
               <input
                 type="text"
                 placeholder="Buscar cartão..."
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
-                className="w-full pl-9 pr-md py-sm border border-border rounded-md text-sm text-text-primary bg-surface focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)]"
+                className={styles.searchInput}
               />
             </div>
-            <div className="relative min-w-[120px]">
-              <ChevronDown size={18} strokeWidth={2} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none shrink-0" />
-              <select
-                value={filtroStatus}
-                onChange={(e) => setFiltroStatus(e.target.value as 'todos' | 'ativos' | 'inativos')}
-                className="w-full min-h-[40px] pl-4 pr-9 py-2.5 border border-border rounded-md text-sm text-text-primary bg-surface focus:outline-none focus:border-positive appearance-none cursor-pointer"
-              >
-                <option value="todos">Todos</option>
-                <option value="ativos">Ativos</option>
-                <option value="inativos">Inativos</option>
-              </select>
+
+            <div className={styles.segmented} role="group" aria-label="Filtrar por status">
+              {(['todos', 'ativos', 'inativos'] as const).map((status) => (
+                <button
+                  key={status}
+                  type="button"
+                  className={`${styles.segBtn} ${filtroStatus === status ? styles.segBtnActive : ''}`}
+                  onClick={() => setFiltroStatus(status)}
+                  aria-pressed={filtroStatus === status}
+                >
+                  {status === 'todos' ? 'Todos' : status === 'ativos' ? 'Ativos' : 'Inativos'}
+                </button>
+              ))}
             </div>
-            <div className="relative min-w-[160px]">
-              <ChevronDown size={18} strokeWidth={2} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none shrink-0" />
+
+            <div className={styles.selectWrap}>
               <select
                 value={filtroProprietario}
                 onChange={(e) => setFiltroProprietario(e.target.value as 'todos' | 'usuario1' | 'usuario2')}
-                className="w-full min-h-[40px] pl-4 pr-9 py-2.5 border border-border rounded-md text-sm text-text-primary bg-surface focus:outline-none focus:border-positive appearance-none cursor-pointer"
+                className={styles.select}
               >
                 <option value="todos">Todos os proprietários</option>
                 <option value="usuario1">{usuario1Nome}</option>
                 <option value="usuario2">{usuario2Nome}</option>
               </select>
+              <ChevronDown size={15} className={styles.selectChevron} />
             </div>
-            <div className="relative min-w-[140px]">
-              <ArrowUpDown size={18} strokeWidth={2} className="absolute left-md top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none shrink-0" />
+
+            <div className={styles.selectWrap}>
               <select
                 value={ordenacao}
                 onChange={(e) => setOrdenacao(e.target.value as 'nome' | 'limite' | 'uso' | 'fechamento')}
-                className="w-full pl-9 pr-md py-sm border border-border rounded-md text-sm text-text-primary bg-surface focus:outline-none focus:border-positive appearance-none cursor-pointer min-h-[40px]"
+                className={styles.select}
               >
                 <option value="nome">Nome (A-Z)</option>
                 <option value="limite">Limite (maior)</option>
                 <option value="uso">Uso (maior)</option>
                 <option value="fechamento">Fechamento</option>
               </select>
+              <ArrowUpDown size={14} className={styles.selectChevron} />
             </div>
-            {(busca || filtroStatus !== 'todos' || filtroProprietario !== 'todos') && (
-              <div className="text-xs text-text-secondary flex items-center">
-                {cartoesFiltrados.length} {cartoesFiltrados.length === 1 ? 'cartão encontrado' : 'cartões encontrados'}
-              </div>
-            )}
-          </div>
-        )}
-        {cartoes.length === 0 ? (
-          <EmptyState 
-            hideText={true}
-            actionButton={
+
+            <div className={styles.viewToggle} role="group" aria-label="Modo de visualização">
               <button
-                className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background"
-                onClick={handleAddCartao}
+                type="button"
+                onClick={() => setVisualizacao('cards')}
+                className={`${styles.viewBtn} ${visualizacao === 'cards' ? styles.viewBtnActive : ''}`}
+                aria-label="Visualização em cards"
+                title="Visualização em cards"
               >
-                Adicionar cartão
+                <LayoutGrid size={16} />
               </button>
-            }
-          />
-        ) : (
-          <>
-            {cartoesFiltrados.length === 0 ? (
-              <EmptyState
-                hideText={false}
-                title="Nenhum cartão encontrado"
-                message={busca || filtroStatus !== 'todos' 
-                  ? 'Tente ajustar os filtros de busca' 
-                  : 'Adicione seu primeiro cartão de crédito'}
-                actionButton={
-                  <button
-                    className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background"
-                    onClick={handleAddCartao}
-                  >
-                    Adicionar cartão
-                  </button>
-                }
-              />
-            ) : visualizacao === 'cards' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
-                {cartoesFiltrados
-                  .filter(c => c.ativo)
-                  .map((cartao) => (
-                    <div id={`cartao-${cartao.id}`}>
-                      <CartaoCard
-                        key={cartao.id}
-                        cartao={cartao}
-                        hideValues={hideCartoesValues}
-                        onEdit={handleEditCartao}
-                        onDelete={handleDeleteCartao}
-                        onToggleAtivo={toggleCartaoAtivo}
-                        onDuplicate={handleDuplicateCartao}
-                      />
-                    </div>
-                  ))}
-                {cartoesFiltrados.filter(c => !c.ativo).length > 0 && (
-                  <>
-                    <div className="col-span-full text-sm font-semibold text-text-secondary uppercase mb-xs py-xs">
-                      Cartões Inativos
-                    </div>
-                    {cartoesFiltrados
-                      .filter(c => !c.ativo)
-                      .map((cartao) => (
-                        <div id={`cartao-${cartao.id}`}>
-                          <CartaoCard
-                            key={cartao.id}
-                            cartao={cartao}
-                            hideValues={hideCartoesValues}
-                            onEdit={handleEditCartao}
-                            onDelete={handleDeleteCartao}
-                            onToggleAtivo={toggleCartaoAtivo}
-                            onDuplicate={handleDuplicateCartao}
-                          />
-                        </div>
-                      ))}
-                  </>
-                )}
-              </div>
-            ) : (
-              <CartoesList
-                cartoes={cartoesFiltrados}
-                hideValues={hideCartoesValues}
-                onEdit={handleEditCartao}
-                onDelete={handleDeleteCartao}
-                onToggleAtivo={toggleCartaoAtivo}
-              />
+              <button
+                type="button"
+                onClick={() => setVisualizacao('lista')}
+                className={`${styles.viewBtn} ${visualizacao === 'lista' ? styles.viewBtnActive : ''}`}
+                aria-label="Visualização em lista"
+                title="Visualização em lista"
+              >
+                <List size={16} />
+              </button>
+            </div>
+
+            {temFiltroAtivo && (
+              <span className={styles.resultCount}>
+                {cartoesFiltrados.length} {cartoesFiltrados.length === 1 ? 'cartão encontrado' : 'cartões encontrados'}
+              </span>
             )}
-          </>
-        )}
-      </Card>
+
+            <PrivacyToggleButton sectionKey="cartoes-credito" />
+
+            <button className={styles.addBtn} onClick={handleAddCartao} aria-label="Adicionar cartão">
+              <Plus size={17} />
+              <span>Adicionar</span>
+            </button>
+          </div>
+
+          {cartoesFiltrados.length === 0 ? (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyStateIcon}><CreditCard size={26} /></div>
+              <div>
+                <div className={styles.emptyStateTitle}>Nenhum cartão encontrado</div>
+                <div className={styles.emptyStateMessage}>
+                  {temFiltroAtivo ? 'Tente ajustar os filtros de busca.' : 'Adicione seu primeiro cartão de crédito.'}
+                </div>
+              </div>
+              <button className={styles.emptyStateAction} onClick={handleAddCartao}>Adicionar cartão</button>
+            </div>
+          ) : visualizacao === 'cards' ? (
+            <div className={styles.grid}>
+              {cartoesFiltrados
+                .filter(c => c.ativo)
+                .map((cartao) => (
+                  <div key={cartao.id} id={`cartao-${cartao.id}`}>
+                    <CartaoCard
+                      cartao={cartao}
+                      hideValues={hideCartoesValues}
+                      onEdit={handleEditCartao}
+                      onDelete={handleDeleteCartao}
+                      onToggleAtivo={toggleCartaoAtivo}
+                      onDuplicate={handleDuplicateCartao}
+                    />
+                  </div>
+                ))}
+              {cartoesFiltrados.filter(c => !c.ativo).length > 0 && (
+                <>
+                  <div className={styles.sectionLabel}>Cartões inativos</div>
+                  {cartoesFiltrados
+                    .filter(c => !c.ativo)
+                    .map((cartao) => (
+                      <div key={cartao.id} id={`cartao-${cartao.id}`}>
+                        <CartaoCard
+                          cartao={cartao}
+                          hideValues={hideCartoesValues}
+                          onEdit={handleEditCartao}
+                          onDelete={handleDeleteCartao}
+                          onToggleAtivo={toggleCartaoAtivo}
+                          onDuplicate={handleDuplicateCartao}
+                        />
+                      </div>
+                    ))}
+                </>
+              )}
+            </div>
+          ) : (
+            <CartoesList
+              cartoes={cartoesFiltrados}
+              hideValues={hideCartoesValues}
+              onEdit={handleEditCartao}
+              onDelete={handleDeleteCartao}
+              onToggleAtivo={toggleCartaoAtivo}
+            />
+          )}
+        </>
+      )}
 
       {cartoes.length > 0 && faturasExibidas.length > 0 && (
-        <Card
-          title="Faturas"
-          className="mt-lg"
-        >
+        <div className={styles.section}>
+          <span className={styles.sectionTitle}>Faturas</span>
           <FaturasList
             faturas={faturasExibidas}
             cartoes={cartoes}
@@ -387,7 +335,7 @@ const Cartoes = () => {
             categorias={categorias}
             onMarcarComoPaga={handleMarcarFaturaComoPaga}
           />
-        </Card>
+        </div>
       )}
 
       {showForm && (

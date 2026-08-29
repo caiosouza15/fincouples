@@ -84,7 +84,9 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
   };
 
   const isPadrao = (id: string): boolean => {
-    return id.startsWith('padrao-');
+    // Mock: convenção de prefixo no id. Supabase: coluna `padrao` real na tabela.
+    const categoria = categorias.find((c) => c.id === id);
+    return categoria?.padrao === true || id.startsWith('padrao-');
   };
 
   useEffect(() => {

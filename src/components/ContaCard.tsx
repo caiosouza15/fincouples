@@ -5,6 +5,7 @@ import { formatCurrencyWithPrivacy } from '@/utils';
 import { iconMap } from '@/utils/iconMap';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { useCasal } from '@/hooks/useCasal';
+import styles from './ContaCard.module.css';
 
 const tipoLabels: Record<Conta['tipo'], string> = {
   corrente: 'Conta Corrente',
@@ -41,11 +42,11 @@ export function ContaCard({
   const getContaIcon = () => {
     if (conta.icone) {
       const IconComponent = iconMap[conta.icone];
-      if (IconComponent) return <IconComponent size={24} />;
+      if (IconComponent) return <IconComponent size={20} />;
     }
     const defaultIconName = tipoIconNames[conta.tipo];
     const DefaultIcon = iconMap[defaultIconName];
-    return DefaultIcon ? <DefaultIcon size={24} /> : <Wallet size={24} />;
+    return DefaultIcon ? <DefaultIcon size={20} /> : <Wallet size={20} />;
   };
 
   const nomeProprietario = conta.proprietarioId
@@ -59,83 +60,68 @@ export function ContaCard({
 
   return (
     <>
-      <div className={`relative group animate-[fadeInUp_0.3s_ease] rounded-lg p-lg border-2 transition-all duration-300 hover:shadow-md transition-shadow duration-200 ${
-        conta.ativa
-          ? 'bg-surface border-border hover:border-positive/30'
-          : 'bg-surface border-border opacity-60'
-      }`}>
-        <div className="absolute top-md right-md flex gap-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+      <div className={`${styles.card} ${!conta.ativa ? styles.cardInactive : ''}`}>
+        <div className={styles.actions}>
           {onDuplicate && (
             <button
+              className={styles.actionBtn}
               onClick={() => onDuplicate(conta)}
-              className="w-8 h-8 flex items-center justify-center bg-background rounded-md text-text-secondary hover:text-positive hover:bg-surface transition-colors"
               aria-label="Duplicar conta"
               title="Duplicar conta"
             >
-              <Copy size={16} />
+              <Copy size={15} />
             </button>
           )}
           <button
+            className={styles.actionBtn}
             onClick={() => onEdit(conta)}
-            className="w-8 h-8 flex items-center justify-center bg-background rounded-md text-text-secondary hover:text-positive transition-colors"
             aria-label="Editar conta"
             title="Editar conta"
           >
-            <Edit2 size={16} />
+            <Edit2 size={15} />
           </button>
           <button
+            className={`${styles.actionBtn} ${styles.actionBtnWarn}`}
             onClick={() => onToggleAtiva(conta.id)}
-            className={`w-8 h-8 flex items-center justify-center bg-background rounded-md transition-colors ${
-              conta.ativa ? 'text-warning hover:text-negative' : 'text-text-secondary hover:text-positive'
-            }`}
             aria-label={conta.ativa ? 'Desativar conta' : 'Ativar conta'}
             title={conta.ativa ? 'Desativar conta' : 'Ativar conta'}
           >
-            <Power size={16} />
+            <Power size={15} />
           </button>
           <button
+            className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
             onClick={() => setShowConfirmDelete(true)}
-            className="w-8 h-8 flex items-center justify-center bg-background rounded-md text-text-secondary hover:text-negative transition-colors"
             aria-label="Excluir conta"
             title="Excluir conta"
           >
-            <Trash2 size={16} />
+            <Trash2 size={15} />
           </button>
         </div>
 
-        <div className="flex flex-col gap-md">
-          <div className="flex items-start gap-sm">
-            <div className="w-10 h-10 flex items-center justify-center bg-background rounded-md shrink-0 text-text-secondary">
-              {getContaIcon()}
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold text-text-primary m-0 mb-xs">{conta.nome}</h3>
-              <p className="text-sm text-text-secondary m-0 mb-xs">{tipoLabels[conta.tipo]}</p>
-              <div className="flex flex-wrap gap-xs">
-                {nomeProprietario && (
-                  <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                    conta.proprietarioId === 'usuario1' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
-                  }`}>
-                    {nomeProprietario}
-                  </span>
-                )}
-                {!conta.ativa && (
-                  <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-warning/20 text-warning">
-                    Inativa
-                  </span>
-                )}
-              </div>
-            </div>
+        <div className={styles.header}>
+          <div className={`${styles.icon} ${conta.proprietarioId === 'usuario2' ? styles.iconP2 : ''}`}>
+            {getContaIcon()}
           </div>
+          <div className={styles.headerText}>
+            <div className={styles.title}>{conta.nome}</div>
+            <div className={styles.subtitle}>{tipoLabels[conta.tipo]}</div>
+          </div>
+        </div>
 
-          <div className="pt-sm border-t border-border">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-text-secondary">Saldo</span>
-              <span className={`text-xl font-bold ${conta.saldo >= 0 ? 'text-positive' : 'text-negative'}`}>
-                {formatCurrencyWithPrivacy(conta.saldo, hideSaldo)}
-              </span>
-            </div>
-          </div>
+        <div className={styles.badges}>
+          {nomeProprietario && (
+            <span className={`${styles.badge} ${conta.proprietarioId === 'usuario2' ? styles.badgeP2 : styles.badgeP1}`}>
+              {nomeProprietario}
+            </span>
+          )}
+          {!conta.ativa && <span className={`${styles.badge} ${styles.badgeWarn}`}>Inativa</span>}
+        </div>
+
+        <div className={styles.footer}>
+          <span className={styles.footerLabel}>Saldo</span>
+          <span className={`${styles.value} ${conta.saldo >= 0 ? styles.valuePositive : styles.valueNegative}`}>
+            {formatCurrencyWithPrivacy(conta.saldo, hideSaldo)}
+          </span>
         </div>
       </div>
 

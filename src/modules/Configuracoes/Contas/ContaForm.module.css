@@ -1,0 +1,152 @@
+/*
+ * Tokens vêm de src/styles/glass-tokens.css, importado globalmente.
+ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 12, 20, .45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: fadeIn .2s ease;
+}
+
+.panel {
+  background: var(--glass);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid var(--stroke);
+  border-radius: 24px;
+  box-shadow: var(--shadow-hi);
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp .3s ease;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 22px 18px;
+  border-bottom: 1px solid var(--hair);
+}
+
+.title { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); margin: 0; }
+
+.closeBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: background-color .2s ease, color .2s ease;
+}
+
+.closeBtn:hover { background: var(--glass-soft); color: var(--ink); }
+.closeBtn:disabled { opacity: .5; cursor: not-allowed; }
+
+.form { padding: 22px; display: flex; flex-direction: column; gap: 16px; }
+
+.errorBanner {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(239, 68, 68, .10);
+  border: 1px solid rgba(239, 68, 68, .3);
+  color: #EF4444;
+  font-size: 13px;
+}
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.label { font-size: 12.5px; font-weight: 500; color: var(--ink-2); }
+
+.input, .select {
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--glass-soft);
+  border: 1px solid var(--stroke);
+  color: var(--ink);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.input:focus, .select:focus {
+  outline: none;
+  border-color: var(--p1);
+  box-shadow: 0 0 0 3px var(--p1-soft);
+}
+
+.input:disabled, .select:disabled { opacity: .6; cursor: not-allowed; }
+.inputError { border-color: #EF4444; }
+.fieldError { font-size: 12px; color: #EF4444; margin: 0; }
+
+.radioGroup { display: flex; gap: 20px; padding-top: 2px; }
+.radioLabel { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--ink); cursor: pointer; }
+
+.checkboxLabel { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--ink); cursor: pointer; }
+
+.actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 6px;
+  padding-top: 18px;
+  border-top: 1px solid var(--hair);
+}
+
+@media (max-width: 640px) {
+  .actions { flex-direction: column-reverse; }
+}
+
+.btnGhost {
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid var(--stroke);
+  background: var(--glass-soft);
+  color: var(--ink);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color .2s ease;
+}
+
+.btnGhost:hover { border-color: var(--ink-3); }
+.btnGhost:disabled { opacity: .6; cursor: not-allowed; }
+
+.btnPrimary {
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  background: var(--p1-grad);
+  box-shadow: 0 8px 20px rgba(249, 115, 22, .30);
+}
+
+.btnPrimary:disabled { opacity: .6; cursor: not-allowed; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}

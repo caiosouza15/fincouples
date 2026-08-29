@@ -1,18 +1,45 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card } from '@/components/Card';
 import { useCasal } from '@/hooks/useCasal';
+import { useConvitePendente } from '@/hooks/useConvitePendente';
+import { isApiConfigured } from '@/data/config';
 
 export function CasalConfig() {
-  const { usuario1Nome, usuario2Nome, setUsuario1Nome, setUsuario2Nome } = useCasal();
+  const supabaseMode = isApiConfigured();
+  const {
+    usuario1Nome,
+    usuario2Nome,
+    meuPessoaId,
+    parceiroJaEntrou,
+    setUsuario1Nome,
+    setUsuario2Nome,
+  } = useCasal();
+  const convitePendente = useConvitePendente();
+
+  const meuNomeAtual = meuPessoaId === 'usuario1' ? usuario1Nome : usuario2Nome;
+  const nomeDoParceiroAtual = meuPessoaId === 'usuario1' ? usuario2Nome : usuario1Nome;
+  const setMeuNome = meuPessoaId === 'usuario1' ? setUsuario1Nome : setUsuario2Nome;
+
   const [nome1, setNome1] = useState(usuario1Nome);
   const [nome2, setNome2] = useState(usuario2Nome);
+  const [meuNome, setMeuNomeInput] = useState(meuNomeAtual);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
+  // Os nomes chegam de forma assíncrona (Supabase). Quando mudam "por fora"
+  // (não por digitação do usuário), ajusta o estado local durante a
+  // renderização em vez de um useEffect — evita o passe extra de render.
+  const [sincronizado, setSincronizado] = useState({ usuario1Nome, usuario2Nome, meuNomeAtual });
+  if (
+    sincronizado.usuario1Nome !== usuario1Nome ||
+    sincronizado.usuario2Nome !== usuario2Nome ||
+    sincronizado.meuNomeAtual !== meuNomeAtual
+  ) {
+    setSincronizado({ usuario1Nome, usuario2Nome, meuNomeAtual });
     setNome1(usuario1Nome);
     setNome2(usuario2Nome);
-  }, [usuario1Nome, usuario2Nome]);
+    setMeuNomeInput(meuNomeAtual);
+  }
 
   const validateNome = (nome: string): string | null => {
     const trimmed = nome.trim();
@@ -25,7 +52,7 @@ export function CasalConfig() {
     return null;
   };
 
-  const handleSave = () => {
+  const handleSaveMock = () => {
     const error1 = validateNome(nome1);
     const error2 = validateNome(nome2);
 
@@ -50,12 +77,121 @@ export function CasalConfig() {
     }
   };
 
+  const handleSaveMeuNome = () => {
+    const error = validateNome(meuNome);
+    if (error) {
+      setErrors({ meuNome: error });
+      return;
+    }
+    try {
+      setMeuNome(meuNome.trim());
+      setErrors({});
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      setErrors({
+        geral: err instanceof Error ? err.message : 'Erro ao salvar configuração',
+      });
+    }
+  };
+
   const getInputClassName = (hasError: boolean) =>
     `p-md border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none ${
       hasError
         ? 'border-negative focus:border-negative focus:shadow-[0_0_0_3px_rgba(220,38,38,0.1)]'
         : 'border-border focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)]'
     }`;
+
+  if (supabaseMode) {
+    return (
+      <Card title="Configuração do Casal">
+        <div className="flex flex-col gap-lg">
+          <p className="text-sm text-text-secondary">
+            Esse é o nome que aparece em lançamentos e relatórios do casal. Você edita só o
+            seu — seu parceiro(a) edita o dele(a).
+          </p>
+
+          <div className="flex flex-col gap-xs">
+            <label htmlFor="meuNome" className="text-sm font-medium text-text-primary">
+              Seu nome *
+            </label>
+            <input
+              id="meuNome"
+              type="text"
+              className={getInputClassName(!!errors.meuNome)}
+              value={meuNome}
+              onChange={(e) => {
+                setMeuNomeInput(e.target.value);
+                if (errors.meuNome) setErrors((prev) => ({ ...prev, meuNome: '' }));
+              }}
+              placeholder="Seu nome"
+              maxLength={50}
+            />
+            {errors.meuNome && (
+              <p className="text-sm text-negative" role="alert">
+                {errors.meuNome}
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-xs">
+            <span className="text-sm font-medium text-text-primary">Nome do parceiro(a)</span>
+            <p className="text-sm text-text-secondary">
+              {parceiroJaEntrou ? nomeDoParceiroAtual : 'Aguardando seu parceiro(a) aceitar o convite'}
+            </p>
+          </div>
+
+          {!parceiroJaEntrou && convitePendente.convite && (
+            <div className="flex flex-col gap-sm">
+              {convitePendente.expirado && (
+                <p className="text-sm text-negative">O convite anterior expirou.</p>
+              )}
+              <div className="flex gap-sm">
+                {!convitePendente.expirado && (
+                  <button
+                    type="button"
+                    onClick={convitePendente.copiar}
+                    className="bg-transparent text-text-primary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background"
+                  >
+                    {convitePendente.copiado ? 'Copiado!' : 'Copiar link do convite'}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={convitePendente.regenerar}
+                  disabled={convitePendente.loading}
+                  className="bg-transparent text-text-secondary border border-border py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-background disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {convitePendente.loading ? 'Gerando...' : 'Gerar novo link'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {errors.geral && (
+            <div className="p-md bg-negative/10 border border-negative rounded-md text-negative text-sm" role="alert">
+              {errors.geral}
+            </div>
+          )}
+
+          {saved && (
+            <div className="p-md bg-positive/10 border border-positive rounded-md text-positive text-sm" role="alert">
+              Configuração salva com sucesso!
+            </div>
+          )}
+
+          <div className="flex gap-md">
+            <button
+              onClick={handleSaveMeuNome}
+              className="bg-positive text-white py-sm px-lg rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-positive/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Salvar
+            </button>
+          </div>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card title="Configuração do Casal">
@@ -132,7 +268,7 @@ export function CasalConfig() {
 
         <div className="flex gap-md">
           <button
-            onClick={handleSave}
+            onClick={handleSaveMock}
             className="bg-positive text-white py-sm px-lg rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-positive/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Salvar

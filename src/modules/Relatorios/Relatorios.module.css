@@ -1,0 +1,162 @@
+/*
+ * Tokens vêm de src/styles/glass-tokens.css, importado globalmente.
+ */
+
+.page { display: flex; flex-direction: column; gap: 18px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 18px;
+  align-items: stretch;
+}
+
+.spanFull { grid-column: 1 / -1; }
+
+/* ---------- card base (mesma receita do Dashboard/Contas/Cartões/Metas) ---------- */
+
+.card {
+  border-radius: 24px;
+  padding: 22px;
+  background: var(--glass);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: box-shadow .28s cubic-bezier(.2, .7, .3, 1);
+}
+
+.card:hover { box-shadow: var(--shadow-hi); }
+
+.cardHeader { display: flex; align-items: center; gap: 10px; }
+
+.cardIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--p1-soft);
+  color: var(--p1);
+}
+
+.iconP2 { background: var(--p2-soft); color: var(--p2); }
+.iconGrad { background: linear-gradient(135deg, var(--p1-soft), var(--p2-soft)); color: var(--ink-2); }
+
+.cardHeaderText { flex: 1; min-width: 0; }
+
+.cardTitle {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.cardSubtitle { font-size: 12px; color: var(--ink-3); margin-top: 1px; }
+
+/* ---------- stat row (visão geral) ---------- */
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.statGrid > .statFull { grid-column: 1 / -1; }
+
+.stat { display: flex; flex-direction: column; gap: 4px; }
+.statLabel { font-size: 11.5px; color: var(--ink-3); }
+.statValue { font-size: 19px; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); }
+.statValuePositive { color: var(--good); }
+.statValueNegative { color: #DC2626; }
+.statComparativo { font-size: 12.5px; font-weight: 500; color: var(--ink-2); }
+
+/* ---------- lista maiores gastos ---------- */
+
+.listaRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--hair);
+}
+
+.listaRow:last-child { border-bottom: none; padding-bottom: 0; }
+.listaRow:first-child { padding-top: 0; }
+
+.listaIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--track);
+  color: var(--ink-2);
+  flex-shrink: 0;
+}
+
+.listaText { flex: 1; min-width: 0; }
+.listaTitle { font-size: 13.5px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.listaSub { font-size: 11.5px; color: var(--ink-3); margin-top: 1px; }
+.listaValue { font-size: 14px; font-weight: 600; color: #DC2626; flex-shrink: 0; }
+
+/* ---------- contas (resumo) ---------- */
+
+.contaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--glass-soft);
+  border: 1px solid var(--hair);
+}
+
+.contaNome { font-size: 13px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.contaOwner { font-size: 11px; color: var(--ink-3); margin-top: 1px; }
+.contaValue { font-size: 13.5px; font-weight: 600; flex-shrink: 0; }
+
+/* ---------- por pessoa ---------- */
+
+.pessoaGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.pessoaCard {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--glass-soft);
+  border: 1px solid var(--hair);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pessoaName { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+
+.pessoaRow { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.pessoaRow:not(:last-child) { padding-bottom: 8px; border-bottom: 1px solid var(--hair); }
+.pessoaLabel { font-size: 12px; color: var(--ink-3); }
+.pessoaValue { font-size: 13px; font-weight: 600; color: var(--ink); }
+
+/* ---------- empty state (dentro do card, sem fundo próprio) ---------- */
+
+.chartEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  text-align: center;
+  color: var(--ink-3);
+  font-size: 13px;
+}

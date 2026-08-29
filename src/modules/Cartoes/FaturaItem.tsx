@@ -5,6 +5,7 @@ import { parseNumberInput, handleNumberInputChange } from '@/utils/numberMask';
 import { CheckCircle2, Clock, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { FaturaDetalhes } from './FaturaDetalhes';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import styles from './FaturaItem.module.css';
 
 interface FaturaItemProps {
   fatura: FaturaCartao;
@@ -20,52 +21,28 @@ export function FaturaItem({ fatura, cartao, lancamentos, categorias, onMarcarCo
   const [valorParcial, setValorParcial] = useState('');
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
   const formatMes = (mesReferencia: string) => {
     const [ano, mes] = mesReferencia.split('-');
-    const meses = [
-      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-    ];
+    const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
     return `${meses[parseInt(mes) - 1]} ${ano}`;
   };
 
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  };
+  const formatDate = (date: Date) => new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-  const getStatusIcon = () => {
+  const getStatusConfig = () => {
     switch (fatura.status) {
       case 'pago_total':
-        return <CheckCircle2 size={20} className="text-positive" />;
+        return { icon: CheckCircle2, iconClass: styles.iconPago, statusClass: styles.statusPago, label: 'Pago' };
       case 'pago_parcial':
-        return <Clock size={20} className="text-warning" />;
+        return { icon: Clock, iconClass: styles.iconParcial, statusClass: styles.statusParcial, label: 'Pago Parcial' };
       default:
-        return <AlertCircle size={20} className="text-negative" />;
+        return { icon: AlertCircle, iconClass: styles.iconNaoPago, statusClass: styles.statusNaoPago, label: 'Não Pago' };
     }
   };
 
-  const getStatusLabel = () => {
-    switch (fatura.status) {
-      case 'pago_total':
-        return 'Pago';
-      case 'pago_parcial':
-        return 'Pago Parcial';
-      default:
-        return 'Não Pago';
-    }
-  };
-
-  const getStatusColor = () => {
-    switch (fatura.status) {
-      case 'pago_total':
-        return 'text-positive';
-      case 'pago_parcial':
-        return 'text-warning';
-      default:
-        return 'text-negative';
-    }
-  };
-
+  const config = getStatusConfig();
+  const StatusIcon = config.icon;
   const valorRestante = fatura.valorTotal - fatura.valorPago;
 
   const handlePagarParcial = () => {
@@ -86,43 +63,31 @@ export function FaturaItem({ fatura, cartao, lancamentos, categorias, onMarcarCo
   };
 
   return (
-    <div className="bg-surface border border-border rounded-md transition-all duration-200 hover:border-positive hover:shadow-sm">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between p-md gap-md">
-        <div className="flex items-center gap-md flex-1 min-w-0">
-          <div className="shrink-0">
-            {getStatusIcon()}
+    <div className={styles.item}>
+      <div className={styles.row}>
+        <div className={styles.main}>
+          <div className={`${styles.statusIcon} ${config.iconClass}`}>
+            <StatusIcon size={20} />
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-base font-medium text-text-primary mb-xs">
-              {formatMes(fatura.mesReferencia)}
-            </div>
-            <div className="text-sm text-text-secondary">
+          <div className={styles.info}>
+            <div className={styles.mes}>{formatMes(fatura.mesReferencia)}</div>
+            <div className={styles.dates}>
               Fechamento: {formatDate(fatura.dataFechamento)} • Vencimento: {formatDate(fatura.dataVencimento)}
             </div>
-            <div className="text-sm text-text-primary mt-xs">
+            <div className={styles.amounts}>
               Total: {formatCurrency(fatura.valorTotal)} • Pago: {formatCurrency(fatura.valorPago)}
-              {valorRestante > 0 && (
-                <span className="text-negative ml-sm">• Restante: {formatCurrency(valorRestante)}</span>
-              )}
+              {valorRestante > 0 && <span className={styles.restante}>• Restante: {formatCurrency(valorRestante)}</span>}
             </div>
           </div>
-          <div className={`text-sm font-semibold shrink-0 ${getStatusColor()}`}>
-            {getStatusLabel()}
-          </div>
+          <span className={`${styles.statusLabel} ${config.statusClass}`}>{config.label}</span>
         </div>
         {fatura.status !== 'pago_total' && (
-          <div className="flex gap-xs shrink-0 md:justify-start justify-end md:border-0 border-t border-border md:pt-0 pt-sm">
-            <button
-              className="py-xs px-md rounded-md text-sm font-medium cursor-pointer transition-all duration-200 border-none bg-positive text-white hover:bg-positive/90 disabled:opacity-60 disabled:cursor-not-allowed"
-              onClick={() => onMarcarComoPaga(fatura.id, fatura.valorTotal)}
-            >
+          <div className={styles.actions}>
+            <button className={styles.btnPrimary} onClick={() => onMarcarComoPaga(fatura.id, fatura.valorTotal)}>
               Pagar Total
             </button>
             {valorRestante > 0 && (
-              <button
-                className="py-xs px-md rounded-md text-sm font-medium cursor-pointer transition-all duration-200 border border-border bg-surface text-text-primary hover:bg-background disabled:opacity-60 disabled:cursor-not-allowed"
-                onClick={() => setShowPagamentoParcial(!showPagamentoParcial)}
-              >
+              <button className={styles.btnGhost} onClick={() => setShowPagamentoParcial(!showPagamentoParcial)}>
                 Pagar Parcial
               </button>
             )}
@@ -131,57 +96,33 @@ export function FaturaItem({ fatura, cartao, lancamentos, categorias, onMarcarCo
       </div>
 
       {showPagamentoParcial && fatura.status !== 'pago_total' && (
-        <div className="px-md pb-md border-t border-border pt-md">
-          <div className="flex flex-col gap-sm">
-            <label className="text-sm font-medium text-text-primary">
-              Valor a pagar (máximo: {formatCurrency(valorRestante)})
-            </label>
-            <div className="flex gap-xs">
-              <input
-                type="text"
-                inputMode="decimal"
-                className="flex-1 p-sm border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive"
-                value={valorParcial}
-                onChange={(e) => setValorParcial(handleNumberInputChange(e, true))}
-                placeholder="0,00"
-              />
-              <button
-                className="py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-all duration-200 border-none bg-positive text-white hover:bg-positive/90"
-                onClick={handlePagarParcial}
-              >
-                Confirmar
-              </button>
-              <button
-                className="py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-all duration-200 border border-border bg-surface text-text-primary hover:bg-background"
-                onClick={() => {
-                  setShowPagamentoParcial(false);
-                  setValorParcial('');
-                }}
-              >
-                Cancelar
-              </button>
-            </div>
+        <div className={styles.partialWrap}>
+          <label className={styles.partialLabel}>Valor a pagar (máximo: {formatCurrency(valorRestante)})</label>
+          <div className={styles.partialRow}>
+            <input
+              type="text"
+              inputMode="decimal"
+              className={styles.partialInput}
+              value={valorParcial}
+              onChange={(e) => setValorParcial(handleNumberInputChange(e, true))}
+              placeholder="0,00"
+            />
+            <button className={styles.btnPrimary} onClick={handlePagarParcial}>Confirmar</button>
+            <button className={styles.btnGhost} onClick={() => { setShowPagamentoParcial(false); setValorParcial(''); }}>
+              Cancelar
+            </button>
           </div>
         </div>
       )}
 
-      <div className="px-md pb-md border-t border-border">
-        <button
-          className="flex items-center justify-between w-full py-sm text-sm text-text-secondary hover:text-text-primary transition-colors duration-200"
-          onClick={() => setExpanded(!expanded)}
-        >
-          <span>{expanded ? 'Ocultar' : 'Ver'} detalhes da fatura</span>
-          {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
-        {expanded && (
-          <FaturaDetalhes
-            fatura={fatura}
-            cartao={cartao}
-            lancamentos={lancamentos}
-            categorias={categorias}
-          />
-        )}
-      </div>
+      <button className={styles.expandBtn} onClick={() => setExpanded(!expanded)}>
+        <span>{expanded ? 'Ocultar' : 'Ver'} detalhes da fatura</span>
+        {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+      </button>
+      {expanded && (
+        <FaturaDetalhes fatura={fatura} cartao={cartao} lancamentos={lancamentos} categorias={categorias} />
+      )}
+
       <ConfirmDialog
         isOpen={showErrorDialog}
         title="Erro no pagamento"

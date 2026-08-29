@@ -1,10 +1,8 @@
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { formatCurrency } from '@/utils';
-import { useTheme } from '@/contexts/ThemeContext';
-
-const COR_RECEITA = '#22c55e';
-const COR_DESPESA = '#ef4444';
+import { useChartTheme } from './chartTheme';
+import styles from './Relatorios.module.css';
 
 interface ChartReceitasDespesasProps {
   receita: number;
@@ -13,43 +11,26 @@ interface ChartReceitasDespesasProps {
 }
 
 export function ChartReceitasDespesas({ receita, despesa }: ChartReceitasDespesasProps) {
-  const { resolvedTheme } = useTheme();
+  const { apexBase, cores } = useChartTheme();
+
+  if (receita === 0 && despesa === 0) {
+    return <div className={styles.chartEmpty}>Nenhum dado no mês selecionado.</div>;
+  }
+
   const options: ApexOptions = {
-    theme: { mode: resolvedTheme === 'dark' ? 'dark' : 'light' },
-    chart: { type: 'bar', toolbar: { show: false }, foreColor: resolvedTheme === 'dark' ? '#94a3b8' : '#64748b' },
+    ...apexBase,
+    chart: { ...apexBase.chart, type: 'bar' },
     plotOptions: {
-      bar: {
-        horizontal: false,
-        columnWidth: '50%',
-        distributed: true,
-      },
+      bar: { horizontal: false, columnWidth: '50%', distributed: true },
     },
-    colors: [COR_RECEITA, COR_DESPESA],
+    colors: cores.polaridade,
     xaxis: { categories: ['Receitas', 'Despesas'] },
-    yaxis: {
-      labels: {
-        formatter: (val: number) => formatCurrency(val),
-      },
-    },
-    tooltip: {
-      y: {
-        formatter: (val: number) => formatCurrency(val),
-      },
-    },
+    yaxis: { labels: { formatter: (val: number) => formatCurrency(val) } },
+    tooltip: { ...apexBase.tooltip, y: { formatter: (val: number) => formatCurrency(val) } },
     legend: { show: false },
-    dataLabels: { enabled: false },
-    grid: { borderColor: resolvedTheme === 'dark' ? '#334155' : '#e5e7eb' },
   };
 
   const series = [{ name: 'Valor', data: [receita, despesa] }];
-
-  if (receita === 0 && despesa === 0) {
-    return (
-      <div className="flex items-center justify-center py-xl text-text-secondary">
-        Nenhum dado no mês selecionado.
-      </div>
-    );
-  }
 
   return (
     <div className="w-full min-w-0" style={{ height: 280 }}>

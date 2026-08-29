@@ -49,6 +49,7 @@ export interface Categoria {
   tipo: 'receita' | 'despesa';
   cor?: string;
   icone?: string;
+  padrao?: boolean; // Categoria padrão (não editável/deletável). No mock, inferido pelo prefixo "padrao-" do id.
 }
 
 export interface Lancamento {

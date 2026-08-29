@@ -1,5 +1,6 @@
 import type { Conta } from '@/types';
 import { ContaItem } from './ContaItem';
+import styles from './ContasList.module.css';
 
 interface ContasListProps {
   contas: Conta[];
@@ -48,7 +49,7 @@ export function ContasList({
 
       {contasInativas.length > 0 && (
         <div className="flex flex-col gap-sm">
-          <div className="text-sm font-semibold text-text-secondary uppercase mb-xs py-xs">Contas Inativas</div>
+          <div className={styles.sectionLabel}>Contas Inativas</div>
           {contasInativas.map((conta) => (
             <div key={conta.id} id={`conta-${conta.id}`}>
               <ContaItem

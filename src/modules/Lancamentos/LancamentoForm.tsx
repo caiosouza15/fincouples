@@ -8,6 +8,7 @@ import { useCasal } from '@/hooks/useCasal';
 import { formatNumberInput, parseNumberInput, handleNumberInputChange } from '@/utils/numberMask';
 import { CartaoForm } from '@/modules/Configuracoes/Cartoes/CartaoForm';
 import { ContaForm } from '@/modules/Configuracoes/Contas/ContaForm';
+import styles from './LancamentoForm.module.css';
 
 function getDataInicialParaMes(mes: string): string {
   const [year, month] = mes.split('-').map(Number);
@@ -75,20 +76,10 @@ export function LancamentoForm({
     });
   };
 
-  const getInputClassName = (hasError: boolean) =>
-    `p-md border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed ${
-      hasError
-        ? 'border-negative focus:border-negative focus:shadow-[0_0_0_3px_rgba(220,38,38,0.1)]'
-        : 'border-border focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)]'
-    }`;
+  const inputClassName = (hasError: boolean) => `${styles.input} ${hasError ? styles.inputError : ''}`;
 
-  // Filtrar categorias por tipo
   const categoriasFiltradas = categorias.filter((c) => c.tipo === tipo);
-
-  // Filtrar contas ativas
   const contasAtivas = contas.filter((c) => c.ativa);
-
-  // Filtrar cartões ativos
   const cartoesAtivos = cartoes.filter((c) => c.ativo);
 
   useEffect(() => {
@@ -106,7 +97,6 @@ export function LancamentoForm({
       setPessoaId(lancamento.pessoaId || 'usuario1');
       setPago(lancamento.pago !== undefined ? lancamento.pago : true);
     } else {
-      // Valores padrão para novo lançamento
       setPago(tipo === 'receita');
       setMetodoPagamento('debito');
       setParcelado(false);
@@ -115,17 +105,15 @@ export function LancamentoForm({
     }
   }, [lancamento, tipo]);
 
-  // Herdar proprietário do cartão quando cartão é selecionado
   useEffect(() => {
     if (metodoPagamento === 'cartao' && cartaoId && !isEditMode) {
-      const cartaoSelecionado = cartoes.find(c => c.id === cartaoId);
+      const cartaoSelecionado = cartoes.find((c) => c.id === cartaoId);
       if (cartaoSelecionado?.proprietarioId) {
         setPessoaId(cartaoSelecionado.proprietarioId);
       }
     }
   }, [cartaoId, metodoPagamento, cartoes, isEditMode]);
 
-  // Resetar categoria quando tipo mudar
   useEffect(() => {
     if (!isEditMode) {
       setCategoriaId('');
@@ -139,7 +127,6 @@ export function LancamentoForm({
 
     const errors: Record<string, string> = {};
 
-    // Validações
     const valorNum = parseNumberInput(valor);
     if (isNaN(valorNum) || valorNum <= 0) {
       errors.valor = valor.trim() ? 'Valor deve ser maior que zero' : 'Este campo é obrigatório';
@@ -188,7 +175,7 @@ export function LancamentoForm({
       setLoading(true);
 
       const nomePessoa = tipo === 'despesa' ? getNomePessoa(pessoaId) : undefined;
-      
+
       const lancamentoData: Omit<Lancamento, 'id'> | Lancamento = isEditMode && lancamento
         ? {
             ...lancamento,
@@ -233,9 +220,7 @@ export function LancamentoForm({
   };
 
   const handleClose = () => {
-    if (!loading) {
-      onClose();
-    }
+    if (!loading) onClose();
   };
 
   const handleOpenCartaoForm = () => {
@@ -292,44 +277,25 @@ export function LancamentoForm({
   }, [loading]);
 
   return (
-    <div
-      className="fixed top-0 left-0 right-0 bottom-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[1000] p-md animate-[fadeIn_0.2s_ease]"
-      onClick={handleClose}
-    >
-      <div
-        className="rounded-lg overflow-hidden w-full max-w-[500px] max-h-[90vh] shadow-lg bg-surface animate-[slideUp_0.3s_ease] md:max-w-[500px]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="overflow-y-auto max-h-[90vh]">
-          <div className="flex items-center justify-between p-lg border-b border-border">
-          <h3 className="text-xl font-semibold text-text-primary m-0">
+    <div className={styles.overlay} onClick={handleClose}>
+      <div className={styles.panel} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.header}>
+          <h3 className={styles.title}>
             {isEditMode ? 'Editar Lançamento' : tipo === 'despesa' ? 'Nova Despesa' : 'Nova Receita'}
           </h3>
-          <button
-            className="w-8 h-8 flex items-center justify-center bg-transparent border-none rounded-sm cursor-pointer text-text-secondary transition-all duration-200 hover:bg-background hover:text-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={handleClose}
-            aria-label="Fechar"
-            disabled={loading}
-          >
-            <X size={20} />
+          <button className={styles.closeBtn} onClick={handleClose} aria-label="Fechar" disabled={loading}>
+            <X size={18} />
           </button>
         </div>
 
-        <form ref={formRef} onSubmit={handleSubmit} className="p-lg flex flex-col gap-md" noValidate>
-          {error && (
-            <div
-              className="p-md bg-negative/10 border border-negative rounded-md text-negative text-sm"
-              role="alert"
-            >
-              {error}
-            </div>
-          )}
+        <form ref={formRef} onSubmit={handleSubmit} className={styles.form} noValidate>
+          {error && <div className={styles.errorBanner} role="alert">{error}</div>}
 
           {!tipoPreSelecionado && (
-            <div className="flex flex-col gap-xs">
-              <label className="text-sm font-medium text-text-primary">Tipo *</label>
-              <div className="flex gap-md">
-                <label className="flex items-center gap-sm cursor-pointer flex-1 p-md border border-border rounded-md hover:bg-background transition-colors">
+            <div className={styles.field}>
+              <label className={styles.label}>Tipo *</label>
+              <div className={styles.radioCardGroup}>
+                <label className={`${styles.radioCard} ${tipo === 'despesa' ? styles.radioCardChecked : ''}`}>
                   <input
                     type="radio"
                     name="tipo"
@@ -337,11 +303,10 @@ export function LancamentoForm({
                     checked={tipo === 'despesa'}
                     onChange={(e) => setTipo(e.target.value as 'despesa')}
                     disabled={loading}
-                    className="cursor-pointer"
                   />
-                  <span className="text-text-primary">Despesa</span>
+                  <span className={styles.radioCardLabel}>Despesa</span>
                 </label>
-                <label className="flex items-center gap-sm cursor-pointer flex-1 p-md border border-border rounded-md hover:bg-background transition-colors">
+                <label className={`${styles.radioCard} ${tipo === 'receita' ? styles.radioCardChecked : ''}`}>
                   <input
                     type="radio"
                     name="tipo"
@@ -349,105 +314,72 @@ export function LancamentoForm({
                     checked={tipo === 'receita'}
                     onChange={(e) => setTipo(e.target.value as 'receita')}
                     disabled={loading}
-                    className="cursor-pointer"
                   />
-                  <span className="text-text-primary">Receita</span>
+                  <span className={styles.radioCardLabel}>Receita</span>
                 </label>
               </div>
             </div>
           )}
 
-          <div className="flex flex-col gap-xs">
-            <label htmlFor="valor" className="text-sm font-medium text-text-primary">
-              Valor *
-            </label>
+          <div className={styles.field}>
+            <label htmlFor="valor" className={styles.label}>Valor *</label>
             <input
               ref={valorInputRef}
               id="valor"
               type="text"
               inputMode="decimal"
-              className={getInputClassName(!!fieldErrors.valor)}
+              className={inputClassName(!!fieldErrors.valor)}
               value={valor}
-              onChange={(e) => {
-                clearFieldError('valor');
-                setValor(handleNumberInputChange(e, true));
-              }}
+              onChange={(e) => { clearFieldError('valor'); setValor(handleNumberInputChange(e, true)); }}
               placeholder="0,00"
               disabled={loading}
             />
-            {fieldErrors.valor && (
-              <p className="text-sm text-negative" role="alert">
-                {fieldErrors.valor}
-              </p>
-            )}
+            {fieldErrors.valor && <p className={styles.fieldError}>{fieldErrors.valor}</p>}
           </div>
 
-          <div className="flex flex-col gap-xs">
-            <label htmlFor="categoria" className="text-sm font-medium text-text-primary">
-              Categoria *
-            </label>
+          <div className={styles.field}>
+            <label htmlFor="categoria" className={styles.label}>Categoria *</label>
             <select
               id="categoria"
-              className={getInputClassName(!!fieldErrors.categoriaId)}
+              className={styles.select}
               value={categoriaId}
-              onChange={(e) => {
-                clearFieldError('categoriaId');
-                setCategoriaId(e.target.value);
-              }}
+              onChange={(e) => { clearFieldError('categoriaId'); setCategoriaId(e.target.value); }}
               disabled={loading || categoriasFiltradas.length === 0}
             >
               <option value="">Selecione uma categoria</option>
               {categoriasFiltradas.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.nome}
-                </option>
+                <option key={cat.id} value={cat.id}>{cat.nome}</option>
               ))}
             </select>
-            {fieldErrors.categoriaId && (
-              <p className="text-sm text-negative" role="alert">
-                {fieldErrors.categoriaId}
-              </p>
-            )}
+            {fieldErrors.categoriaId && <p className={styles.fieldError}>{fieldErrors.categoriaId}</p>}
             {categoriasFiltradas.length === 0 && (
-              <p className="text-sm text-text-muted">
-                Nenhuma categoria de {tipo} cadastrada. Cadastre uma categoria primeiro.
-              </p>
+              <p className={styles.hint}>Nenhuma categoria de {tipo} cadastrada. Cadastre uma categoria primeiro.</p>
             )}
           </div>
 
           {tipo === 'despesa' && (
-            <div className="flex flex-col gap-xs">
-              <label className="text-sm font-medium text-text-primary">
-                Quem realizou? *
-              </label>
-              <div className="flex gap-md">
-                <label className="flex items-center gap-sm cursor-pointer flex-1 p-md border border-border rounded-md hover:bg-background transition-colors">
+            <div className={styles.field}>
+              <label className={styles.label}>Quem realizou? *</label>
+              <div className={styles.radioCardGroup}>
+                <label className={`${styles.radioCard} ${pessoaId === 'usuario1' ? styles.radioCardChecked : ''}`}>
                   <input
                     type="radio"
                     name="pessoa"
                     checked={pessoaId === 'usuario1'}
-                    onChange={() => {
-                      clearFieldError('pessoaId');
-                      setPessoaId('usuario1');
-                    }}
+                    onChange={() => { clearFieldError('pessoaId'); setPessoaId('usuario1'); }}
                     disabled={loading}
-                    className="cursor-pointer"
                   />
-                  <span className="text-text-primary">{usuario1Nome}</span>
+                  <span className={styles.radioCardLabel}>{usuario1Nome}</span>
                 </label>
-                <label className="flex items-center gap-sm cursor-pointer flex-1 p-md border border-border rounded-md hover:bg-background transition-colors">
+                <label className={`${styles.radioCard} ${pessoaId === 'usuario2' ? styles.radioCardChecked : ''}`}>
                   <input
                     type="radio"
                     name="pessoa"
                     checked={pessoaId === 'usuario2'}
-                    onChange={() => {
-                      clearFieldError('pessoaId');
-                      setPessoaId('usuario2');
-                    }}
+                    onChange={() => { clearFieldError('pessoaId'); setPessoaId('usuario2'); }}
                     disabled={loading}
-                    className="cursor-pointer"
                   />
-                  <span className="text-text-primary">{usuario2Nome}</span>
+                  <span className={styles.radioCardLabel}>{usuario2Nome}</span>
                 </label>
               </div>
             </div>
@@ -455,56 +387,42 @@ export function LancamentoForm({
 
           {tipo === 'despesa' && (
             <>
-              <div className="flex flex-col gap-xs">
-                <label className="text-sm font-medium text-text-primary">Método de Pagamento *</label>
-                <div className="flex gap-md">
-                  <label className="flex items-center gap-sm cursor-pointer flex-1 p-md border border-border rounded-md hover:bg-background transition-colors">
+              <div className={styles.field}>
+                <label className={styles.label}>Método de Pagamento *</label>
+                <div className={styles.radioCardGroup}>
+                  <label className={`${styles.radioCard} ${metodoPagamento === 'debito' ? styles.radioCardChecked : ''}`}>
                     <input
                       type="radio"
                       name="metodoPagamento"
                       value="debito"
                       checked={metodoPagamento === 'debito'}
-                      onChange={() => {
-                        setMetodoPagamento('debito');
-                        setCartaoId('');
-                        setParcelado(false);
-                      }}
+                      onChange={() => { setMetodoPagamento('debito'); setCartaoId(''); setParcelado(false); }}
                       disabled={loading}
-                      className="cursor-pointer"
                     />
-                    <span className="text-text-primary">Débito</span>
+                    <span className={styles.radioCardLabel}>Débito</span>
                   </label>
-                  <label className="flex items-center gap-sm cursor-pointer flex-1 p-md border border-border rounded-md hover:bg-background transition-colors">
+                  <label className={`${styles.radioCard} ${metodoPagamento === 'cartao' ? styles.radioCardChecked : ''}`}>
                     <input
                       type="radio"
                       name="metodoPagamento"
                       value="cartao"
                       checked={metodoPagamento === 'cartao'}
-                      onChange={() => {
-                        setMetodoPagamento('cartao');
-                        setContaId('');
-                      }}
+                      onChange={() => { setMetodoPagamento('cartao'); setContaId(''); }}
                       disabled={loading}
-                      className="cursor-pointer"
                     />
-                    <span className="text-text-primary">Cartão de Crédito</span>
+                    <span className={styles.radioCardLabel}>Cartão de Crédito</span>
                   </label>
                 </div>
               </div>
 
               {metodoPagamento === 'debito' && (
-                <div className="flex flex-col gap-xs">
-                  <label htmlFor="conta" className="text-sm font-medium text-text-primary">
-                    Conta *
-                  </label>
+                <div className={styles.field}>
+                  <label htmlFor="conta" className={styles.label}>Conta *</label>
                   <select
                     id="conta"
-                    className={getInputClassName(!!fieldErrors.contaId)}
+                    className={styles.select}
                     value={contaId}
-                    onChange={(e) => {
-                      clearFieldError('contaId');
-                      setContaId(e.target.value);
-                    }}
+                    onChange={(e) => { clearFieldError('contaId'); setContaId(e.target.value); }}
                     disabled={loading || contasAtivas.length === 0}
                   >
                     <option value="">Selecione uma conta</option>
@@ -514,20 +432,11 @@ export function LancamentoForm({
                       </option>
                     ))}
                   </select>
-                  {fieldErrors.contaId && (
-                    <p className="text-sm text-negative" role="alert">
-                      {fieldErrors.contaId}
-                    </p>
-                  )}
+                  {fieldErrors.contaId && <p className={styles.fieldError}>{fieldErrors.contaId}</p>}
                   {contasAtivas.length === 0 && (
-                    <p className="text-sm text-text-muted">
+                    <p className={styles.hint}>
                       Nenhuma conta cadastrada.{' '}
-                      <button
-                        type="button"
-                        className="text-positive underline hover:text-positive/90 transition-colors duration-200 cursor-pointer bg-transparent border-none p-0 font-inherit text-inherit"
-                        onClick={handleOpenContaForm}
-                        disabled={loading}
-                      >
+                      <button type="button" className={styles.hintLink} onClick={handleOpenContaForm} disabled={loading}>
                         Adicionar conta
                       </button>
                     </p>
@@ -537,18 +446,13 @@ export function LancamentoForm({
 
               {metodoPagamento === 'cartao' && (
                 <>
-                  <div className="flex flex-col gap-xs">
-                    <label htmlFor="cartao" className="text-sm font-medium text-text-primary">
-                      Cartão de Crédito *
-                    </label>
+                  <div className={styles.field}>
+                    <label htmlFor="cartao" className={styles.label}>Cartão de Crédito *</label>
                     <select
                       id="cartao"
-                      className={getInputClassName(!!fieldErrors.cartaoId)}
+                      className={styles.select}
                       value={cartaoId}
-                      onChange={(e) => {
-                        clearFieldError('cartaoId');
-                        setCartaoId(e.target.value);
-                      }}
+                      onChange={(e) => { clearFieldError('cartaoId'); setCartaoId(e.target.value); }}
                       disabled={loading || cartoesAtivos.length === 0}
                     >
                       <option value="">Selecione um cartão</option>
@@ -558,78 +462,58 @@ export function LancamentoForm({
                         </option>
                       ))}
                     </select>
-                    {fieldErrors.cartaoId && (
-                      <p className="text-sm text-negative" role="alert">
-                        {fieldErrors.cartaoId}
-                      </p>
-                    )}
+                    {fieldErrors.cartaoId && <p className={styles.fieldError}>{fieldErrors.cartaoId}</p>}
                     {cartoesAtivos.length === 0 && (
-                      <p className="text-sm text-text-muted">
+                      <p className={styles.hint}>
                         Nenhum cartão cadastrado.{' '}
-                        <button
-                          type="button"
-                          className="text-positive underline hover:text-positive/90 transition-colors duration-200 cursor-pointer bg-transparent border-none p-0 font-inherit text-inherit"
-                          onClick={handleOpenCartaoForm}
-                          disabled={loading}
-                        >
+                        <button type="button" className={styles.hintLink} onClick={handleOpenCartaoForm} disabled={loading}>
                           Adicionar cartão
                         </button>
                       </p>
                     )}
                   </div>
 
-                  <div className="flex flex-col gap-xs">
-                    <label className="text-sm font-medium text-text-primary">Forma de Pagamento</label>
-                    <div className="flex gap-md">
-                      <label className="flex items-center gap-sm cursor-pointer flex-1 p-md border border-border rounded-md hover:bg-background transition-colors">
+                  <div className={styles.field}>
+                    <label className={styles.label}>Forma de Pagamento</label>
+                    <div className={styles.radioCardGroup}>
+                      <label className={`${styles.radioCard} ${!parcelado ? styles.radioCardChecked : ''}`}>
                         <input
                           type="radio"
                           name="parcelado"
                           checked={!parcelado}
                           onChange={() => setParcelado(false)}
                           disabled={loading || !cartaoId}
-                          className="cursor-pointer"
                         />
-                        <span className="text-text-primary">À vista</span>
+                        <span className={styles.radioCardLabel}>À vista</span>
                       </label>
-                      <label className="flex items-center gap-sm cursor-pointer flex-1 p-md border border-border rounded-md hover:bg-background transition-colors">
+                      <label className={`${styles.radioCard} ${parcelado ? styles.radioCardChecked : ''}`}>
                         <input
                           type="radio"
                           name="parcelado"
                           checked={parcelado}
                           onChange={() => setParcelado(true)}
                           disabled={loading || !cartaoId}
-                          className="cursor-pointer"
                         />
-                        <span className="text-text-primary">Parcelado</span>
+                        <span className={styles.radioCardLabel}>Parcelado</span>
                       </label>
                     </div>
                   </div>
 
                   {parcelado && cartaoId && (
-                    <div className="flex flex-col gap-xs">
-                      <label htmlFor="numeroParcelas" className="text-sm font-medium text-text-primary">
-                        Número de Parcelas *
-                      </label>
+                    <div className={styles.field}>
+                      <label htmlFor="numeroParcelas" className={styles.label}>Número de Parcelas *</label>
                       <input
                         id="numeroParcelas"
                         type="text"
                         inputMode="numeric"
-                        className={getInputClassName(!!fieldErrors.numeroParcelas)}
+                        className={inputClassName(!!fieldErrors.numeroParcelas)}
                         value={numeroParcelas}
-                        onChange={(e) => {
-                          clearFieldError('numeroParcelas');
-                          setNumeroParcelas(handleNumberInputChange(e, false));
-                        }}
+                        onChange={(e) => { clearFieldError('numeroParcelas'); setNumeroParcelas(handleNumberInputChange(e, false)); }}
                         placeholder="1"
                         disabled={loading}
                       />
-                      {fieldErrors.numeroParcelas && (
-                        <p className="text-sm text-negative" role="alert">
-                          {fieldErrors.numeroParcelas}
-                        </p>
-                      )}
-                      <p className="text-sm text-text-muted">
+                      {fieldErrors.numeroParcelas && <p className={styles.fieldError}>{fieldErrors.numeroParcelas}</p>}
+                      <p className={styles.hint}>
                         Valor por parcela: R$ {valor && numeroParcelas ? formatNumberInput(parseNumberInput(valor) / parseNumberInput(numeroParcelas)) : '0,00'}
                       </p>
                     </div>
@@ -640,18 +524,13 @@ export function LancamentoForm({
           )}
 
           {tipo === 'receita' && (
-            <div className="flex flex-col gap-xs">
-              <label htmlFor="conta-receita" className="text-sm font-medium text-text-primary">
-                Conta *
-              </label>
+            <div className={styles.field}>
+              <label htmlFor="conta-receita" className={styles.label}>Conta *</label>
               <select
                 id="conta-receita"
-                className={getInputClassName(!!fieldErrors.contaId)}
+                className={styles.select}
                 value={contaId}
-                onChange={(e) => {
-                  clearFieldError('contaId');
-                  setContaId(e.target.value);
-                }}
+                onChange={(e) => { clearFieldError('contaId'); setContaId(e.target.value); }}
                 disabled={loading || contasAtivas.length === 0}
               >
                 <option value="">Selecione uma conta</option>
@@ -661,20 +540,11 @@ export function LancamentoForm({
                   </option>
                 ))}
               </select>
-              {fieldErrors.contaId && (
-                <p className="text-sm text-negative" role="alert">
-                  {fieldErrors.contaId}
-                </p>
-              )}
+              {fieldErrors.contaId && <p className={styles.fieldError}>{fieldErrors.contaId}</p>}
               {contasAtivas.length === 0 && (
-                <p className="text-sm text-text-muted">
+                <p className={styles.hint}>
                   Nenhuma conta cadastrada.{' '}
-                  <button
-                    type="button"
-                    className="text-positive underline hover:text-positive/90 transition-colors duration-200 cursor-pointer bg-transparent border-none p-0 font-inherit text-inherit"
-                    onClick={handleOpenContaForm}
-                    disabled={loading}
-                  >
+                  <button type="button" className={styles.hintLink} onClick={handleOpenContaForm} disabled={loading}>
                     Adicionar conta
                   </button>
                 </p>
@@ -682,36 +552,25 @@ export function LancamentoForm({
             </div>
           )}
 
-          <div className="flex flex-col gap-xs">
-            <label htmlFor="data" className="text-sm font-medium text-text-primary">
-              Data *
-            </label>
+          <div className={styles.field}>
+            <label htmlFor="data" className={styles.label}>Data *</label>
             <input
               id="data"
               type="date"
-              className={getInputClassName(!!fieldErrors.data)}
+              className={inputClassName(!!fieldErrors.data)}
               value={data}
-              onChange={(e) => {
-                clearFieldError('data');
-                setData(e.target.value);
-              }}
+              onChange={(e) => { clearFieldError('data'); setData(e.target.value); }}
               disabled={loading}
               max={new Date().toISOString().split('T')[0]}
             />
-            {fieldErrors.data && (
-              <p className="text-sm text-negative" role="alert">
-                {fieldErrors.data}
-              </p>
-            )}
+            {fieldErrors.data && <p className={styles.fieldError}>{fieldErrors.data}</p>}
           </div>
 
-          <div className="flex flex-col gap-xs">
-            <label htmlFor="descricao" className="text-sm font-medium text-text-primary">
-              Descrição
-            </label>
+          <div className={styles.field}>
+            <label htmlFor="descricao" className={styles.label}>Descrição</label>
             <textarea
               id="descricao"
-              className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed resize-none"
+              className={styles.textarea}
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
               placeholder="Descrição opcional do lançamento"
@@ -721,56 +580,34 @@ export function LancamentoForm({
           </div>
 
           {tipo === 'despesa' && (
-            <div className="flex flex-col gap-xs">
-              <label className="flex items-center gap-sm cursor-pointer text-sm text-text-primary">
-                <input
-                  type="checkbox"
-                  className="w-[18px] h-[18px] cursor-pointer"
-                  checked={pago}
-                  onChange={(e) => setPago(e.target.checked)}
-                  disabled={loading}
-                />
+            <div className={styles.field}>
+              <label className={styles.checkboxLabel}>
+                <input type="checkbox" checked={pago} onChange={(e) => setPago(e.target.checked)} disabled={loading} />
                 <span>Marcar como pago</span>
               </label>
             </div>
           )}
 
-          <div className="flex flex-col-reverse md:flex-row gap-md justify-end mt-md pt-md border-t border-border">
-            <button
-              type="button"
-              className="py-md px-lg rounded-md text-base font-medium cursor-pointer transition-all duration-200 border-none bg-surface text-text-primary border border-border hover:bg-background disabled:opacity-60 disabled:cursor-not-allowed md:w-auto w-full"
-              onClick={handleClose}
-              disabled={loading}
-            >
+          <div className={styles.actions}>
+            <button type="button" className={styles.btnGhost} onClick={handleClose} disabled={loading}>
               Cancelar
             </button>
-            <button
-              type="submit"
-              className="py-md px-lg rounded-md text-base font-medium cursor-pointer transition-all duration-200 border-none bg-positive text-white hover:bg-positive/90 disabled:opacity-60 disabled:cursor-not-allowed md:w-auto w-full"
-              disabled={loading}
-            >
+            <button type="submit" className={styles.btnPrimary} disabled={loading}>
               {loading ? 'Salvando...' : isEditMode ? 'Salvar' : 'Criar Lançamento'}
             </button>
           </div>
         </form>
-        </div>
       </div>
 
       {showCartaoForm && (
-        <div className="fixed inset-0 z-[1100]">
-          <CartaoForm
-            onClose={handleCloseCartaoForm}
-            onSave={handleSaveCartao}
-          />
+        <div className={styles.nestedModalWrap} onClick={(e) => e.stopPropagation()}>
+          <CartaoForm onClose={handleCloseCartaoForm} onSave={handleSaveCartao} />
         </div>
       )}
 
       {showContaForm && (
-        <div className="fixed inset-0 z-[1100]">
-          <ContaForm
-            onClose={handleCloseContaForm}
-            onSave={handleSaveConta}
-          />
+        <div className={styles.nestedModalWrap} onClick={(e) => e.stopPropagation()}>
+          <ContaForm onClose={handleCloseContaForm} onSave={handleSaveConta} />
         </div>
       )}
     </div>

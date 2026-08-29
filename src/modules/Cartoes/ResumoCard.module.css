@@ -1,0 +1,43 @@
+/*
+ * Tokens vêm de src/styles/glass-tokens.css, importado globalmente.
+ */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.stat {
+  border-radius: 20px;
+  padding: 18px;
+  background: var(--glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow);
+}
+
+.statLabel {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 10px;
+}
+
+.statValue { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); }
+.statValueNegative { color: #EF4444; }
+.statSub { font-size: 12px; color: var(--ink-3); margin-top: 4px; }
+
+.progressTrack { height: 7px; border-radius: 999px; background: var(--track); overflow: hidden; margin-top: 12px; }
+.progressFill { height: 100%; border-radius: 999px; transition: width .3s ease; }
+.progressLow { background: var(--p1-grad); }
+.progressMed { background: linear-gradient(135deg, #FBBF24, #F59E0B); }
+.progressHigh { background: linear-gradient(135deg, #F87171, #EF4444); }
+
+.statusRow { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 12px; font-weight: 600; }
+.statusNegative { color: #EF4444; }
+.statusWarning { color: #F59E0B; }
+.statusNeutral { color: var(--ink-3); }

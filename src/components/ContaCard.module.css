@@ -1,0 +1,122 @@
+/*
+ * Tokens vêm de src/styles/glass-tokens.css, importado globalmente.
+ */
+
+.card {
+  position: relative;
+  border-radius: 24px;
+  padding: 20px;
+  background: var(--glass);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  transition: transform .28s cubic-bezier(.2, .7, .3, 1), box-shadow .28s cubic-bezier(.2, .7, .3, 1);
+}
+
+.card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hi); }
+
+.cardInactive { opacity: .6; }
+
+.actions {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+
+.card:hover .actions,
+.card:focus-within .actions { opacity: 1; }
+
+.actionBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--glass-soft);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--stroke);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: color .2s ease, border-color .2s ease;
+}
+
+.actionBtn:hover { color: var(--ink); border-color: var(--ink-3); }
+.actionBtnDanger:hover { color: #EF4444; border-color: #EF4444; }
+.actionBtnWarn:hover { color: #F59E0B; border-color: #F59E0B; }
+
+.header { display: flex; align-items: flex-start; gap: 12px; }
+
+.icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--p1-soft);
+  color: var(--p1);
+}
+
+.iconP2 { background: var(--p2-soft); color: var(--p2); }
+
+.headerText { flex: 1; min-width: 0; }
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subtitle { font-size: 12.5px; color: var(--ink-3); }
+
+.badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+
+.badge {
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--track);
+  color: var(--ink-2);
+}
+
+.badgeP1 { background: var(--p1-soft); color: var(--p1); }
+.badgeP2 { background: var(--p2-soft); color: var(--p2); }
+.badgeWarn { background: rgba(245, 158, 11, .14); color: #F59E0B; }
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid var(--hair);
+  margin-top: auto;
+}
+
+.footerLabel { font-size: 12px; color: var(--ink-3); }
+
+.value {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.valuePositive { color: var(--good); }
+.valueNegative { color: #EF4444; }

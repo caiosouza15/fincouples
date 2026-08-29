@@ -1,0 +1,41 @@
+/*
+ * Tokens vêm de src/styles/glass-tokens.css, importado globalmente.
+ */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.stat {
+  border-radius: 20px;
+  padding: 18px;
+  background: var(--glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow);
+}
+
+.statLabel {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.statValue { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); }
+.statSub { font-size: 12px; color: var(--ink-3); margin-top: 4px; }
+
+.rows { display: flex; flex-direction: column; gap: 9px; }
+
+.rowItem { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+.rowLabel { font-size: 13px; color: var(--ink-2); display: flex; align-items: center; gap: 6px; }
+.rowValue { font-size: 13px; font-weight: 600; color: var(--ink); }

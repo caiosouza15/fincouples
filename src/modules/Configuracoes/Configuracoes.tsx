@@ -128,7 +128,7 @@ const Configuracoes = () => {
   };
 
   return (
-    <div className="max-w-[1280px] mx-auto pb-xl">
+    <div className="pb-xl">
       <h1 className="text-2xl md:text-3xl font-bold text-text-primary mb-lg">Configurações</h1>
 
       {/* Sistema de Abas */}

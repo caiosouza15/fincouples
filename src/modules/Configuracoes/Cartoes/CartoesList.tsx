@@ -1,5 +1,6 @@
 import type { CartaoCredito } from '@/types';
 import { CartaoItem } from './CartaoItem';
+import styles from './CartoesList.module.css';
 
 interface CartoesListProps {
   cartoes: CartaoCredito[];
@@ -16,7 +17,6 @@ export function CartoesList({
   onDelete,
   onToggleAtivo,
 }: CartoesListProps) {
-  // Separar cartões ativos e inativos
   const cartoesAtivos = cartoes.filter((c) => c.ativo);
   const cartoesInativos = cartoes.filter((c) => !c.ativo);
 
@@ -43,7 +43,7 @@ export function CartoesList({
 
       {cartoesInativos.length > 0 && (
         <div className="flex flex-col gap-sm">
-          <div className="text-sm font-semibold text-text-secondary uppercase mb-xs py-xs">Cartões Inativos</div>
+          <div className={styles.sectionLabel}>Cartões Inativos</div>
           {cartoesInativos.map((cartao) => (
             <CartaoItem
               key={cartao.id}

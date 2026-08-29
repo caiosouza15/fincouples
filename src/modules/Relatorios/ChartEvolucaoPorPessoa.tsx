@@ -1,17 +1,15 @@
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { formatCurrency } from '@/utils';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useChartTheme } from './chartTheme';
 import { getUltimos12Meses, formatMonthLabel } from '@/utils/relatoriosUtils';
 import { useLancamentos } from '@/hooks/useLancamentos';
 import { useCasal } from '@/hooks/useCasal';
 import { useSelectedMonth } from '@/contexts/SelectedMonthContext';
-
-const COR_USUARIO1 = '#3b82f6';
-const COR_USUARIO2 = '#8b5cf6';
+import styles from './Relatorios.module.css';
 
 export function ChartEvolucaoPorPessoa() {
-  const { resolvedTheme } = useTheme();
+  const { apexBase, cores } = useChartTheme();
   const { getLancamentosPorMes } = useLancamentos();
   const { usuario1Nome, usuario2Nome } = useCasal();
   const { selectedMonth } = useSelectedMonth();
@@ -31,25 +29,20 @@ export function ChartEvolucaoPorPessoa() {
       .reduce((s, l) => s + l.valor, 0);
   });
 
+  const temDados = gastos1.some((v) => v > 0) || gastos2.some((v) => v > 0);
+  if (!temDados) {
+    return <div className={styles.chartEmpty}>Nenhum gasto por pessoa nos últimos 12 meses.</div>;
+  }
+
   const options: ApexOptions = {
-    theme: { mode: resolvedTheme === 'dark' ? 'dark' : 'light' },
-    chart: { type: 'line', toolbar: { show: false }, zoom: { enabled: false }, foreColor: resolvedTheme === 'dark' ? '#94a3b8' : '#64748b' },
+    ...apexBase,
+    chart: { ...apexBase.chart, type: 'line', zoom: { enabled: false } },
     stroke: { curve: 'smooth', width: 2 },
-    colors: [COR_USUARIO1, COR_USUARIO2],
+    colors: cores.pessoa,
     xaxis: { categories: labels },
-    yaxis: {
-      labels: {
-        formatter: (val: number) => formatCurrency(val),
-      },
-    },
-    tooltip: {
-      y: {
-        formatter: (val: number) => formatCurrency(val),
-      },
-    },
+    yaxis: { labels: { formatter: (val: number) => formatCurrency(val) } },
+    tooltip: { ...apexBase.tooltip, y: { formatter: (val: number) => formatCurrency(val) } },
     legend: { position: 'top', horizontalAlign: 'right' },
-    dataLabels: { enabled: false },
-    grid: { borderColor: resolvedTheme === 'dark' ? '#334155' : '#e5e7eb' },
   };
 
   const series = [
@@ -57,18 +50,9 @@ export function ChartEvolucaoPorPessoa() {
     { name: usuario2Nome, data: gastos2 },
   ];
 
-  const temDados = gastos1.some((v) => v > 0) || gastos2.some((v) => v > 0);
-  if (!temDados) {
-    return (
-      <div className="flex items-center justify-center py-xl text-text-secondary">
-        Nenhum gasto por pessoa nos últimos 12 meses.
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full min-w-0" style={{ height: 280 }}>
-      <Chart options={options} series={series} type="line" height={280} />
+    <div className="w-full min-w-0" style={{ height: 300 }}>
+      <Chart options={options} series={series} type="line" height={300} />
     </div>
   );
 }

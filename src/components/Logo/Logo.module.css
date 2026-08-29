@@ -1,0 +1,69 @@
+/*
+ * Wordmark "Nos" com o acento agudo desenhado via pseudo-elemento
+ * (não é tipográfico, pra poder colorir com o gradiente da marca).
+ * Todas as medidas em em — escala junto com o font-size do elemento.
+ */
+
+.lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42em;
+  line-height: 1;
+}
+
+.vertical {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  line-height: 1;
+}
+
+.mark {
+  display: inline-flex;
+}
+
+.word {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  color: var(--ink);
+  display: inline-block;
+}
+
+.wordMono {
+  color: currentColor;
+}
+
+.o {
+  position: relative;
+}
+
+.o::after {
+  content: '';
+  position: absolute;
+  left: 0.16em;
+  top: 0.16em;
+  width: 0.36em;
+  height: 0.105em;
+  border-radius: 99px;
+  transform: rotate(-20deg);
+  background: linear-gradient(90deg, #3EE0DD, #17BEBB);
+}
+
+.wordMono .o::after {
+  background: currentColor;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

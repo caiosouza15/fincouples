@@ -1,0 +1,63 @@
+/*
+ * Tokens vêm de src/styles/glass-tokens.css, importado globalmente.
+ */
+
+.wrap { padding: 16px; border-top: 1px solid var(--hair); }
+.title { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 14px; }
+
+.groups { display: flex; flex-direction: column; gap: 12px; }
+
+.group { border-radius: 16px; background: var(--glass); border: 1px solid var(--hair); padding: 14px; }
+
+.groupHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.groupHeaderLeft { display: flex; align-items: center; gap: 8px; }
+
+.groupIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--track);
+  color: var(--ink-2);
+  flex-shrink: 0;
+}
+
+.groupName { font-size: 13px; font-weight: 500; color: var(--ink); }
+.groupTotal { font-size: 13px; font-weight: 600; color: var(--ink); }
+
+.items { display: flex; flex-direction: column; gap: 6px; }
+
+.itemRow { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 10px; background: var(--glass-soft); }
+.itemLeft { flex: 1; min-width: 0; }
+.itemTop { display: flex; align-items: center; gap: 6px; }
+.itemDesc { font-size: 12.5px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.itemBadge { font-size: 9.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; flex-shrink: 0; }
+.itemBadgeP1 { background: var(--p1-soft); color: var(--p1); }
+.itemBadgeP2 { background: var(--p2-soft); color: var(--p2); }
+
+.itemDate { font-size: 11px; color: var(--ink-3); margin-top: 1px; }
+.itemValue { font-size: 12.5px; font-weight: 600; color: #EF4444; flex-shrink: 0; margin-left: 8px; }
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--hair);
+}
+
+.footerLabel { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.footerValue { font-size: 16px; font-weight: 700; color: var(--ink); }
+
+.empty {
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--glass-soft);
+  font-size: 12.5px;
+  color: var(--ink-3);
+  text-align: center;
+}

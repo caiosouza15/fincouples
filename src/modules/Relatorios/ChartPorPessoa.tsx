@@ -1,7 +1,7 @@
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { formatCurrency } from '@/utils';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useChartTheme } from './chartTheme';
 
 interface MetricasPessoa {
   nome: string;
@@ -11,41 +11,24 @@ interface MetricasPessoa {
 }
 
 interface ChartPorPessoaProps {
-  metricas: [MetricasPessoa, MetricasPessoa];
+  metricas: readonly [MetricasPessoa, MetricasPessoa];
 }
 
-const COR_USUARIO1 = '#3b82f6';
-const COR_USUARIO2 = '#8b5cf6';
-
 export function ChartPorPessoa({ metricas }: ChartPorPessoaProps) {
-  const { resolvedTheme } = useTheme();
+  const { apexBase, cores } = useChartTheme();
   const [m1, m2] = metricas;
 
   const options: ApexOptions = {
-    theme: { mode: resolvedTheme === 'dark' ? 'dark' : 'light' },
-    chart: { type: 'bar', toolbar: { show: false }, stacked: false, foreColor: resolvedTheme === 'dark' ? '#94a3b8' : '#64748b' },
+    ...apexBase,
+    chart: { ...apexBase.chart, type: 'bar', stacked: false },
     plotOptions: {
-      bar: {
-        horizontal: false,
-        columnWidth: '60%',
-        borderRadius: 4,
-      },
+      bar: { horizontal: false, columnWidth: '60%', borderRadius: 4 },
     },
-    colors: [COR_USUARIO1, COR_USUARIO2],
+    colors: cores.pessoa,
     xaxis: { categories: ['Gastos', 'Receitas', 'Saldo'] },
-    yaxis: {
-      labels: {
-        formatter: (val: number) => formatCurrency(val),
-      },
-    },
-    tooltip: {
-      y: {
-        formatter: (val: number) => formatCurrency(val),
-      },
-    },
+    yaxis: { labels: { formatter: (val: number) => formatCurrency(val) } },
+    tooltip: { ...apexBase.tooltip, y: { formatter: (val: number) => formatCurrency(val) } },
     legend: { position: 'top', horizontalAlign: 'right' },
-    dataLabels: { enabled: false },
-    grid: { borderColor: resolvedTheme === 'dark' ? '#334155' : '#e5e7eb' },
   };
 
   const series = [

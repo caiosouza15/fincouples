@@ -1,11 +1,9 @@
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { formatCurrency } from '@/utils';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useChartTheme } from './chartTheme';
 import { getUltimos12Meses, formatMonthLabel } from '@/utils/relatoriosUtils';
-
-const COR_RECEITA = '#22c55e';
-const COR_DESPESA = '#ef4444';
+import styles from './Relatorios.module.css';
 
 interface ChartEvolucaoMensalProps {
   selectedMonth: string;
@@ -18,35 +16,27 @@ export function ChartEvolucaoMensal({
   getReceitaMensal,
   getDespesaMensal,
 }: ChartEvolucaoMensalProps) {
-  const { resolvedTheme } = useTheme();
+  const { apexBase, cores } = useChartTheme();
   const meses = getUltimos12Meses(selectedMonth);
   const labels = meses.map(formatMonthLabel);
   const receitas = meses.map((m) => getReceitaMensal(m));
   const despesas = meses.map((m) => getDespesaMensal(m));
 
+  const temDados = receitas.some((r) => r > 0) || despesas.some((d) => d > 0);
+  if (!temDados) {
+    return <div className={styles.chartEmpty}>Nenhum dado nos últimos 12 meses.</div>;
+  }
+
   const options: ApexOptions = {
-    theme: { mode: resolvedTheme === 'dark' ? 'dark' : 'light' },
-    chart: { type: 'area', toolbar: { show: false }, zoom: { enabled: false }, foreColor: resolvedTheme === 'dark' ? '#94a3b8' : '#64748b' },
+    ...apexBase,
+    chart: { ...apexBase.chart, type: 'area', zoom: { enabled: false } },
     stroke: { curve: 'smooth', width: 2 },
     fill: { type: 'gradient', opacity: 0.3 },
-    colors: [COR_RECEITA, COR_DESPESA],
+    colors: cores.polaridade,
     xaxis: { categories: labels },
-    yaxis: {
-      labels: {
-        formatter: (val: number) => formatCurrency(val),
-      },
-    },
-    tooltip: {
-      y: {
-        formatter: (val: number) => formatCurrency(val),
-      },
-    },
-    legend: {
-      position: 'top',
-      horizontalAlign: 'right',
-    },
-    dataLabels: { enabled: false },
-    grid: { borderColor: resolvedTheme === 'dark' ? '#334155' : '#e5e7eb' },
+    yaxis: { labels: { formatter: (val: number) => formatCurrency(val) } },
+    tooltip: { ...apexBase.tooltip, y: { formatter: (val: number) => formatCurrency(val) } },
+    legend: { position: 'top', horizontalAlign: 'right' },
   };
 
   const series = [
@@ -54,18 +44,9 @@ export function ChartEvolucaoMensal({
     { name: 'Despesas', data: despesas },
   ];
 
-  const temDados = receitas.some((r) => r > 0) || despesas.some((d) => d > 0);
-  if (!temDados) {
-    return (
-      <div className="flex items-center justify-center py-xl text-text-secondary">
-        Nenhum dado nos últimos 12 meses.
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full min-w-0" style={{ height: 280 }}>
-      <Chart options={options} series={series} type="area" height={280} />
+    <div className="w-full min-w-0" style={{ height: 300 }}>
+      <Chart options={options} series={series} type="area" height={300} />
     </div>
   );
 }

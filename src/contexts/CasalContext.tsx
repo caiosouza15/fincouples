@@ -1,105 +1,124 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { isApiConfigured } from '@/data/config';
+import { supabase, getCasalSession } from '@/data/sources/supabase';
 
-const STORAGE_KEY = 'fincouples_casal_config';
-
-interface CasalConfig {
-  usuario1Nome: string;
-  usuario2Nome: string;
-}
+const STORAGE_KEY = 'fincouples_casal_nomes';
 
 interface CasalContextType {
   usuario1Nome: string;
   usuario2Nome: string;
+  /** Qual dos dois "eu" sou. No mock não existe essa noção — fica sempre 'usuario1'. */
+  meuPessoaId: 'usuario1' | 'usuario2';
+  /** No Supabase, false até o parceiro aceitar o convite. No mock, sempre true. */
+  parceiroJaEntrou: boolean;
+  loading: boolean;
   setUsuario1Nome: (nome: string) => void;
   setUsuario2Nome: (nome: string) => void;
-  getNomePessoa: (pessoaId: 'usuario1' | 'usuario2') => string;
-  getPessoaId: (nome: string) => 'usuario1' | 'usuario2' | null;
+  getNomePessoa: (pessoaId?: 'usuario1' | 'usuario2') => string;
 }
 
 const CasalContext = createContext<CasalContextType | undefined>(undefined);
 
-const DEFAULT_CONFIG: CasalConfig = {
-  usuario1Nome: 'Usuario 1',
-  usuario2Nome: 'Usuario 2',
-};
-
-function loadFromStorage(): CasalConfig {
+function loadNomesMock(): { usuario1: string; usuario2: string } {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
     if (data) {
       const parsed = JSON.parse(data);
       return {
-        usuario1Nome: parsed.usuario1Nome || DEFAULT_CONFIG.usuario1Nome,
-        usuario2Nome: parsed.usuario2Nome || DEFAULT_CONFIG.usuario2Nome,
+        usuario1: parsed.usuario1 ?? 'Pessoa 1',
+        usuario2: parsed.usuario2 ?? 'Pessoa 2',
       };
     }
-  } catch (error) {
-    console.error('Erro ao carregar configuração do casal:', error);
+  } catch {
+    /* ignore */
   }
-  return DEFAULT_CONFIG;
+  return { usuario1: 'Pessoa 1', usuario2: 'Pessoa 2' };
 }
 
-function saveToStorage(config: CasalConfig): void {
+function saveNomesMock(usuario1: string, usuario2: string): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-  } catch (error) {
-    console.error('Erro ao salvar configuração do casal:', error);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ usuario1, usuario2 }));
+  } catch {
+    console.error('Erro ao salvar nomes do casal');
   }
 }
 
 export function CasalProvider({ children }: { children: ReactNode }) {
-  const [config, setConfig] = useState<CasalConfig>(loadFromStorage);
+  const supabaseMode = isApiConfigured();
+  const [nomes, setNomes] = useState(() =>
+    supabaseMode ? { usuario1: '', usuario2: '' } : loadNomesMock()
+  );
+  const [meuPessoaId, setMeuPessoaId] = useState<'usuario1' | 'usuario2'>('usuario1');
+  const [parceiroJaEntrou, setParceiroJaEntrou] = useState(!supabaseMode);
+  const [loading, setLoading] = useState(supabaseMode);
 
   useEffect(() => {
-    saveToStorage(config);
-  }, [config]);
+    if (!supabaseMode) return;
+    let ativo = true;
 
-  const setUsuario1Nome = useCallback((nome: string) => {
-    if (nome.trim().length < 2) {
-      throw new Error('Nome deve ter pelo menos 2 caracteres');
-    }
-    if (nome.trim().length > 50) {
-      throw new Error('Nome deve ter no máximo 50 caracteres');
-    }
-    setConfig((prev) => ({ ...prev, usuario1Nome: nome.trim() }));
-  }, []);
+    getCasalSession()
+      .then((session) => {
+        if (!ativo) return;
+        setNomes({ usuario1: session.usuario1Nome, usuario2: session.usuario2Nome });
+        setMeuPessoaId(session.pessoaId);
+        setParceiroJaEntrou(session.parceiroJaEntrou);
+      })
+      .catch(() => {
+        // Sem sessão/casal ainda — o AuthGate cuida de levar pro login/onboarding.
+      })
+      .finally(() => {
+        if (ativo) setLoading(false);
+      });
 
-  const setUsuario2Nome = useCallback((nome: string) => {
-    if (nome.trim().length < 2) {
-      throw new Error('Nome deve ter pelo menos 2 caracteres');
-    }
-    if (nome.trim().length > 50) {
-      throw new Error('Nome deve ter no máximo 50 caracteres');
-    }
-    setConfig((prev) => ({ ...prev, usuario2Nome: nome.trim() }));
-  }, []);
+    return () => {
+      ativo = false;
+    };
+  }, [supabaseMode]);
 
-  const getNomePessoa = useCallback(
-    (pessoaId: 'usuario1' | 'usuario2'): string => {
-      return pessoaId === 'usuario1' ? config.usuario1Nome : config.usuario2Nome;
-    },
-    [config]
-  );
+  useEffect(() => {
+    if (supabaseMode) return;
+    saveNomesMock(nomes.usuario1, nomes.usuario2);
+  }, [supabaseMode, nomes.usuario1, nomes.usuario2]);
 
-  const getPessoaId = useCallback(
-    (nome: string): 'usuario1' | 'usuario2' | null => {
-      const nomeTrimmed = nome.trim();
-      if (nomeTrimmed === config.usuario1Nome) return 'usuario1';
-      if (nomeTrimmed === config.usuario2Nome) return 'usuario2';
-      return null;
-    },
-    [config]
-  );
+  const atualizarMeuNomeNoBanco = async (nome: string) => {
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) return;
+    await supabase.from('perfis').update({ nome }).eq('id', data.user.id);
+  };
+
+  const setUsuario1Nome = (nome: string) => {
+    if (supabaseMode) {
+      if (meuPessoaId !== 'usuario1') return; // não posso editar o nome do parceiro
+      void atualizarMeuNomeNoBanco(nome);
+    }
+    setNomes((prev) => ({ ...prev, usuario1: nome }));
+  };
+
+  const setUsuario2Nome = (nome: string) => {
+    if (supabaseMode) {
+      if (meuPessoaId !== 'usuario2') return;
+      void atualizarMeuNomeNoBanco(nome);
+    }
+    setNomes((prev) => ({ ...prev, usuario2: nome }));
+  };
+
+  const getNomePessoa = (pessoaId?: 'usuario1' | 'usuario2'): string => {
+    if (pessoaId === 'usuario1') return nomes.usuario1;
+    if (pessoaId === 'usuario2') return nomes.usuario2;
+    return nomes.usuario1;
+  };
 
   return (
     <CasalContext.Provider
       value={{
-        usuario1Nome: config.usuario1Nome,
-        usuario2Nome: config.usuario2Nome,
+        usuario1Nome: nomes.usuario1,
+        usuario2Nome: nomes.usuario2,
+        meuPessoaId,
+        parceiroJaEntrou,
+        loading,
         setUsuario1Nome,
         setUsuario2Nome,
         getNomePessoa,
-        getPessoaId,
       }}
     >
       {children}
@@ -107,10 +126,10 @@ export function CasalProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useCasal() {
-  const context = useContext(CasalContext);
-  if (context === undefined) {
-    throw new Error('useCasal deve ser usado dentro de um CasalProvider');
+export function useCasal(): CasalContextType {
+  const ctx = useContext(CasalContext);
+  if (!ctx) {
+    throw new Error('useCasal deve ser usado dentro de CasalProvider');
   }
-  return context;
+  return ctx;
 }
