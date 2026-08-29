@@ -1,0 +1,122 @@
+/*
+ * Modal glass compartilhado (ConfirmDialog, ContaForm, CartaoForm).
+ * Tokens vêm de src/styles/glass-tokens.css, importado globalmente.
+ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 12, 20, .45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: fadeIn .2s ease;
+}
+
+.panel {
+  background: var(--glass);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid var(--stroke);
+  border-radius: 24px;
+  box-shadow: var(--shadow-hi);
+  width: 100%;
+  max-width: 400px;
+  animation: slideUp .3s ease;
+}
+
+.body { padding: 22px; }
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.iconWrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.iconDanger { background: rgba(239, 68, 68, .14); color: #EF4444; }
+.iconWarning { background: rgba(245, 158, 11, .14); color: #F59E0B; }
+.iconInfo { background: var(--glass-soft); color: var(--ink-2); }
+
+.textWrap { flex: 1; min-width: 0; }
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0 0 4px;
+}
+
+.message {
+  font-size: 13px;
+  color: var(--ink-2);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+  .actions { flex-direction: column-reverse; }
+}
+
+.btnGhost {
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--stroke);
+  background: var(--glass-soft);
+  color: var(--ink);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color .2s ease;
+}
+
+.btnGhost:hover { border-color: var(--ink-3); }
+
+.btnDanger,
+.btnWarning,
+.btnPrimary {
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.btnDanger { background: linear-gradient(135deg, #F87171, #EF4444); box-shadow: 0 8px 20px rgba(239, 68, 68, .30); }
+.btnWarning { background: linear-gradient(135deg, #FBBF24, #F59E0B); box-shadow: 0 8px 20px rgba(245, 158, 11, .30); }
+.btnPrimary { background: var(--p1-grad); box-shadow: 0 8px 20px rgba(249, 115, 22, .30); }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}

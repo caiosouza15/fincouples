@@ -1,5 +1,6 @@
 import { Eye, EyeOff } from 'lucide-react';
 import { useSectionPrivacy } from '@/hooks/usePrivacy';
+import styles from './PrivacyToggleButton.module.css';
 
 interface PrivacyToggleButtonProps {
   sectionKey: string;
@@ -11,11 +12,11 @@ export function PrivacyToggleButton({ sectionKey }: PrivacyToggleButtonProps) {
   return (
     <button
       onClick={toggle}
-      className="bg-transparent border-none cursor-pointer p-xs opacity-70 transition-opacity duration-200 text-text-secondary hover:opacity-100 hover:text-text-primary"
+      className={styles.btn}
       aria-label={hidden ? 'Mostrar valores' : 'Ocultar valores'}
       title={hidden ? 'Mostrar valores' : 'Ocultar valores'}
     >
-      {hidden ? <EyeOff size={20} /> : <Eye size={20} />}
+      {hidden ? <EyeOff size={17} /> : <Eye size={17} />}
     </button>
   );
 }

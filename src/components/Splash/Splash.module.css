@@ -1,0 +1,56 @@
+/* Tela de abertura — fundo navy fixo (não segue o tema), independente
+   de light/dark, igual ao tratamento dos ícones do app (ver PARTE 5). */
+
+.splash {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  overflow: hidden;
+  background: linear-gradient(150deg, #12294D, #0B1B33);
+  color: #F2F5FA;
+}
+
+.blob1,
+.blob2 {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.blob1 {
+  width: 280px;
+  height: 280px;
+  top: -90px;
+  right: -70px;
+  background: rgba(249, 115, 22, .30);
+  filter: blur(70px);
+}
+
+.blob2 {
+  width: 240px;
+  height: 240px;
+  bottom: -100px;
+  left: -60px;
+  background: rgba(23, 190, 187, .28);
+  filter: blur(70px);
+}
+
+.logo {
+  position: relative;
+  z-index: 1;
+  /* Sobrepõe --ink localmente: o wordmark do Logo usa var(--ink), e aqui
+     o fundo é sempre navy, então o texto precisa ficar sempre claro. */
+  --ink: #F2F5FA;
+}
+
+.status {
+  position: relative;
+  z-index: 1;
+  font-size: 14px;
+  color: #F2F5FA;
+  opacity: .7;
+}

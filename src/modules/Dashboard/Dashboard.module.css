@@ -1,0 +1,593 @@
+/*
+ * Tokens (--bg, --glass, --p1, etc.) vêm de src/styles/glass-tokens.css,
+ * importado uma vez globalmente. Este arquivo só consome var(--x).
+ */
+
+/* ---------- filter ---------- */
+
+.filterRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.segmented {
+  display: flex;
+  padding: 5px;
+  background: var(--glass-soft);
+  border: 1px solid var(--stroke);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 999px;
+  gap: 2px;
+}
+
+.segBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 22px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color .2s ease, box-shadow .2s ease, color .2s ease;
+}
+
+.segBtnActive {
+  background: var(--glass);
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow);
+  color: var(--ink);
+}
+
+.segDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.segDotP1 { background: var(--p1); }
+.segDotP2 { background: var(--p2); }
+
+.filterHint {
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
+/* ---------- bento ---------- */
+
+.bento {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.spanSaldo { grid-column: span 2; grid-row: span 2; }
+.spanMeta { grid-column: span 1; grid-row: span 2; }
+.spanOne { grid-column: span 1; grid-row: span 1; }
+.spanTwo { grid-column: span 2; grid-row: span 1; }
+
+/* ---------- card base ---------- */
+
+.card {
+  border-radius: 24px;
+  padding: 22px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: transform .28s cubic-bezier(.2, .7, .3, 1), box-shadow .28s cubic-bezier(.2, .7, .3, 1);
+}
+
+.card:hover { transform: translateY(-4px); }
+
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow);
+}
+
+.glass:hover { box-shadow: var(--shadow-hi); }
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.cardIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.iconP1 { background: var(--p1-soft); color: var(--p1); }
+.iconP2 { background: var(--p2-soft); color: var(--p2); }
+.iconGrad {
+  background: linear-gradient(135deg, var(--p1-soft), var(--p2-soft));
+  color: var(--ink-2);
+}
+
+.cardHeaderText { flex: 1; min-width: 0; }
+
+.cardTitle {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardSubtitle {
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-top: 1px;
+}
+
+.cardMetaInfo {
+  font-size: 12px;
+  color: var(--ink-3);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ---------- card saldo ---------- */
+
+.saldoBadge {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(14, 124, 90, .12);
+  color: var(--good);
+}
+
+.saldoLabel {
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-bottom: 4px;
+}
+
+.saldoValueRow {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.saldoValue {
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--ink);
+}
+
+.saldoCents {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.saldoChartWrap {
+  position: relative;
+  width: 100%;
+  height: 170px;
+  margin-bottom: 14px;
+}
+
+.saldoChartWrap svg { display: block; width: 100%; height: 100%; }
+
+.tooltip {
+  position: absolute;
+  transform: translate(-50%, -125%);
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--stroke);
+  border-radius: 14px;
+  padding: 8px 13px;
+  box-shadow: var(--shadow);
+  text-align: center;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.tooltipValue { font-size: 14px; font-weight: 600; color: var(--ink); }
+.tooltipDate { font-size: 10.5px; color: var(--ink-3); margin-top: 1px; }
+
+.saldoChips {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.chip {
+  font-size: 12px;
+  padding: 8px 15px;
+  border-radius: 999px;
+  border: 1px solid var(--hair);
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color .2s ease, color .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.chipActive {
+  background: var(--p1-grad);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 8px 20px rgba(249, 115, 22, .30);
+}
+
+/* ---------- card meta ---------- */
+
+.gaugeWrap {
+  position: relative;
+  width: 172px;
+  height: 172px;
+  margin: 0 auto 18px;
+}
+
+.gaugeCenter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.gaugeValue {
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.gaugeLegend {
+  font-size: 11.5px;
+  color: var(--ink-3);
+  margin-top: 4px;
+}
+
+.gaugeArc {
+  transition: stroke-dashoffset 1s cubic-bezier(.2, .8, .2, 1);
+}
+
+.contribRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.contribRow:last-of-type { margin-bottom: 0; }
+
+.contribName {
+  width: 56px;
+  flex-shrink: 0;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.contribBarTrack {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--track);
+  overflow: hidden;
+}
+
+.contribBarFill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 1s cubic-bezier(.2, .8, .2, 1);
+}
+
+.contribBarFillP1 { background: var(--p1-grad); }
+.contribBarFillP2 { background: var(--p2-grad); }
+
+.contribValue {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.metaFooter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 18px;
+  padding: 13px 15px;
+  background: var(--glass-soft);
+  border: 1px solid var(--hair);
+  margin-top: auto;
+  cursor: pointer;
+  transition: border-color .2s ease;
+  text-align: left;
+  font-family: inherit;
+}
+
+.metaFooter:hover { border-color: var(--stroke); }
+
+.metaFooterIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.metaFooterText { flex: 1; min-width: 0; }
+
+.metaFooterTitle {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.metaFooterSub {
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 1px;
+}
+
+.metaFooterChevron {
+  color: var(--ink-3);
+  flex-shrink: 0;
+}
+
+/* ---------- card cartão ---------- */
+
+.cartaoCard {
+  border-radius: 20px;
+  padding: 18px;
+  color: #fff;
+  background: linear-gradient(135deg, #F97316 0%, #FFB020 55%, #17BEBB 140%);
+  box-shadow: 0 14px 34px rgba(249, 115, 22, .32);
+}
+
+.cartaoCard:hover { box-shadow: 0 20px 44px rgba(249, 115, 22, .38); }
+
+.cartaoGlow {
+  position: absolute;
+  top: -90px;
+  right: -50px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .18);
+  pointer-events: none;
+}
+
+.cartaoLabel {
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  opacity: .85;
+}
+
+.cartaoValue {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-top: 16px;
+}
+
+.cartaoFooter {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 14px;
+  position: relative;
+}
+
+.cartaoFooter span {
+  font-size: 11.5px;
+  opacity: .9;
+  letter-spacing: .04em;
+}
+
+/* ---------- card acerto ---------- */
+
+.acertoBlock {
+  text-align: center;
+  border-radius: 18px;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--p2-soft), var(--p1-soft));
+  border: 1px solid var(--stroke);
+  margin-top: auto;
+}
+
+.acertoPhrase {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.acertoExplain {
+  font-size: 11.5px;
+  color: var(--ink-2);
+  margin-top: 4px;
+}
+
+/* ---------- card lista ---------- */
+
+.listaRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--hair);
+}
+
+.listaRow:last-child { border-bottom: none; padding-bottom: 0; }
+.listaRow:first-child { padding-top: 0; }
+
+.listaAvatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.listaText { flex: 1; min-width: 0; }
+
+.listaTitle {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.listaSub {
+  font-size: 11.5px;
+  color: var(--ink-3);
+  margin-top: 1px;
+}
+
+.listaTag {
+  font-size: 10.5px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--track);
+  color: var(--ink-2);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.listaValue {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.avatarP1 { background: var(--p1-grad); }
+.avatarP2 { background: var(--p2-grad); }
+
+/* ---------- card barras ---------- */
+
+.barrasChart {
+  height: 130px;
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.barItem {
+  flex: 1;
+  max-width: 46px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.barCol {
+  width: 100%;
+  border-radius: 12px;
+  background: var(--track);
+  transition: height 1s cubic-bezier(.2, .8, .2, 1);
+}
+
+.barColActive {
+  background: linear-gradient(180deg, #FFB020, #F97316);
+}
+
+.barLabels {
+  display: flex;
+  gap: 14px;
+  margin-top: 9px;
+}
+
+.barLabelItem {
+  flex: 1;
+  max-width: 46px;
+  text-align: center;
+}
+
+.barName {
+  font-size: 11.5px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.barNameActive { color: var(--ink); font-weight: 500; }
+
+.barValue {
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+
+/* ---------- empty states ---------- */
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex: 1;
+  padding: 24px 12px;
+  text-align: center;
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.emptyStateAction {
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 9px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: var(--glass-soft);
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color .2s ease;
+}
+
+.emptyStateAction:hover { border-color: var(--ink-3); }

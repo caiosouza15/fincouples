@@ -1,0 +1,102 @@
+/*
+ * Tokens vêm de src/styles/glass-tokens.css, importado globalmente.
+ */
+
+.item {
+  border-radius: 20px;
+  background: var(--glass-soft);
+  border: 1px solid var(--hair);
+  overflow: hidden;
+  transition: border-color .2s ease;
+}
+
+.item:hover { border-color: var(--stroke); }
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  gap: 14px;
+}
+
+.main { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+.statusIcon { flex-shrink: 0; }
+.iconPago { color: var(--good); }
+.iconParcial { color: #F59E0B; }
+.iconNaoPago { color: #EF4444; }
+
+.info { flex: 1; min-width: 0; }
+.mes { font-size: 14px; font-weight: 500; color: var(--ink); }
+.dates { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+.amounts { font-size: 12.5px; color: var(--ink-2); margin-top: 4px; }
+.restante { color: #EF4444; margin-left: 6px; }
+
+.statusLabel { font-size: 12.5px; font-weight: 600; flex-shrink: 0; }
+.statusPago { color: var(--good); }
+.statusParcial { color: #F59E0B; }
+.statusNaoPago { color: #EF4444; }
+
+.actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+.btnPrimary {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  background: var(--p1-grad);
+}
+
+.btnGhost {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 500;
+  border: 1px solid var(--stroke);
+  background: var(--glass);
+  color: var(--ink);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.partialWrap { padding: 14px 16px 16px; border-top: 1px solid var(--hair); }
+.partialLabel { font-size: 12.5px; font-weight: 500; color: var(--ink-2); margin-bottom: 8px; display: block; }
+.partialRow { display: flex; gap: 8px; }
+
+.partialInput {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--glass);
+  border: 1px solid var(--stroke);
+  font-size: 13px;
+  color: var(--ink);
+  font-family: inherit;
+}
+
+.partialInput:focus { outline: none; border-color: var(--p1); }
+
+.expandBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 16px;
+  border-top: 1px solid var(--hair);
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  font-size: 12.5px;
+  color: var(--ink-3);
+  cursor: pointer;
+  font-family: inherit;
+  transition: color .2s ease;
+}
+
+.expandBtn:hover { color: var(--ink); }

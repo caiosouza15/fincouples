@@ -465,6 +465,7 @@ export function clearAllData(): void {
     localStorage.removeItem('fincouples_lancamentos');
     localStorage.removeItem('fincouples_cartoes');
     localStorage.removeItem('fincouples_faturas');
+    localStorage.removeItem('fincouples_metas');
     console.log('✅ Todos os dados foram limpos');
   } catch (error) {
     console.error('Erro ao limpar dados:', error);

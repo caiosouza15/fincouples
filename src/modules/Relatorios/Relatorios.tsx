@@ -1,7 +1,18 @@
-// Módulo: Relatórios
-// Análise gráfica e comparativa de dados
-
-import { Card } from '@/components/Card';
+import type { ReactNode } from 'react';
+import {
+  ArrowLeftRight,
+  TrendingUp,
+  Tag,
+  Banknote,
+  ListOrdered,
+  Scale,
+  LineChart,
+  CreditCard,
+  Users,
+  CalendarClock,
+  UserRound,
+} from 'lucide-react';
+import { IconBarChart, IconTarget, IconWallet } from '@/components/GlassIcons';
 import { useLancamentos } from '@/hooks/useLancamentos';
 import { useCategorias } from '@/hooks/useCategorias';
 import { useSelectedMonth } from '@/contexts/SelectedMonthContext';
@@ -21,6 +32,7 @@ import { ChartEvolucaoPorPessoa } from './ChartEvolucaoPorPessoa';
 import { ChartPrevisoesBarras } from './ChartPrevisoesBarras';
 import { ChartMetas } from './ChartMetas';
 import { RelatoriosPorPessoa } from './RelatoriosPorPessoa';
+import styles from './Relatorios.module.css';
 
 const Relatorios = () => {
   const { selectedMonth } = useSelectedMonth();
@@ -44,125 +56,103 @@ const Relatorios = () => {
   const formaPagamento = getDespesasPorFormaPagamento(selectedMonth);
 
   return (
-    <div className="w-full max-w-[1280px] mx-auto px-md md:px-lg pb-xl min-w-0 overflow-x-hidden">
-      <h1 className="text-2xl md:text-3xl font-bold text-text-primary mb-lg">Relatórios</h1>
-
-      <div className="flex flex-col gap-md">
-        <Card
-          title="Visão geral do mês"
-          description="Resumo do mês: receitas, despesas, saldo, comparativo com o mês anterior e taxa de economia."
-        >
+    <div className={styles.page}>
+      <div className={styles.grid}>
+        <SectionCard icon={<IconBarChart />} title="Visão geral do mês" subtitle="Receitas, despesas, saldo e economia" span="full">
           <VisaoGeralRelatorios selectedMonth={selectedMonth} />
-        </Card>
+        </SectionCard>
 
-        <Card
-          title="Receitas x Despesas"
-          description="Comparação entre o total de receitas e o total de despesas no mês selecionado."
-        >
+        <SectionCard icon={<ArrowLeftRight size={17} />} title="Receitas × Despesas" subtitle="Comparação do mês selecionado">
           <ChartReceitasDespesas receita={receita} despesa={despesa} selectedMonth={selectedMonth} />
-        </Card>
+        </SectionCard>
 
-        <Card
-          title="Evolução (12 meses)"
-          description="Receitas e despesas mês a mês nos últimos 12 meses."
-        >
+        <SectionCard icon={<TrendingUp size={17} />} iconVariant="p2" title="Evolução (12 meses)" subtitle="Receitas e despesas mês a mês" span="full">
           <ChartEvolucaoMensal
             selectedMonth={selectedMonth}
             getReceitaMensal={getReceitaMensal}
             getDespesaMensal={getDespesaMensal}
           />
-        </Card>
+        </SectionCard>
 
-        <Card
-          title="Gastos por categoria"
-          description="Total de despesas do mês agrupadas por categoria (alimentação, transporte, etc.)."
-        >
+        <SectionCard icon={<Tag size={17} />} title="Gastos por categoria" subtitle="Despesas do mês agrupadas">
           <ChartGastosPorCategoria itens={gastosPorCategoria} selectedMonth={selectedMonth} />
-        </Card>
+        </SectionCard>
 
-        <Card
-          title="Receitas por categoria"
-          description="Total de receitas do mês agrupadas por categoria."
-        >
+        <SectionCard icon={<Banknote size={17} />} iconVariant="p2" title="Receitas por categoria" subtitle="Receitas do mês agrupadas">
           <ChartReceitasPorCategoria itens={receitasPorCategoria} />
-        </Card>
+        </SectionCard>
 
-        <Card
-          title="Maiores gastos do mês"
-          description="As 5 despesas de maior valor no mês."
-        >
+        <SectionCard icon={<ListOrdered size={17} />} iconVariant="grad" title="Maiores gastos do mês" subtitle="Top 5 despesas por valor">
           <ListaMaioresGastos lancamentos={maioresDespesas} categorias={categorias} />
-        </Card>
+        </SectionCard>
 
-        <Card
-          title="Economia por categoria (mês passado vs este mês)"
-          description="Comparação do gasto por categoria: mês anterior x mês selecionado (barras lado a lado)."
-        >
+        <SectionCard icon={<Scale size={17} />} title="Economia por categoria" subtitle="Mês anterior × este mês" span="full">
           <ChartEconomiaGroupedBar
             selectedMonth={selectedMonth}
             categorias={categorias}
             getMaioresGastos={getMaioresGastos}
           />
-        </Card>
+        </SectionCard>
 
-        <Card
-          title="Evolução do saldo acumulado (12 meses)"
-          description="Soma acumulada do resultado (receitas − despesas) mês a mês nos últimos 12 meses. Mostra a evolução do superávit ou déficit dos lançamentos, não o saldo da conta bancária."
-        >
+        <SectionCard icon={<LineChart size={17} />} iconVariant="p2" title="Saldo acumulado (12 meses)" subtitle="Resultado acumulado mês a mês" span="full">
           <ChartSaldoAcumulado selectedMonth={selectedMonth} getResultadoMensal={getResultadoMensal} />
-        </Card>
+        </SectionCard>
 
-        <Card
-          title="Despesas por forma de pagamento"
-          description="Quanto das despesas do mês foi pago em débito (conta), em crédito (cartão) ou em outros meios."
-        >
+        <SectionCard icon={<CreditCard size={17} />} title="Forma de pagamento" subtitle="Débito, crédito e outros">
           <ChartFormaPagamento dados={formaPagamento} />
-        </Card>
+        </SectionCard>
 
-        <Card
-          title="Uso de cartões"
-          description="Quanto do limite de cada cartão está usado e quanto ainda está disponível."
-        >
+        <SectionCard icon={<CreditCard size={17} />} iconVariant="p2" title="Uso de cartões" subtitle="Limite usado × disponível">
           <ChartUsoCartoes cartoes={cartoes} />
-        </Card>
+        </SectionCard>
 
-        <Card
-          title="Contas – saldo"
-          description="Saldo atual de cada conta (corrente, poupança, investimento)."
-        >
+        <SectionCard icon={<IconWallet />} iconVariant="grad" title="Contas – saldo" subtitle="Saldo atual de cada conta">
           <ResumoContasRelatorios />
-        </Card>
+        </SectionCard>
 
-        <Card
-          title="Evolução por pessoa (12 meses)"
-          description="Quanto cada pessoa do casal gastou em despesas, mês a mês, nos últimos 12 meses."
-        >
+        <SectionCard icon={<Users size={17} />} title="Evolução por pessoa (12 meses)" subtitle="Gastos de cada um, mês a mês" span="full">
           <ChartEvolucaoPorPessoa />
-        </Card>
+        </SectionCard>
 
-        <Card
-          title="Previsões e vencimentos"
-          description="Despesas por dia do mês e vencimentos de faturas de cartão (barras por dia)."
-        >
+        <SectionCard icon={<CalendarClock size={17} />} iconVariant="p2" title="Previsões e vencimentos" subtitle="Despesas e faturas por dia" span="full">
           <ChartPrevisoesBarras />
-        </Card>
+        </SectionCard>
 
-        <Card
-          title="Metas"
-          description="Acompanhamento das metas financeiras."
-        >
+        <SectionCard icon={<IconTarget />} iconVariant="grad" title="Metas" subtitle="Acompanhamento das metas financeiras" span="full">
           <ChartMetas />
-        </Card>
+        </SectionCard>
 
-        <Card
-          title="Por pessoa"
-          description="Relatórios e visões filtradas por pessoa do casal."
-        >
+        <SectionCard icon={<UserRound size={17} />} title="Por pessoa" subtitle="Relatórios filtrados por pessoa do casal" span="full">
           <RelatoriosPorPessoa />
-        </Card>
+        </SectionCard>
       </div>
     </div>
   );
 };
+
+interface SectionCardProps {
+  icon: ReactNode;
+  iconVariant?: 'p1' | 'p2' | 'grad';
+  title: string;
+  subtitle: string;
+  span?: 'full' | 'auto';
+  children: ReactNode;
+}
+
+function SectionCard({ icon, iconVariant = 'p1', title, subtitle, span = 'auto', children }: SectionCardProps) {
+  const iconClass = iconVariant === 'p2' ? styles.iconP2 : iconVariant === 'grad' ? styles.iconGrad : '';
+  return (
+    <section className={`${styles.card} ${span === 'full' ? styles.spanFull : ''}`}>
+      <div className={styles.cardHeader}>
+        <div className={`${styles.cardIcon} ${iconClass}`}>{icon}</div>
+        <div className={styles.cardHeaderText}>
+          <div className={styles.cardTitle}>{title}</div>
+          <div className={styles.cardSubtitle}>{subtitle}</div>
+        </div>
+      </div>
+      {children}
+    </section>
+  );
+}
 
 export default Relatorios;

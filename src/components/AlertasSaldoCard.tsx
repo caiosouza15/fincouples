@@ -1,7 +1,7 @@
-import { AlertCircle, TrendingDown, Wallet } from 'lucide-react';
-import { Card } from '@/components/Card';
+import { AlertCircle, TrendingDown } from 'lucide-react';
 import type { AlertaSaldo, TipoAlertaSaldo } from '@/hooks/useAlertasSaldo';
 import { formatCurrency } from '@/utils';
+import styles from './AlertasSaldoCard.module.css';
 
 interface AlertasSaldoCardProps {
   alertas: AlertaSaldo[];
@@ -11,17 +11,9 @@ interface AlertasSaldoCardProps {
 function getTipoConfig(tipo: TipoAlertaSaldo) {
   switch (tipo) {
     case 'negativo':
-      return {
-        icon: AlertCircle,
-        color: 'text-negative',
-        bgColor: 'bg-negative/10',
-      };
+      return { icon: AlertCircle, iconClass: styles.iconNegative, valueClass: styles.valueNegative };
     case 'saldo_baixo':
-      return {
-        icon: TrendingDown,
-        color: 'text-warning',
-        bgColor: 'bg-warning/10',
-      };
+      return { icon: TrendingDown, iconClass: styles.iconWarning, valueClass: styles.valueWarning };
   }
 }
 
@@ -30,40 +22,33 @@ export function AlertasSaldoCard({ alertas, hideSaldo = false }: AlertasSaldoCar
     return null;
   }
 
-  const criticos = alertas.filter(a => a.tipo === 'negativo').length;
+  const criticos = alertas.filter((a) => a.tipo === 'negativo').length;
 
   return (
-    <Card
-      title="Alertas de Saldo"
-      actions={
-        criticos > 0 ? (
-          <span className="px-sm py-xs bg-negative text-white text-xs font-semibold rounded-full">
+    <div className={styles.card}>
+      <div className={styles.header}>
+        <span className={styles.title}>Alertas de Saldo</span>
+        {criticos > 0 && (
+          <span className={styles.countBadge}>
             {criticos} {criticos === 1 ? 'conta negativa' : 'contas negativas'}
           </span>
-        ) : null
-      }
-    >
-      <div className="flex flex-col gap-sm">
+        )}
+      </div>
+
+      <div className={styles.list}>
         {alertas.map((alerta) => {
           const config = getTipoConfig(alerta.tipo);
           const IconComponent = config.icon;
 
           return (
-            <div
-              key={alerta.contaId}
-              className={`flex items-center gap-md p-md bg-surface border border-border rounded-md transition-all duration-200 ${config.bgColor}`}
-            >
-              <div className={`shrink-0 w-10 h-10 flex items-center justify-center rounded-md bg-background`}>
-                <IconComponent size={20} className={config.color} />
+            <div key={alerta.contaId} className={styles.row}>
+              <div className={`${styles.icon} ${config.iconClass}`}>
+                <IconComponent size={18} />
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-base font-medium text-text-primary mb-xs">
-                  {alerta.contaNome}
-                </div>
-                <div className="text-sm text-text-secondary">
-                  {alerta.mensagem}
-                </div>
-                <div className={`text-sm font-semibold mt-xs ${alerta.saldo < 0 ? 'text-negative' : 'text-warning'}`}>
+              <div className={styles.info}>
+                <div className={styles.name}>{alerta.contaNome}</div>
+                <div className={styles.message}>{alerta.mensagem}</div>
+                <div className={`${styles.value} ${config.valueClass}`}>
                   {hideSaldo ? (
                     <span className="blur-value">{formatCurrency(alerta.saldo)}</span>
                   ) : (
@@ -71,11 +56,10 @@ export function AlertasSaldoCard({ alertas, hideSaldo = false }: AlertasSaldoCar
                   )}
                 </div>
               </div>
-              <Wallet size={18} className="text-text-secondary shrink-0" />
             </div>
           );
         })}
       </div>
-    </Card>
+    </div>
   );
 }

@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
-import { Card } from '@/components/Card';
 import type { Lancamento } from '@/types';
 import { formatCurrency } from '@/utils';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import styles from './Lancamentos.module.css';
 
 interface ResumoLancamentosProps {
   lancamentos: Lancamento[];
@@ -22,40 +22,25 @@ export function ResumoLancamentos({ lancamentos, mesRef }: ResumoLancamentosProp
 
     const receitas = list.filter((l) => l.tipo === 'receita').reduce((s, l) => s + l.valor, 0);
     const despesas = list.filter((l) => l.tipo === 'despesa').reduce((s, l) => s + l.valor, 0);
-    return {
-      totalReceitas: receitas,
-      totalDespesas: despesas,
-      saldo: receitas - despesas,
-    };
+    return { totalReceitas: receitas, totalDespesas: despesas, saldo: receitas - despesas };
   }, [lancamentos, mesRef]);
 
   return (
-    <Card title="Resumo">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
-        <div className="p-md bg-background rounded-md border border-border">
-          <div className="text-sm text-text-secondary uppercase mb-xs flex items-center gap-xs">
-            <TrendingUp size={16} />
-            Receitas
-          </div>
-          <div className="text-2xl font-bold text-positive">{formatCurrency(totalReceitas)}</div>
-        </div>
-        <div className="p-md bg-background rounded-md border border-border">
-          <div className="text-sm text-text-secondary uppercase mb-xs flex items-center gap-xs">
-            <TrendingDown size={16} />
-            Despesas
-          </div>
-          <div className="text-2xl font-bold text-negative">{formatCurrency(totalDespesas)}</div>
-        </div>
-        <div className="p-md bg-background rounded-md border border-border">
-          <div className="text-sm text-text-secondary uppercase mb-xs flex items-center gap-xs">
-            <Minus size={16} />
-            Saldo do período
-          </div>
-          <div className={`text-2xl font-bold ${saldo >= 0 ? 'text-positive' : 'text-negative'}`}>
-            {formatCurrency(saldo)}
-          </div>
-        </div>
+    <div className={styles.statGrid}>
+      <div className={styles.stat}>
+        <span className={styles.statLabel}><TrendingUp size={14} /> Receitas</span>
+        <span className={`${styles.statValue} ${styles.statValuePositive}`}>{formatCurrency(totalReceitas)}</span>
       </div>
-    </Card>
+      <div className={styles.stat}>
+        <span className={styles.statLabel}><TrendingDown size={14} /> Despesas</span>
+        <span className={`${styles.statValue} ${styles.statValueNegative}`}>{formatCurrency(totalDespesas)}</span>
+      </div>
+      <div className={styles.stat}>
+        <span className={styles.statLabel}><Minus size={14} /> Saldo do período</span>
+        <span className={`${styles.statValue} ${saldo >= 0 ? styles.statValuePositive : styles.statValueNegative}`}>
+          {formatCurrency(saldo)}
+        </span>
+      </div>
+    </div>
   );
 }

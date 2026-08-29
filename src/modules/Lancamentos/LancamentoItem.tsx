@@ -6,7 +6,8 @@ import { useCategorias } from '@/hooks/useCategorias';
 import { useContas } from '@/hooks/useContas';
 import { useCasal } from '@/hooks/useCasal';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
-import { Pencil, Trash2, CheckCircle2, Circle, Copy } from 'lucide-react';
+import { Pencil, Trash2, CheckCircle2, Circle, Copy, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
+import styles from './Lancamentos.module.css';
 
 interface LancamentoItemProps {
   lancamento: Lancamento;
@@ -29,22 +30,15 @@ export function LancamentoItem({
   const { getNomePessoa } = useCasal();
 
   const categoria = categorias.find((c) => c.id === lancamento.categoriaId);
-  const conta = lancamento.contaId
-    ? contas.find((c) => c.id === lancamento.contaId)
-    : null;
-  
-  const nomePessoa = lancamento.pessoaId 
-    ? (lancamento.nomePessoa || getNomePessoa(lancamento.pessoaId))
-    : null;
+  const conta = lancamento.contaId ? contas.find((c) => c.id === lancamento.contaId) : null;
+  const nomePessoa = lancamento.pessoaId ? (lancamento.nomePessoa || getNomePessoa(lancamento.pessoaId)) : null;
 
   const getCategoriaIcon = () => {
     if (categoria?.icone) {
       const IconComponent = iconMap[categoria.icone];
-      if (IconComponent) {
-        return <IconComponent size={20} />;
-      }
+      if (IconComponent) return <IconComponent size={17} />;
     }
-    return null;
+    return isReceita ? <ArrowDownLeft size={17} /> : <ArrowUpRight size={17} />;
   };
 
   const formatDate = (date: Date): string => {
@@ -53,12 +47,8 @@ export function LancamentoItem({
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
-    if (d.toDateString() === today.toDateString()) {
-      return 'Hoje';
-    }
-    if (d.toDateString() === yesterday.toDateString()) {
-      return 'Ontem';
-    }
+    if (d.toDateString() === today.toDateString()) return 'Hoje';
+    if (d.toDateString() === yesterday.toDateString()) return 'Ontem';
 
     return d.toLocaleDateString('pt-BR', {
       day: '2-digit',
@@ -73,109 +63,69 @@ export function LancamentoItem({
   };
 
   const isReceita = lancamento.tipo === 'receita';
-  const valorColor = isReceita ? 'text-positive' : 'text-negative';
-  const valorPrefix = isReceita ? '+' : '-';
 
   return (
     <>
-    <div
-      id={`lancamento-${lancamento.id}`}
-      className={`flex md:flex-row flex-col md:items-center md:justify-between p-md bg-surface border border-border rounded-md transition-all duration-200 gap-md ${
-        !lancamento.pago ? 'opacity-75' : ''
-      } hover:border-positive hover:shadow-sm`}
-    >
-      <div className="flex items-center gap-md flex-1 min-w-0 md:flex-row flex-col md:items-center">
-        <div
-          className={`shrink-0 w-10 h-10 flex items-center justify-center rounded-md ${
-            isReceita ? 'bg-positive/10' : 'bg-negative/10'
-          }`}
-        >
-          {getCategoriaIcon() || (
-            <span className="text-text-secondary">{isReceita ? '💰' : '💸'}</span>
-          )}
+      <div id={`lancamento-${lancamento.id}`} className={`${styles.row} ${!lancamento.pago ? styles.rowPendente : ''}`}>
+        <div className={`${styles.icon} ${isReceita ? styles.iconReceita : styles.iconDespesa}`}>
+          {getCategoriaIcon()}
         </div>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-sm mb-xs flex-wrap">
-            <div className="font-medium text-text-primary">{categoria?.nome || 'Sem categoria'}</div>
+        <div className={styles.info}>
+          <div className={styles.infoTop}>
+            <span className={styles.categoria}>{categoria?.nome || 'Sem categoria'}</span>
             {nomePessoa && lancamento.tipo === 'despesa' && (
-              <span className={`px-2.5 py-1 text-xs font-medium rounded-full shrink-0 ${
-                lancamento.pessoaId === 'usuario1'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-purple-100 text-purple-700'
-              }`}>
+              <span className={`${styles.badge} ${lancamento.pessoaId === 'usuario2' ? styles.badgeP2 : styles.badgeP1}`}>
                 {nomePessoa}
               </span>
             )}
-            {!lancamento.pago && (
-              <span className="text-xs px-sm py-xs bg-negative/10 text-negative rounded-sm">
-                Pendente
-              </span>
-            )}
+            {!lancamento.pago && <span className={`${styles.badge} ${styles.badgePendente}`}>Pendente</span>}
           </div>
-          <div className="text-sm text-text-secondary">
-            {lancamento.descricao || 'Sem descrição'}
-          </div>
-          <div className="text-xs text-text-muted mt-xs">
-            {formatDate(lancamento.data)} • {conta?.nome || 'Sem conta'}
-          </div>
+          <div className={styles.descricao}>{lancamento.descricao || 'Sem descrição'}</div>
+          <div className={styles.meta}>{formatDate(lancamento.data)} · {conta?.nome || 'Sem conta'}</div>
         </div>
 
-        <div className={`text-lg font-semibold shrink-0 md:text-right ${valorColor} md:mt-0 mt-xs`}>
-          {valorPrefix} {formatCurrency(lancamento.valor)}
-        </div>
-      </div>
+        <span className={`${styles.valor} ${isReceita ? styles.valorPositivo : styles.valorNegativo}`}>
+          {isReceita ? '+' : '-'} {formatCurrency(lancamento.valor)}
+        </span>
 
-      <div className="flex gap-xs shrink-0 md:justify-start justify-end md:border-0 border-t border-border md:pt-0 pt-sm">
-        {onDuplicate && (
-          <button
-            className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer transition-all duration-200 p-0 hover:bg-background hover:border-text-muted"
-            onClick={() => onDuplicate(lancamento)}
-            aria-label="Duplicar lançamento"
-            title="Duplicar lançamento"
-          >
-            <Copy size={16} />
-          </button>
-        )}
-        <button
-          className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer transition-all duration-200 p-0 hover:bg-background hover:border-text-muted"
-          onClick={() => onTogglePago(lancamento.id)}
-          aria-label={lancamento.pago ? 'Marcar como pendente' : 'Marcar como pago'}
-          title={lancamento.pago ? 'Marcar como pendente' : 'Marcar como pago'}
-        >
-          {lancamento.pago ? (
-            <CheckCircle2 size={16} className="text-positive" />
-          ) : (
-            <Circle size={16} className="text-text-muted" />
+        <div className={styles.actions}>
+          {onDuplicate && (
+            <button className={styles.actionBtn} onClick={() => onDuplicate(lancamento)} aria-label="Duplicar lançamento" title="Duplicar lançamento">
+              <Copy size={14} />
+            </button>
           )}
-        </button>
-        <button
-          className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer transition-all duration-200 p-0 hover:bg-background hover:border-text-muted"
-          onClick={() => onEdit(lancamento)}
-          aria-label="Editar lançamento"
-          title="Editar lançamento"
-        >
-          <Pencil size={16} />
-        </button>
-        <button
-          className="w-8 h-8 flex items-center justify-center bg-transparent border border-border rounded-sm cursor-pointer transition-all duration-200 p-0 hover:bg-negative hover:border-negative group"
-          onClick={() => setShowConfirmDelete(true)}
-          aria-label="Excluir lançamento"
-          title="Excluir lançamento"
-        >
-          <Trash2 size={16} className="text-text-secondary group-hover:text-white" />
-        </button>
+          <button
+            className={`${styles.actionBtn} ${lancamento.pago ? styles.actionBtnActive : ''}`}
+            onClick={() => onTogglePago(lancamento.id)}
+            aria-label={lancamento.pago ? 'Marcar como pendente' : 'Marcar como pago'}
+            title={lancamento.pago ? 'Marcar como pendente' : 'Marcar como pago'}
+          >
+            {lancamento.pago ? <CheckCircle2 size={14} /> : <Circle size={14} />}
+          </button>
+          <button className={styles.actionBtn} onClick={() => onEdit(lancamento)} aria-label="Editar lançamento" title="Editar lançamento">
+            <Pencil size={14} />
+          </button>
+          <button
+            className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
+            onClick={() => setShowConfirmDelete(true)}
+            aria-label="Excluir lançamento"
+            title="Excluir lançamento"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
       </div>
-    </div>
-    <ConfirmDialog
-      isOpen={showConfirmDelete}
-      title="Excluir lançamento?"
-      message="Tem certeza que deseja excluir este lançamento? Esta ação não pode ser desfeita."
-      confirmText="Excluir"
-      onConfirm={handleConfirmDelete}
-      onCancel={() => setShowConfirmDelete(false)}
-      variant="danger"
-    />
+
+      <ConfirmDialog
+        isOpen={showConfirmDelete}
+        title="Excluir lançamento?"
+        message="Tem certeza que deseja excluir este lançamento? Esta ação não pode ser desfeita."
+        confirmText="Excluir"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowConfirmDelete(false)}
+        variant="danger"
+      />
     </>
   );
 }

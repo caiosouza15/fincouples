@@ -1,0 +1,54 @@
+/*
+ * Tokens do novo design system (glassmorphism, rail lateral, bento).
+ * Fonte única de verdade — AppShell e as páginas consomem só var(--x),
+ * nunca redefinem essas cores. Tema segue o data-theme aplicado pelo
+ * AppShell a partir do ThemeContext real do app.
+ */
+
+:root {
+  --bg: #F7F5F2;
+  --glass: rgba(255, 255, 255, .66);
+  --glass-soft: rgba(255, 255, 255, .42);
+  --stroke: rgba(255, 255, 255, .75);
+  --hair: rgba(20, 20, 30, .07);
+  --ink: #16181D;
+  --ink-2: #5B6070;
+  --ink-3: #8E94A4;
+  --track: rgba(20, 20, 30, .07);
+  --shadow: 0 20px 60px rgba(20, 22, 40, .08);
+  --shadow-hi: 0 28px 70px rgba(20, 22, 40, .14);
+  --good: #0E7C5A;
+
+  --p1: #F97316;
+  --p1-grad: linear-gradient(135deg, #FFB020, #F97316);
+  --p2: #17BEBB;
+  --p2-grad: linear-gradient(135deg, #3EE0DD, #17BEBB);
+  --p1-soft: rgba(249, 115, 22, .14);
+  --p2-soft: rgba(23, 190, 187, .16);
+
+  --blob1: rgba(249, 115, 22, .28);
+  --blob2: rgba(23, 190, 187, .26);
+  --blob3: rgba(150, 130, 255, .20);
+}
+
+[data-theme='dark'] {
+  --bg: #0B1B33;
+  --glass: rgba(255, 255, 255, .07);
+  --glass-soft: rgba(255, 255, 255, .045);
+  --stroke: rgba(255, 255, 255, .14);
+  --hair: rgba(255, 255, 255, .09);
+  --ink: #F2F5FA;
+  --ink-2: #A7B2C6;
+  --ink-3: #7A8699;
+  --track: rgba(255, 255, 255, .10);
+  --shadow: 0 20px 60px rgba(0, 0, 0, .35);
+  --shadow-hi: 0 28px 70px rgba(0, 0, 0, .45);
+  --good: #3DD6A0;
+
+  --p1-soft: rgba(249, 115, 22, .20);
+  --p2-soft: rgba(23, 190, 187, .20);
+
+  --blob1: rgba(249, 115, 22, .24);
+  --blob2: rgba(23, 190, 187, .22);
+  --blob3: rgba(90, 80, 220, .28);
+}

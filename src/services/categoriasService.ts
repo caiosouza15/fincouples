@@ -1,134 +1,18 @@
 import type { Categoria } from "@/types";
+import { getDataSource } from "@/data/config";
 
-const STORAGE_KEY = 'fincouples_categorias';
-
-function loadFromStorage(): Categoria[] {
-    try {
-        const data = localStorage.getItem(STORAGE_KEY);
-        return data ? JSON.parse(data) : [];
-    } catch {
-        return [];
-    }
-}
-
-function saveToStorage(categorias: Categoria[]): void {
-    try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(categorias));
-    } catch {
-        console.error('Erro ao salvar categorias no localStorage');
-    }
-}
+const ds = () => getDataSource().categorias;
 
 export async function getCategorias(): Promise<Categoria[]> {
-    const categorias = loadFromStorage();
-    
-    // Se não houver categorias, inicializar com padrões
-    if (categorias.length === 0) {
-        const padroes = initCategoriasPadrao();
-        saveToStorage(padroes);
-        return padroes;
-    }
-    
-    return categorias;
+  return ds().getCategorias();
 }
 
 export async function createCategoria(categoria: Omit<Categoria, 'id'>): Promise<Categoria> {
-    const categorias = loadFromStorage();
-    
-    // Validar duplicatas
-    const duplicada = categorias.find(
-        c => c.nome.toLowerCase() === categoria.nome.toLowerCase().trim() && 
-             c.tipo === categoria.tipo
-    );
-    
-    if (duplicada) {
-        throw new Error('Já existe uma categoria com este nome e tipo');
-    }
-    
-    const newCategoria: Categoria = {
-        ...categoria,
-        id: crypto.randomUUID(),
-        nome: categoria.nome.trim(),
-    };
-    
-    categorias.push(newCategoria);
-    saveToStorage(categorias);
-    return newCategoria;
+  return ds().createCategoria(categoria);
 }
-
 export async function updateCategoria(id: string, categoria: Partial<Categoria>): Promise<Categoria> {
-    const categorias = loadFromStorage();
-    const index = categorias.findIndex(c => c.id === id);
-    
-    if (index === -1) {
-        throw new Error('Categoria não encontrada');
-    }
-    
-    // Se for categoria padrão, não permitir alterar o tipo
-    if (categorias[index].id.startsWith('padrao-') && categoria.tipo && categoria.tipo !== categorias[index].tipo) {
-        throw new Error('Não é possível alterar o tipo de uma categoria padrão');
-    }
-    
-    // Validar duplicatas (se estiver alterando nome ou tipo)
-    if (categoria.nome || categoria.tipo) {
-        const novoNome = (categoria.nome || categorias[index].nome).toLowerCase().trim();
-        const novoTipo = categoria.tipo || categorias[index].tipo;
-        
-        const duplicada = categorias.find(
-            (c, i) => i !== index && 
-                      c.nome.toLowerCase() === novoNome && 
-                      c.tipo === novoTipo
-        );
-        
-        if (duplicada) {
-            throw new Error('Já existe uma categoria com este nome e tipo');
-        }
-    }
-    
-    categorias[index] = {
-        ...categorias[index],
-        ...categoria,
-        nome: categoria.nome ? categoria.nome.trim() : categorias[index].nome,
-    };
-    
-    saveToStorage(categorias);
-    return categorias[index];
+  return ds().updateCategoria(id, categoria);
 }
-
 export async function deleteCategoria(id: string): Promise<void> {
-    const categorias = loadFromStorage();
-    
-    // Proteger categorias padrão
-    if (id.startsWith('padrao-')) {
-        throw new Error('Não é possível excluir uma categoria padrão');
-    }
-    
-    const index = categorias.findIndex(c => c.id === id);
-    if (index === -1) {
-        throw new Error('Categoria não encontrada');
-    }
-    
-    categorias.splice(index, 1);
-    saveToStorage(categorias);
-}
-
-function initCategoriasPadrao(): Categoria[] {
-    return [
-        // Despesas
-        { id: 'padrao-moradia', nome: 'Moradia', tipo: 'despesa' as const, cor: '#ef4444', icone: 'moradia' },
-        { id: 'padrao-alimentacao', nome: 'Alimentacao', tipo: 'despesa' as const, cor: '#ef4444', icone: 'alimentacao' },
-        { id: 'padrao-transporte', nome: 'Transporte', tipo: 'despesa' as const, cor: '#f97316', icone: 'transporte' },
-        { id: 'padrao-saude', nome: 'Saude', tipo: 'despesa' as const, cor: '#ef4444', icone: 'saude' },
-        { id: 'padrao-educacao', nome: 'Educacao', tipo: 'despesa' as const, cor: '#3b82f6', icone: 'educacao' },
-        { id: 'padrao-compras', nome: 'Compras', tipo: 'despesa' as const, cor: '#f97316', icone: 'compras' },
-        { id: 'padrao-contas', nome: 'Contas', tipo: 'despesa' as const, cor: '#ef4444', icone: 'contas' },
-        { id: 'padrao-lazer', nome: 'Lazer', tipo: 'despesa' as const, cor: '#3b82f6', icone: 'lazer' },
-        { id: 'padrao-roupas', nome: 'Roupas', tipo: 'despesa' as const, cor: '#f97316', icone: 'roupas' },
-        { id: 'padrao-assinaturas', nome: 'Assinaturas', tipo: 'despesa' as const, cor: '#3b82f6', icone: 'assinaturas' },
-        // Receitas
-        { id: 'padrao-salario', nome: 'Salario', tipo: 'receita' as const, cor: '#22c55e', icone: 'salario' },
-        { id: 'padrao-outras-receitas', nome: 'Outras Receitas', tipo: 'receita' as const, cor: '#22c55e', icone: 'outras-receitas' },
-        { id: 'padrao-presentes', nome: 'Presentes', tipo: 'receita' as const, cor: '#22c55e', icone: 'presentes' },
-        { id: 'padrao-rendimentos', nome: 'Rendimentos', tipo: 'receita' as const, cor: '#22c55e', icone: 'rendimentos' },
-    ];
+  return ds().deleteCategoria(id);
 }

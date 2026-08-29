@@ -6,210 +6,130 @@ interface CategoriaFormProps {
   categoria?: Categoria | null;
   onClose: () => void;
   onSave: (categoria: Omit<Categoria, 'id'> | Categoria) => Promise<void>;
-  isPadrao?: (id: string) => boolean;
+  isPadrao: (id: string) => boolean;
 }
 
-const CORES_PADRAO = [
-  '#22c55e',
-  '#ef4444',
-  '#f97316',
-  '#3b82f6',
-  '#8b5cf6',
-  '#ec4899',
-  '#64748b',
-];
+const CORES = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#64748b'];
 
 export function CategoriaForm({ categoria, onClose, onSave, isPadrao }: CategoriaFormProps) {
   const [nome, setNome] = useState('');
-  const [tipo, setTipo] = useState<Categoria['tipo']>('despesa');
-  const [cor, setCor] = useState(CORES_PADRAO[0]);
-  const [icone, setIcone] = useState('');
+  const [tipo, setTipo] = useState<'receita' | 'despesa'>('despesa');
+  const [cor, setCor] = useState(CORES[0]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isEditMode = !!categoria;
-  const tipoBloqueado = isEditMode && categoria && isPadrao?.(categoria.id);
+  const padrao = isEditMode && isPadrao(categoria.id);
 
   useEffect(() => {
     if (categoria) {
       setNome(categoria.nome);
       setTipo(categoria.tipo);
-      setCor(categoria.cor ?? CORES_PADRAO[0]);
-      setIcone(categoria.icone ?? '');
+      setCor(categoria.cor ?? CORES[0]);
     }
   }, [categoria]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    if (!nome.trim()) {
-      setError('Nome da categoria é obrigatório');
+    const nomeTrim = nome.trim();
+    if (!nomeTrim) {
+      setError('Nome é obrigatório');
       return;
     }
 
+    setLoading(true);
     try {
-      setLoading(true);
-
-      const categoriaData: Omit<Categoria, 'id'> | Categoria =
-        isEditMode && categoria
-          ? {
-              ...categoria,
-              nome: nome.trim(),
-              tipo,
-              cor: cor || undefined,
-              icone: icone.trim() || undefined,
-            }
-          : {
-              nome: nome.trim(),
-              tipo,
-              cor: cor || undefined,
-              icone: icone.trim() || undefined,
-            };
-
-      await onSave(categoriaData);
+      if (categoria) {
+        await onSave({ ...categoria, nome: nomeTrim, tipo: padrao ? categoria.tipo : tipo, cor });
+      } else {
+        await onSave({ nome: nomeTrim, tipo, cor });
+      }
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao salvar categoria');
+      setError(err instanceof Error ? err.message : 'Erro ao salvar');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleClose = () => {
-    if (!loading) {
-      onClose();
-    }
-  };
-
   return (
-    <div
-      className="fixed top-0 left-0 right-0 bottom-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[1000] p-md animate-[fadeIn_0.2s_ease]"
-      onClick={handleClose}
-    >
-      <div
-        className="bg-surface rounded-lg w-full max-w-[500px] max-h-[90vh] overflow-y-auto shadow-lg animate-[slideUp_0.3s_ease] md:rounded-lg md:max-w-[500px]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between p-lg border-b border-border">
-          <h3 className="text-xl font-semibold text-text-primary m-0">
-            {isEditMode ? 'Editar Categoria' : 'Nova Categoria'}
-          </h3>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-md bg-black/50">
+      <div className="bg-surface rounded-lg shadow-xl max-w-md w-full">
+        <div className="flex items-center justify-between px-lg py-md border-b border-border">
+          <h2 className="text-lg font-semibold text-text-primary">
+            {isEditMode ? 'Editar categoria' : 'Nova categoria'}
+          </h2>
           <button
-            className="w-8 h-8 flex items-center justify-center bg-transparent border-none rounded-sm cursor-pointer text-text-secondary transition-all duration-200 hover:bg-background hover:text-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={handleClose}
-            aria-label="Fechar"
+            onClick={onClose}
             disabled={loading}
+            className="p-sm rounded-md hover:bg-background text-text-secondary"
+            aria-label="Fechar"
           >
             <X size={20} />
           </button>
         </div>
-
         <form onSubmit={handleSubmit} className="p-lg flex flex-col gap-md">
           {error && (
-            <div
-              className="p-md bg-negative/10 border border-negative rounded-md text-negative text-sm"
-              role="alert"
-            >
+            <div className="p-md bg-negative/10 border border-negative rounded-md text-negative text-sm">
               {error}
             </div>
           )}
-
-          <div className="flex flex-col gap-xs">
-            <label htmlFor="categoria-nome" className="text-sm font-medium text-text-primary">
-              Nome da categoria *
-            </label>
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-xs">Nome *</label>
             <input
-              id="categoria-nome"
               type="text"
-              className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
-              placeholder="Ex: Alimentação, Transporte"
+              placeholder="Ex: Alimentação"
+              className="w-full p-md border border-border rounded-md text-text-primary bg-background focus:outline-none focus:border-positive"
               required
-              disabled={loading}
             />
           </div>
-
-          <div className="flex flex-col gap-xs">
-            <label htmlFor="categoria-tipo" className="text-sm font-medium text-text-primary">
-              Tipo *
-            </label>
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-xs">Tipo</label>
             <select
-              id="categoria-tipo"
-              className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
               value={tipo}
-              onChange={(e) => setTipo(e.target.value as Categoria['tipo'])}
-              required
-              disabled={loading || tipoBloqueado}
+              onChange={(e) => setTipo(e.target.value as 'receita' | 'despesa')}
+              disabled={padrao}
+              className="w-full p-md border border-border rounded-md text-text-primary bg-background focus:outline-none focus:border-positive disabled:opacity-60"
             >
               <option value="despesa">Despesa</option>
               <option value="receita">Receita</option>
             </select>
-            {tipoBloqueado && (
-              <span className="text-xs text-text-muted">
-                O tipo não pode ser alterado em categorias padrão.
-              </span>
-            )}
           </div>
-
-          <div className="flex flex-col gap-xs">
-            <label className="text-sm font-medium text-text-primary">Cor</label>
-            <div className="flex flex-wrap gap-sm items-center">
-              {CORES_PADRAO.map((c) => (
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-xs">Cor</label>
+            <div className="flex gap-sm flex-wrap">
+              {CORES.map((c) => (
                 <button
                   key={c}
                   type="button"
-                  className="w-8 h-8 rounded-full border-2 transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-positive"
-                  style={{
-                    backgroundColor: c,
-                    borderColor: cor === c ? '#1e293b' : 'transparent',
-                  }}
                   onClick={() => setCor(c)}
+                  className={`w-8 h-8 rounded-full border-2 transition-all ${
+                    cor === c ? 'border-positive scale-110' : 'border-transparent hover:scale-105'
+                  }`}
+                  style={{ backgroundColor: c }}
                   aria-label={`Cor ${c}`}
                 />
               ))}
-              <input
-                type="color"
-                value={cor}
-                onChange={(e) => setCor(e.target.value)}
-                className="w-8 h-8 rounded-full border-0 cursor-pointer p-0 bg-transparent"
-                title="Escolher cor"
-              />
             </div>
           </div>
-
-          <div className="flex flex-col gap-xs">
-            <label htmlFor="categoria-icone" className="text-sm font-medium text-text-primary">
-              Icone (nome do icone)
-            </label>
-            <input
-              id="categoria-icone"
-              type="text"
-              className="p-md border border-border rounded-md text-base font-inherit text-text-primary bg-surface transition-colors duration-200 focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
-              value={icone}
-              onChange={(e) => setIcone(e.target.value)}
-              placeholder="Ex: alimentacao, salario"
-              maxLength={4}
-              disabled={loading}
-            />
-          </div>
-
-          <div className="flex flex-col-reverse md:flex-row gap-md justify-end mt-md pt-md border-t border-border">
+          <div className="flex gap-md pt-sm">
             <button
               type="button"
-              className="py-md px-lg rounded-md text-base font-medium cursor-pointer transition-all duration-200 border-none bg-surface text-text-primary border border-border hover:bg-background disabled:opacity-60 disabled:cursor-not-allowed md:w-auto w-full"
-              onClick={handleClose}
+              onClick={onClose}
               disabled={loading}
+              className="flex-1 py-sm px-md border border-border rounded-md text-text-primary hover:bg-background"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="py-md px-lg rounded-md text-base font-medium cursor-pointer transition-all duration-200 border-none bg-positive text-white hover:bg-positive/90 disabled:opacity-60 disabled:cursor-not-allowed md:w-auto w-full"
               disabled={loading}
+              className="flex-1 py-sm px-md bg-positive text-white rounded-md font-medium hover:bg-positive/90 disabled:opacity-50"
             >
-              {loading ? 'Salvando...' : isEditMode ? 'Salvar' : 'Criar Categoria'}
+              {loading ? 'Salvando...' : 'Salvar'}
             </button>
           </div>
         </form>

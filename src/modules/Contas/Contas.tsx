@@ -1,11 +1,8 @@
 import { useState, useMemo } from 'react';
 import { Plus, Wallet, Search, ChevronDown, ArrowUpDown, LayoutGrid, List } from 'lucide-react';
-import { Card } from '@/components/Card';
-import { EmptyState } from '@/components/EmptyState';
 import { useContas } from '@/hooks/useContas';
 import { useSectionPrivacy } from '@/hooks/usePrivacy';
 import { useToast } from '@/hooks/useToast';
-import { PrivacyToggleButton } from '@/components/PrivacyToggleButton';
 import type { Conta } from '@/types';
 import { ContasList } from '@/modules/Configuracoes/Contas/ContasList';
 import { ContaForm } from '@/modules/Configuracoes/Contas/ContaForm';
@@ -14,6 +11,8 @@ import { useCasal } from '@/hooks/useCasal';
 import { useAlertasSaldo } from '@/hooks/useAlertasSaldo';
 import { AlertasSaldoCard } from '@/components/AlertasSaldoCard';
 import { ContaCard } from '@/components/ContaCard';
+import { PrivacyToggleButton } from '@/components/PrivacyToggleButton';
+import styles from './Contas.module.css';
 
 type FiltroStatus = 'todos' | 'ativos' | 'inativos';
 type FiltroTipo = 'todos' | Conta['tipo'];
@@ -138,209 +137,182 @@ const Contas = () => {
   const temFiltroAtivo = !!busca.trim() || filtroStatus !== 'todos' || filtroTipo !== 'todos' || filtroProprietario !== 'todos';
 
   return (
-    <div className="max-w-[1280px] mx-auto pb-xl">
-      <h1 className="text-2xl md:text-3xl font-bold text-text-primary mb-lg">Minhas Contas</h1>
+    <div className={styles.page}>
+      {alertasSaldo.length > 0 && <AlertasSaldoCard alertas={alertasSaldo} hideSaldo={hideContasValues} />}
+      {contas.length > 0 && <ResumoContas contas={contas} hideSaldo={hideContasValues} />}
 
-      {alertasSaldo.length > 0 && (
-        <div className="mb-lg">
-          <AlertasSaldoCard alertas={alertasSaldo} hideSaldo={hideContasValues} />
-        </div>
-      )}
-      {contas.length > 0 && (
-        <div className="mb-lg">
-          <ResumoContas contas={contas} hideSaldo={hideContasValues} />
-        </div>
-      )}
-
-      <Card
-        title="Minhas contas"
-        actions={
-          <div className="flex items-center gap-sm">
-            <button
-              className="px-md py-sm bg-positive text-white rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-positive/90 flex items-center justify-center gap-xs shrink-0"
-              onClick={handleAddConta}
-              aria-label="Adicionar conta"
-              title="Adicionar conta"
-            >
-              <Plus size={18} strokeWidth={2} className="shrink-0" />
-              <span className="hidden md:inline">Adicionar</span>
-            </button>
-            {contas.length > 0 && (
-              <>
-                <div className="flex border border-border rounded-md overflow-hidden shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setVisualizacao('cards')}
-                    className={`p-sm ${visualizacao === 'cards' ? 'bg-background text-positive' : 'bg-surface text-text-secondary hover:bg-background'}`}
-                    aria-label="Visualização em cards"
-                    title="Visualização em cards"
-                  >
-                    <LayoutGrid size={18} strokeWidth={2} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setVisualizacao('lista')}
-                    className={`p-sm ${visualizacao === 'lista' ? 'bg-background text-positive' : 'bg-surface text-text-secondary hover:bg-background'}`}
-                    aria-label="Visualização em lista"
-                    title="Visualização em lista"
-                  >
-                    <List size={18} strokeWidth={2} />
-                  </button>
-                </div>
-                <PrivacyToggleButton sectionKey="minhas-contas" />
-              </>
-            )}
+      {contas.length === 0 ? (
+        <div className={styles.emptyState}>
+          <div className={styles.emptyStateIcon}><Wallet size={26} /></div>
+          <div>
+            <div className={styles.emptyStateTitle}>Nenhuma conta cadastrada</div>
+            <div className={styles.emptyStateMessage}>Adicione contas para acompanhar seus saldos.</div>
           </div>
-        }
-      >
-        {contas.length === 0 ? (
-          <EmptyState
-            icon={<Wallet size={32} className="text-text-secondary" />}
-            title="Nenhuma conta cadastrada"
-            message="Adicione contas para acompanhar seus saldos."
-            actionButton={
-              <button
-                className="bg-positive text-white py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-positive/90"
-                onClick={handleAddConta}
+          <button className={styles.emptyStateAction} onClick={handleAddConta}>Adicionar conta</button>
+        </div>
+      ) : (
+        <>
+          <div className={styles.toolbar}>
+            <div className={styles.searchWrap}>
+              <span className={styles.searchIcon}><Search size={16} /></span>
+              <input
+                type="text"
+                placeholder="Buscar conta..."
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                className={styles.searchInput}
+              />
+            </div>
+
+            <div className={styles.segmented} role="group" aria-label="Filtrar por status">
+              {(['todos', 'ativos', 'inativos'] as const).map((status) => (
+                <button
+                  key={status}
+                  type="button"
+                  className={`${styles.segBtn} ${filtroStatus === status ? styles.segBtnActive : ''}`}
+                  onClick={() => setFiltroStatus(status)}
+                  aria-pressed={filtroStatus === status}
+                >
+                  {status === 'todos' ? 'Todos' : status === 'ativos' ? 'Ativos' : 'Inativos'}
+                </button>
+              ))}
+            </div>
+
+            <div className={styles.selectWrap}>
+              <select
+                value={filtroTipo}
+                onChange={(e) => setFiltroTipo(e.target.value as FiltroTipo)}
+                className={styles.select}
               >
-                Adicionar conta
+                <option value="todos">Todos os tipos</option>
+                <option value="corrente">Conta Corrente</option>
+                <option value="poupanca">Poupança</option>
+                <option value="investimento">Investimento</option>
+              </select>
+              <ChevronDown size={15} className={styles.selectChevron} />
+            </div>
+
+            <div className={styles.selectWrap}>
+              <select
+                value={filtroProprietario}
+                onChange={(e) => setFiltroProprietario(e.target.value as FiltroProprietario)}
+                className={styles.select}
+              >
+                <option value="todos">Todos</option>
+                <option value="usuario1">{usuario1Nome}</option>
+                <option value="usuario2">{usuario2Nome}</option>
+              </select>
+              <ChevronDown size={15} className={styles.selectChevron} />
+            </div>
+
+            <div className={styles.selectWrap}>
+              <select
+                value={ordenacao}
+                onChange={(e) => setOrdenacao(e.target.value as OrdenacaoContas)}
+                className={styles.select}
+              >
+                <option value="nome">Nome (A-Z)</option>
+                <option value="saldo-maior">Saldo (maior)</option>
+                <option value="saldo-menor">Saldo (menor)</option>
+                <option value="tipo">Tipo</option>
+                <option value="proprietario">Proprietário</option>
+              </select>
+              <ArrowUpDown size={14} className={styles.selectChevron} />
+            </div>
+
+            <div className={styles.viewToggle} role="group" aria-label="Modo de visualização">
+              <button
+                type="button"
+                onClick={() => setVisualizacao('cards')}
+                className={`${styles.viewBtn} ${visualizacao === 'cards' ? styles.viewBtnActive : ''}`}
+                aria-label="Visualização em cards"
+                title="Visualização em cards"
+              >
+                <LayoutGrid size={16} />
               </button>
-            }
-          />
-        ) : (
-          <>
-            <div className="mb-md flex flex-col md:flex-row gap-sm">
-              <div className="relative flex-1 min-w-0">
-                <Search size={18} strokeWidth={2} className="absolute left-md top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none shrink-0" />
-                <input
-                  type="text"
-                  placeholder="Buscar conta..."
-                  value={busca}
-                  onChange={(e) => setBusca(e.target.value)}
-                  className="w-full pl-9 pr-md py-sm border border-border rounded-md text-sm text-text-primary bg-surface focus:outline-none focus:border-positive focus:shadow-[0_0_0_3px_rgba(34,197,94,0.1)]"
-                />
-              </div>
-              <div className="relative min-w-[120px]">
-                <ChevronDown size={18} strokeWidth={2} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none shrink-0" />
-                <select
-                  value={filtroStatus}
-                  onChange={(e) => setFiltroStatus(e.target.value as FiltroStatus)}
-                  className="w-full min-h-[40px] pl-4 pr-9 py-2.5 border border-border rounded-md text-sm text-text-primary bg-surface focus:outline-none focus:border-positive appearance-none cursor-pointer"
-                >
-                  <option value="todos">Todos</option>
-                  <option value="ativos">Ativos</option>
-                  <option value="inativos">Inativos</option>
-                </select>
-              </div>
-              <div className="relative min-w-[160px]">
-                <ChevronDown size={18} strokeWidth={2} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none shrink-0" />
-                <select
-                  value={filtroTipo}
-                  onChange={(e) => setFiltroTipo(e.target.value as FiltroTipo)}
-                  className="w-full min-h-[40px] pl-4 pr-9 py-2.5 border border-border rounded-md text-sm text-text-primary bg-surface focus:outline-none focus:border-positive appearance-none cursor-pointer"
-                >
-                  <option value="todos">Todos os tipos</option>
-                  <option value="corrente">Conta Corrente</option>
-                  <option value="poupanca">Poupança</option>
-                  <option value="investimento">Investimento</option>
-                </select>
-              </div>
-              <div className="relative min-w-[140px]">
-                <ChevronDown size={18} strokeWidth={2} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none shrink-0" />
-                <select
-                  value={filtroProprietario}
-                  onChange={(e) => setFiltroProprietario(e.target.value as FiltroProprietario)}
-                  className="w-full min-h-[40px] pl-4 pr-9 py-2.5 border border-border rounded-md text-sm text-text-primary bg-surface focus:outline-none focus:border-positive appearance-none cursor-pointer"
-                >
-                  <option value="todos">Todos</option>
-                  <option value="usuario1">{usuario1Nome}</option>
-                  <option value="usuario2">{usuario2Nome}</option>
-                </select>
-              </div>
-              <div className="relative min-w-[140px]">
-                <ArrowUpDown size={18} strokeWidth={2} className="absolute left-md top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none shrink-0" />
-                <select
-                  value={ordenacao}
-                  onChange={(e) => setOrdenacao(e.target.value as OrdenacaoContas)}
-                  className="w-full pl-9 pr-md py-sm border border-border rounded-md text-sm text-text-primary bg-surface focus:outline-none focus:border-positive appearance-none cursor-pointer min-h-[40px]"
-                >
-                  <option value="nome">Nome (A-Z)</option>
-                  <option value="saldo-maior">Saldo (maior)</option>
-                  <option value="saldo-menor">Saldo (menor)</option>
-                  <option value="tipo">Tipo</option>
-                  <option value="proprietario">Proprietário</option>
-                </select>
-              </div>
-              {temFiltroAtivo && (
-                <div className="text-xs text-text-secondary flex items-center">
-                  {contasFiltradas.length} {contasFiltradas.length === 1 ? 'conta encontrada' : 'contas encontradas'}
+              <button
+                type="button"
+                onClick={() => setVisualizacao('lista')}
+                className={`${styles.viewBtn} ${visualizacao === 'lista' ? styles.viewBtnActive : ''}`}
+                aria-label="Visualização em lista"
+                title="Visualização em lista"
+              >
+                <List size={16} />
+              </button>
+            </div>
+
+            {temFiltroAtivo && (
+              <span className={styles.resultCount}>
+                {contasFiltradas.length} {contasFiltradas.length === 1 ? 'conta encontrada' : 'contas encontradas'}
+              </span>
+            )}
+
+            <PrivacyToggleButton sectionKey="minhas-contas" />
+
+            <button className={styles.addBtn} onClick={handleAddConta} aria-label="Adicionar conta">
+              <Plus size={17} />
+              <span>Adicionar</span>
+            </button>
+          </div>
+
+          {contasFiltradas.length === 0 ? (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyStateIcon}><Wallet size={26} /></div>
+              <div>
+                <div className={styles.emptyStateTitle}>Nenhuma conta encontrada</div>
+                <div className={styles.emptyStateMessage}>
+                  {temFiltroAtivo ? 'Tente ajustar os filtros de busca.' : 'Adicione contas para acompanhar seus saldos.'}
                 </div>
+              </div>
+              <button className={styles.emptyStateAction} onClick={handleAddConta}>Adicionar conta</button>
+            </div>
+          ) : visualizacao === 'cards' ? (
+            <div className={styles.grid}>
+              {contasFiltradas
+                .filter(c => c.ativa)
+                .map((conta) => (
+                  <div key={conta.id} id={`conta-${conta.id}`}>
+                    <ContaCard
+                      conta={conta}
+                      hideSaldo={hideContasValues}
+                      onEdit={handleEditConta}
+                      onDelete={handleDeleteConta}
+                      onToggleAtiva={toggleContaAtiva}
+                      onDuplicate={handleDuplicateConta}
+                    />
+                  </div>
+                ))}
+              {contasFiltradas.filter(c => !c.ativa).length > 0 && (
+                <>
+                  <div className={styles.sectionLabel}>Contas inativas</div>
+                  {contasFiltradas
+                    .filter(c => !c.ativa)
+                    .map((conta) => (
+                      <div key={conta.id} id={`conta-${conta.id}`}>
+                        <ContaCard
+                          conta={conta}
+                          hideSaldo={hideContasValues}
+                          onEdit={handleEditConta}
+                          onDelete={handleDeleteConta}
+                          onToggleAtiva={toggleContaAtiva}
+                          onDuplicate={handleDuplicateConta}
+                        />
+                      </div>
+                    ))}
+                </>
               )}
             </div>
-            {contasFiltradas.length === 0 ? (
-              <EmptyState
-                icon={<Wallet size={32} className="text-text-secondary" />}
-                title="Nenhuma conta encontrada"
-                message={temFiltroAtivo ? 'Tente ajustar os filtros de busca.' : 'Adicione contas para acompanhar seus saldos.'}
-                actionButton={
-                  <button
-                    className="bg-positive text-white py-sm px-md rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-positive/90"
-                    onClick={handleAddConta}
-                  >
-                    Adicionar conta
-                  </button>
-                }
-              />
-            ) : visualizacao === 'cards' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
-                {contasFiltradas
-                  .filter(c => c.ativa)
-                  .map((conta) => (
-                    <div key={conta.id} id={`conta-${conta.id}`}>
-                      <ContaCard
-                        conta={conta}
-                        hideSaldo={hideContasValues}
-                        onEdit={handleEditConta}
-                        onDelete={handleDeleteConta}
-                        onToggleAtiva={toggleContaAtiva}
-                        onDuplicate={handleDuplicateConta}
-                      />
-                    </div>
-                  ))}
-                {contasFiltradas.filter(c => !c.ativa).length > 0 && (
-                  <>
-                    <div className="col-span-full text-sm font-semibold text-text-secondary uppercase mb-xs py-xs">
-                      Contas inativas
-                    </div>
-                    {contasFiltradas
-                      .filter(c => !c.ativa)
-                      .map((conta) => (
-                        <div key={conta.id} id={`conta-${conta.id}`}>
-                          <ContaCard
-                            conta={conta}
-                            hideSaldo={hideContasValues}
-                            onEdit={handleEditConta}
-                            onDelete={handleDeleteConta}
-                            onToggleAtiva={toggleContaAtiva}
-                            onDuplicate={handleDuplicateConta}
-                          />
-                        </div>
-                      ))}
-                  </>
-                )}
-              </div>
-            ) : (
-              <ContasList
-                contas={contasFiltradas}
-                hideSaldo={hideContasValues}
-                onEdit={handleEditConta}
-                onDelete={handleDeleteConta}
-                onDuplicate={handleDuplicateConta}
-              />
-            )}
-          </>
-        )}
-      </Card>
+          ) : (
+            <ContasList
+              contas={contasFiltradas}
+              hideSaldo={hideContasValues}
+              onEdit={handleEditConta}
+              onDelete={handleDeleteConta}
+              onDuplicate={handleDuplicateConta}
+            />
+          )}
+        </>
+      )}
 
       {showForm && (
         <ContaForm

@@ -20,6 +20,17 @@ export default {
         'text-primary': 'var(--color-text-primary)',
         'text-secondary': 'var(--color-text-secondary)',
         'text-muted': 'var(--color-text-muted)',
+        // shadcn-style tokens for ui components
+        primary: '#0FB9B1',
+        'primary-foreground': '#ffffff',
+        secondary: 'var(--color-surface)',
+        'secondary-foreground': 'var(--color-text-primary)',
+        destructive: '#ef4444',
+        'destructive-foreground': '#ffffff',
+        muted: 'var(--color-muted)',
+        'muted-foreground': 'var(--color-text-muted)',
+        foreground: 'var(--color-text-primary)',
+        ring: '#0FB9B1',
       },
       spacing: {
         xs: '0.25rem',

@@ -1,0 +1,88 @@
+import type { Categoria } from '@/types';
+import type { CategoriasDataSource } from '@/data/contracts';
+
+const STORAGE_KEY = 'fincouples_categorias';
+
+function loadFromStorage(): Categoria[] {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveToStorage(categorias: Categoria[]): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(categorias));
+  } catch {
+    console.error('Erro ao salvar categorias no localStorage');
+  }
+}
+
+function initCategoriasPadrao(): Categoria[] {
+  return [
+    { id: 'padrao-moradia', nome: 'Moradia', tipo: 'despesa', cor: '#ef4444', icone: 'moradia' },
+    { id: 'padrao-alimentacao', nome: 'Alimentacao', tipo: 'despesa', cor: '#ef4444', icone: 'alimentacao' },
+    { id: 'padrao-transporte', nome: 'Transporte', tipo: 'despesa', cor: '#f97316', icone: 'transporte' },
+    { id: 'padrao-saude', nome: 'Saude', tipo: 'despesa', cor: '#ef4444', icone: 'saude' },
+    { id: 'padrao-educacao', nome: 'Educacao', tipo: 'despesa', cor: '#3b82f6', icone: 'educacao' },
+    { id: 'padrao-compras', nome: 'Compras', tipo: 'despesa', cor: '#f97316', icone: 'compras' },
+    { id: 'padrao-contas', nome: 'Contas', tipo: 'despesa', cor: '#ef4444', icone: 'contas' },
+    { id: 'padrao-lazer', nome: 'Lazer', tipo: 'despesa', cor: '#3b82f6', icone: 'lazer' },
+    { id: 'padrao-roupas', nome: 'Roupas', tipo: 'despesa', cor: '#f97316', icone: 'roupas' },
+    { id: 'padrao-assinaturas', nome: 'Assinaturas', tipo: 'despesa', cor: '#3b82f6', icone: 'assinaturas' },
+    { id: 'padrao-salario', nome: 'Salario', tipo: 'receita', cor: '#22c55e', icone: 'salario' },
+    { id: 'padrao-outras-receitas', nome: 'Outras Receitas', tipo: 'receita', cor: '#22c55e', icone: 'outras-receitas' },
+    { id: 'padrao-presentes', nome: 'Presentes', tipo: 'receita', cor: '#22c55e', icone: 'presentes' },
+    { id: 'padrao-rendimentos', nome: 'Rendimentos', tipo: 'receita', cor: '#22c55e', icone: 'rendimentos' },
+  ];
+}
+
+export const mockCategorias: CategoriasDataSource = {
+  async getCategorias() {
+    const categorias = loadFromStorage();
+    if (categorias.length === 0) {
+      const padroes = initCategoriasPadrao();
+      saveToStorage(padroes);
+      return padroes;
+    }
+    return categorias;
+  },
+  async createCategoria(categoria) {
+    const categorias = loadFromStorage();
+    const duplicada = categorias.find(
+      (c) => c.nome.toLowerCase() === categoria.nome.toLowerCase().trim() && c.tipo === categoria.tipo
+    );
+    if (duplicada) throw new Error('Já existe uma categoria com este nome e tipo');
+    const newCategoria = { ...categoria, id: crypto.randomUUID(), nome: categoria.nome.trim() };
+    categorias.push(newCategoria);
+    saveToStorage(categorias);
+    return newCategoria;
+  },
+  async updateCategoria(id, categoria) {
+    const categorias = loadFromStorage();
+    const index = categorias.findIndex((c) => c.id === id);
+    if (index === -1) throw new Error('Categoria não encontrada');
+    if (categorias[index].id.startsWith('padrao-') && categoria.tipo && categoria.tipo !== categorias[index].tipo) {
+      throw new Error('Não é possível alterar o tipo de uma categoria padrão');
+    }
+    if (categoria.nome || categoria.tipo) {
+      const novoNome = (categoria.nome || categorias[index].nome).toLowerCase().trim();
+      const novoTipo = categoria.tipo || categorias[index].tipo;
+      const duplicada = categorias.find((c, i) => i !== index && c.nome.toLowerCase() === novoNome && c.tipo === novoTipo);
+      if (duplicada) throw new Error('Já existe uma categoria com este nome e tipo');
+    }
+    categorias[index] = { ...categorias[index], ...categoria, nome: categoria.nome ? categoria.nome.trim() : categorias[index].nome };
+    saveToStorage(categorias);
+    return categorias[index];
+  },
+  async deleteCategoria(id) {
+    const categorias = loadFromStorage();
+    if (id.startsWith('padrao-')) throw new Error('Não é possível excluir uma categoria padrão');
+    const index = categorias.findIndex((c) => c.id === id);
+    if (index === -1) throw new Error('Categoria não encontrada');
+    categorias.splice(index, 1);
+    saveToStorage(categorias);
+  },
+};
